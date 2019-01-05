@@ -16,12 +16,13 @@ export MANPAGER="/bin/sh -c \"col -b | vim -c 'set ft=man ts=8 nomod nolist nonu
 
 #  ============================== PATH CHANGES ==============================
 PATH="$PYENV_ROOT/bin:${PATH}"
-PATH="${PATH}:/Users/ethomas/scripts"
-PATH="${PATH}:/Users/ethomas/bin" # mostly for ack
-PATH="${PATH}:/Users/ethomas/go/bin"
-PATH="${PATH}:/Users/ethomas/.local/bin" # for haskell stuff
+PATH="${PATH}:$HOME/Users/ethomas/scripts"
+PATH="${PATH}:$HOME/Users/ethomas/bin" # mostly for ack
+PATH="${PATH}:$HOME/Users/ethomas/go/bin"
+PATH="${PATH}:$HOME/.local/bin" # for haskell stuff
 PATH="${PATH}:/usr/local/sbin"
-PATH="${PATH}:/Users/ethomas/Library/Python/2.7/bin" # pip/virtualenv location
+PATH="${PATH}:$HOME/Library/Python/2.7/bin" # pip/virtualenv location
+PATH="${PATH}:$HOME/.cargo/bin"
 export PATH
 
 
@@ -46,3 +47,5 @@ if [[ "$(whoami)" == "ethomas" ]] && ! ps -U "ethomas" -o pid,ucomm | grep -v gr
     eval "$(ssh-agent)"
     ssh-add > /dev/null 2>&1
 fi
+
+alias py37=~/.pyenv/versions/3.7.0/bin/python
