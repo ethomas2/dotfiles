@@ -1,4 +1,4 @@
-##!/bin/bash
+#!/bin/bash
 set -euo pipefail
 ln -s ~/.customization/.ackrc      ~/.ackrc
 ln -s ~/.customization/.bashrc     ~/.bashrc
@@ -12,9 +12,9 @@ ln -s ~/.customization/.vim/.vimrc ~/.vimrc
 ln -s ~/.customization/scripts     ~/scripts
 
 source ~/.marksrc
-mkdir -p ~/scrap    && (cd ~/scrap; m scrap)
-mkdir -p github.com && (cd ~/github.com; m github)
-mkdir -p ~/notes    && (cd ~/notes; m notes)
+mkdir -p ~/scrap      && (cd ~/scrap; m scrap)
+mkdir -p ~/github.com && (cd ~/github.com; m github)
+mkdir -p ~/notes      && (cd ~/notes; m notes)
 (cd ~/Downloads; m downloads)
 (cd ~/.marks; m marks)
 

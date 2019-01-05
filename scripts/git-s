@@ -6,4 +6,4 @@ git rev-parse --abbrev-ref HEAD
 echo -n "${normal}"
 git --no-pager log -1 --pretty=oneline --abbrev-commit
 echo "--------------------- git status -------------------"
-git status -s
+git status -s "$@"

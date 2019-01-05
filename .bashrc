@@ -10,7 +10,7 @@ export HISTCONTROL=ignoredups:ignorespace
 export TERM=xterm-256color
 export PYENV_ROOT="$HOME/.pyenv"
 export PGDATA="/usr/local/var/postgres"
-export GOPATH=/Users/ethomas/go
+export GOPATH=$HOME/go
 export MANPAGER="/bin/sh -c \"col -b | vim -c 'set ft=man ts=8 nomod nolist nonu noma' -\""
 
 
@@ -23,6 +23,7 @@ PATH="${PATH}:$HOME/.local/bin" # for haskell stuff
 PATH="${PATH}:/usr/local/sbin"
 PATH="${PATH}:$HOME/Library/Python/2.7/bin" # pip/virtualenv location
 PATH="${PATH}:$HOME/.cargo/bin"
+PATH="${PATH}:~/.config/yarn/global/node_modules/.bin/" # for yarn binaries, ie prettier
 export PATH
 
 
@@ -34,6 +35,8 @@ alias nose='nosetests -v -x -s'
 alias godevel='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias godvl='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias gdvl='/Users/ethomas/go/src/github.com/golang/go/bin/go'
+alias dc='docker-compose'
+bind -x '"\C-i": clear'
 
 
 #  ================================= OTHER =================================

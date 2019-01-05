@@ -17,6 +17,7 @@
 
 # js stuff
 --ignore-file=match:.json
+--ignore-file=match:.eslintcache
 --ignore-dir=bundles
 
 # other
@@ -24,8 +25,14 @@
 --ignore-dir=.git
 --ignore-dir=dist
 --ignore-dir=assets
+--ignore-file=match:tags
+--ignore-file=match:ipynb
 
 # Redefine js to include jsx, tsx and ts
 --type-set=js:ext:js,jsx,tsx,ts
+--type-set=jsx:ext:js,jsx,tsx,ts
+
+# Redefine css to include scss
+--type-set=css:ext:css,scss
 
 --type-add=ts:ext:ts # Idk if this is useful

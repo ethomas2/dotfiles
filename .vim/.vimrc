@@ -21,16 +21,18 @@ set rtp+=~/.fzf
 set rtp+=~/.vim/bundle/vim-colors-solarized
 call vundle#begin()
 
-"Other
 Plugin 'gmarik/vundle'
-Plugin 'https://github.com/altercation/vim-colors-solarized'
-Plugin 'https://github.com/martinda/Jenkinsfile-vim-syntax'
-Plugin 'https://github.com/google/vim-jsonnet'
 
 "Language IDE-like stuff
 Plugin 'fatih/vim-go'
 Plugin 'bitc/vim-hdevtools'
 Plugin 'https://github.com/dan-t/vim-hsimport'
+" consider https://github.com/romainl/ctags-patterns-for-javascript
+
+" Coloring/syntax highlighting
+Plugin 'https://github.com/leafgarland/typescript-vim'
+Plugin 'https://github.com/mxw/vim-jsx'
+Plugin 'https://github.com/altercation/vim-colors-solarized'
 
 " Verbs
 Plugin 'tpope/vim-surround'
@@ -45,6 +47,8 @@ Plugin 'https://github.com/glts/vim-textobj-comment'
 Plugin 'https://github.com/wellle/targets.vim'
 Plugin 'https://github.com/coderifous/textobj-word-column.vim'
 
+" Other
+Plugin 'https://github.com/christoomey/vim-tmux-navigator'
 
 call vundle#end()
 
@@ -117,6 +121,10 @@ augroup mygroup
   " Not working. Idk why. See
   " https://vi.stackexchange.com/questions/5201/how-do-i-tell-vim-that-some-file-extensions-are-synonymous
   au BufRead,BufNewFile Dockerfile* setfiletype dockerfile
+
+  " autocmd BufNewFile,BufRead *.ts set  ft=javascript
+  " autocmd BufNewFile,BufRead *.tsx set ft=javascript
+  " autocmd BufNewFile,BufRead *.jsx set ft=javascript
 augroup END
 
 
