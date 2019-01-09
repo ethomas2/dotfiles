@@ -1,0 +1,52 @@
+#!/bin/bash
+set -euo pipefail
+ln -s ~/.dotfiles/.ackrc      ~/.ackrc
+ln -s ~/.dotfiles/.bashrc     ~/.bashrc
+ln -s ~/.dotfiles/.ctags      ~/.ctags
+ln -s ~/.dotfiles/.gitconfig  ~/.gitconfig
+ln -s ~/.dotfiles/.inputrc    ~/.inputrc
+ln -s ~/.dotfiles/.marksrc    ~/.marksrc
+ln -s ~/.dotfiles/.tmux.conf  ~/.tmux.conf
+ln -s ~/.dotfiles/.vim        ~/.vim
+ln -s ~/.dotfiles/.vim/.vimrc ~/.vimrc
+ln -s ~/.dotfiles/scripts     ~/scripts
+
+source ~/.marksrc
+mkdir -p ~/scrap      && (cd ~/scrap; m scrap)
+mkdir -p ~/github.com && (cd ~/github.com; m github)
+mkdir -p ~/notes      && (cd ~/notes; m notes)
+(cd ~/Downloads; m downloads)
+(cd ~/.marks; m marks)
+
+(
+  cd ~/scripts
+  for fname in $(ls); do
+    if [ -n "$(echo $fname | grep ^git)" ]; then
+      echo chmod +x "$fname"
+    fi
+  done
+)
+
+# install bat
+(
+  tmpfile=$(mktemp)
+  echo $tmpfile
+  function rmtmp {
+    rm -rf $tmpfile
+  }
+  trap rmtmp EXIT
+  curl -Lo $tmpfile https://github.com/sharkdp/bat/releases/download/v0.9.0/bat-musl_0.9.0_amd64.deb
+  sudo dpkg -i $tmpfile
+)
+
+# install rg
+(
+  tmpfile=$(mktemp)
+  echo $tmpfile
+  function rmtmp {
+    rm -rf $tmpfile
+  }
+  trap rmtmp EXIT
+  curl -LO https://github.com/BurntSushi/ripgrep/releases/download/0.10.0/ripgrep_0.10.0_amd64.deb
+  sudo dpkg -i ripgrep_0.10.0_amd64.deb
+)

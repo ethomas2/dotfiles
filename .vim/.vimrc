@@ -241,9 +241,21 @@ let g:fzf_action = {
   \ 'ctrl-x': 'split',
   \ 'ctrl-v': 'vsplit' }
 let g:fzf_layout = {'down': '45%'}
+
 command! -bang -nargs=* Ag
   \ call fzf#vim#ag(<q-args>, fzf#vim#with_preview('right:35%'))
+
+" command! -nargs=* -complete=dir Rg
+"   \ call fzf#vim#grep(
+"   \   "rg --column --line-number --no-heading --fixed-strings --smart-case --hidden --color=always --glob '!.git/**' --glob '!.hg/**' --glob '!**/*.ico' --glob '!**/*.png' --glob '!**/*.jpg' --glob '!**/*.jpeg' --glob '!**/*.zip' --glob '!**/*.tar.gz' --glob '!**/*.gif' --glob '!**/*.avi' --glob '!**/*.mp4' --glob '!**/*.mp3' --glob '!**/*.ogg' --glob '!**/*.tgz' --glob '!**/*.gz' --glob '!**/*.ctg.z' --glob '!**/*.bcmap' ".<q-args>, 1,
+"   \ fzf#vim#with_preview('right:35%'),
+"   \ )
+
+command! -bang -nargs=* Lines
+  \ call fzf#vim#lines(<q-args>, fzf#vim#with_preview('right:35%'))
+
 " Immediately trigger a search for the current keyword if there is one
 nnoremap <expr> <leader>g (expand("<cword>") ==? "") ? ":Ag " : ":Ag \<C-r>\<C-w><CR>"
+
 " Immediately trigger a search for the current selection if there is one
 xnoremap <leader>g "zy:exe "Ag ".@z.""<CR>

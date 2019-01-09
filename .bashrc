@@ -1,8 +1,8 @@
 #  ================================= SOURCE  =================================
-[ -f ~/.customization/git-completion.bash ] && source ~/.customization/git-completion.bash
-[ -f ~/.marksrc ]                           && source ~/.marksrc
-[ -f ~/.fzf.bash ]                          && source ~/.fzf.bash
-[ -f ~/.customization/secrets ]             && source ~/.customization/secrets
+[ -f ~/.dotfiles/git-completion.bash ] && source ~/.dotfiles/git-completion.bash
+[ -f ~/.marksrc ]                      && source ~/.marksrc
+[ -f ~/.fzf.bash ]                     && source ~/.fzf.bash
+[ -f ~/.dotfiles/secrets ]             && source ~/.dotfiles/secrets
 
 
 #  ================================= EXPORTS =================================
@@ -27,8 +27,8 @@ export PATH
 
 
 #  ================================= ALIASES =================================
-alias lifx='/home/evan/.customization/scripts/lifx-cmd/venv/bin/python /home/evan/.customization/scripts/lifx-cmd/bin/lifx'
-alias lifx-discover='/home/evan/.customization/scripts/lifx-cmd/venv/bin/python /home/evan/.customization/scripts/lifx-cmd/bin/lifx-discover'
+alias lifx='/home/evan/.dotfiles/scripts/lifx-cmd/venv/bin/python /home/evan/.dotfiles/scripts/lifx-cmd/bin/lifx'
+alias lifx-discover='/home/evan/.dotfiles/scripts/lifx-cmd/venv/bin/python /home/evan/.dotfiles/scripts/lifx-cmd/bin/lifx-discover'
 alias ls='ls --color=auto'
 alias nose='nosetests -v -x -s'
 alias dc='docker-compose'
@@ -62,4 +62,4 @@ if [[ "$(whoami)" == "ethomas" ]] && ! ps -U "ethomas" -o pid,ucomm | grep -v gr
 fi
 
 # See http://linux-sxs.org/housekeeping/lscolors.html and https://github.com/seebi/dircolors-solarized
-eval `dircolors ~/.customization/dircolors-solarized/dircolors.256dark`
+eval `dircolors ~/.dotfiles/dircolors-solarized/dircolors.256dark`
