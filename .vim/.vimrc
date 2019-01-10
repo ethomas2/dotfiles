@@ -28,6 +28,7 @@ Plugin 'fatih/vim-go'
 Plugin 'bitc/vim-hdevtools'
 Plugin 'https://github.com/dan-t/vim-hsimport'
 Plugin 'https://github.com/junegunn/fzf.vim'
+Plugin 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
 " consider https://github.com/romainl/ctags-patterns-for-javascript
 
 " Coloring/syntax highlighting
@@ -120,9 +121,6 @@ augroup mygroup
   " https://vi.stackexchange.com/questions/5201/how-do-i-tell-vim-that-some-file-extensions-are-synonymous
   au BufRead,BufNewFile Dockerfile* setfiletype dockerfile
 
-  " autocmd BufNewFile,BufRead *.ts set  ft=javascript
-  " autocmd BufNewFile,BufRead *.tsx set ft=javascript
-  " autocmd BufNewFile,BufRead *.jsx set ft=javascript
 augroup END
 
 
