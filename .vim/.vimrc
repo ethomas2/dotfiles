@@ -27,6 +27,8 @@ Plugin 'gmarik/vundle'
 Plugin 'fatih/vim-go'
 Plugin 'bitc/vim-hdevtools'
 Plugin 'https://github.com/dan-t/vim-hsimport'
+Plugin 'https://github.com/junegunn/fzf.vim'
+Plugin 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
 " consider https://github.com/romainl/ctags-patterns-for-javascript
 
 " Coloring/syntax highlighting
@@ -46,9 +48,6 @@ Plugin 'https://github.com/kana/vim-textobj-user'
 Plugin 'https://github.com/glts/vim-textobj-comment'
 Plugin 'https://github.com/wellle/targets.vim'
 Plugin 'https://github.com/coderifous/textobj-word-column.vim'
-
-" Other
-Plugin 'https://github.com/christoomey/vim-tmux-navigator'
 
 call vundle#end()
 
@@ -122,9 +121,6 @@ augroup mygroup
   " https://vi.stackexchange.com/questions/5201/how-do-i-tell-vim-that-some-file-extensions-are-synonymous
   au BufRead,BufNewFile Dockerfile* setfiletype dockerfile
 
-  " autocmd BufNewFile,BufRead *.ts set  ft=javascript
-  " autocmd BufNewFile,BufRead *.tsx set ft=javascript
-  " autocmd BufNewFile,BufRead *.jsx set ft=javascript
 augroup END
 
 
@@ -209,3 +205,55 @@ function! TmuxRun()
     execute cmd
 endfunction
 xnoremap <leader>r :call TmuxRun()<CR>
+
+" Adapted from https://stackoverflow.com/questions/2974192/how-can-i-pare-down-vims-buffer-list-to-only-include-active-buffers
+command! -nargs=* CleanBuf call CloseHiddenBuffers()
+function! CloseHiddenBuffers()
+  " figure out which buffers are visible in any tab
+  let visible = {}
+  for t in range(1, tabpagenr('$'))
+    for b in tabpagebuflist(t)
+      let visible[b] = 1
+    endfor
+  endfor
+  " close any buffer that are loaded and not visible
+  let l:tally = 0
+  for b in range(1, bufnr('$'))
+    if buflisted(b) && !has_key(visible, b)
+      let l:tally += 1
+      exe 'bw ' . b
+    endif
+  endfor
+  echon "Deleted " . l:tally . " buffers"
+endfun
+
+" FZF Config
+function! s:build_quickfix_list(lines)
+  call setqflist(map(copy(a:lines), '{ "filename": v:val }'))
+  copen
+  cc
+endfunction
+let g:fzf_action = {
+  \ 'ctrl-q': function('s:build_quickfix_list'),
+  \ 'ctrl-t': 'tab split',
+  \ 'ctrl-x': 'split',
+  \ 'ctrl-v': 'vsplit' }
+let g:fzf_layout = {'down': '45%'}
+
+command! -bang -nargs=* Ag
+  \ call fzf#vim#ag(<q-args>, fzf#vim#with_preview('right:35%'))
+
+" command! -nargs=* -complete=dir Rg
+"   \ call fzf#vim#grep(
+"   \   "rg --column --line-number --no-heading --fixed-strings --smart-case --hidden --color=always --glob '!.git/**' --glob '!.hg/**' --glob '!**/*.ico' --glob '!**/*.png' --glob '!**/*.jpg' --glob '!**/*.jpeg' --glob '!**/*.zip' --glob '!**/*.tar.gz' --glob '!**/*.gif' --glob '!**/*.avi' --glob '!**/*.mp4' --glob '!**/*.mp3' --glob '!**/*.ogg' --glob '!**/*.tgz' --glob '!**/*.gz' --glob '!**/*.ctg.z' --glob '!**/*.bcmap' ".<q-args>, 1,
+"   \ fzf#vim#with_preview('right:35%'),
+"   \ )
+
+command! -bang -nargs=* Lines
+  \ call fzf#vim#lines(<q-args>, fzf#vim#with_preview('right:35%'))
+
+" Immediately trigger a search for the current keyword if there is one
+nnoremap <expr> <leader>g (expand("<cword>") ==? "") ? ":Ag " : ":Ag \<C-r>\<C-w><CR>"
+
+" Immediately trigger a search for the current selection if there is one
+xnoremap <leader>g "zy:exe "Ag ".@z.""<CR>
