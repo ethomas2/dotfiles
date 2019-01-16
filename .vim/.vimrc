@@ -257,3 +257,6 @@ nnoremap <expr> <leader>g (expand("<cword>") ==? "") ? ":Ag " : ":Ag \<C-r>\<C-w
 
 " Immediately trigger a search for the current selection if there is one
 xnoremap <leader>g "zy:exe "Ag ".@z.""<CR>
+
+let g:prettier#exec_cmd_path = "~/.config/yarn/global/node_modules/.bin/prettier"
+let g:prettier#exec_cmd_async = 1

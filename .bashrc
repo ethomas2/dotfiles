@@ -35,6 +35,8 @@ alias dc='docker-compose'
 alias pbcopy='xclip -selection clipboard'
 alias pbpaste='xclip -selection clipboard -o'
 alias g='git'
+alias v='vim'
+alias py36='~/.pyenv/versions/3.6.1/bin/python'
 
 
 #  ================================= FZF =================================
@@ -49,16 +51,22 @@ export FZF_DEFAULT_OPTS='
 '
 
 
+#  ========================== HISTORY CONTROL  ==========================
+# See https://unix.stackexchange.com/questions/1288/preserve-bash-history-in-multiple-terminal-windows
+# When the shell exits, append to the history file instead of overwriting it
+shopt -s histappend
+
+# After each command, append to the history file and reread it
+export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+
+# consider
+# export HISTSIZE=100000                   # big big history
+# export HISTFILESIZE=100000               # big big history
+
+
 #  ================================= OTHER =================================
 if [ -z "$TMUX" ]; then
   tmux
-fi
-
-
-# from casey
-if [[ "$(whoami)" == "ethomas" ]] && ! ps -U "ethomas" -o pid,ucomm | grep -v grep | grep -q "ssh-agent"; then
-    eval "$(ssh-agent)"
-    ssh-add > /dev/null 2>&1
 fi
 
 # See http://linux-sxs.org/housekeeping/lscolors.html and https://github.com/seebi/dircolors-solarized
