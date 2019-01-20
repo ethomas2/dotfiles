@@ -257,3 +257,13 @@ nnoremap <expr> <leader>g (expand("<cword>") ==? "") ? ":Ag " : ":Ag \<C-r>\<C-w
 
 " Immediately trigger a search for the current selection if there is one
 xnoremap <leader>g "zy:exe "Ag ".@z.""<CR>
+
+function! RunPython()
+  "clear any characters that have already been typed (if any)
+  execute "r !tmux send-keys -t right \"C-c\""
+  "clear screen
+  execute "r !tmux send-keys -t right \"C-l\""
+  execute "r !tmux send-keys -t right \"python main.py\" Enter"
+endfunction
+command! -nargs=* RunPython call RunPython()
+nnoremap <leader>x :call RunPython()<CR>

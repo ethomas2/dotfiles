@@ -3,6 +3,10 @@
 [ -f ~/.marksrc ]                      && source ~/.marksrc
 [ -f ~/.fzf.bash ]                     && source ~/.fzf.bash
 [ -f ~/.dotfiles/secrets ]             && source ~/.dotfiles/secrets
+[ -f ~/.dotfiles/secrets ]             && source ~/.dotfiles/secrets
+
+# brew bash completion stuff (bat, ag, pandoc). Idk if this even does anything
+[ -d /usr/local/etc/bash_completion. ] && source /usr/local/etc/bash_completion.d/*
 
 
 #  ================================= EXPORTS =================================
@@ -12,6 +16,8 @@ export PYENV_ROOT="$HOME/.pyenv"
 export PGDATA="/usr/local/var/postgres"
 export GOPATH=$HOME/go
 export MANPAGER="/bin/sh -c \"col -b | vim -c 'set ft=man ts=8 nomod nolist nonu noma' -\""
+export AWS_DEFAULT_REGION=us-west-2  # used by aws tools. Specifically sam (maybe others)
+
 
 
 #  ============================== PATH CHANGES ==============================
@@ -20,6 +26,7 @@ PATH="${PATH}:$HOME/scripts"
 PATH="${PATH}:$HOME/bin" # mostly for ack
 PATH="${PATH}:$HOME/go/bin"
 PATH="${PATH}:$HOME/.local/bin" # for haskell stuff
+PATH="${PATH}:$HOME/Library/Haskell/bin" # haskell stuff installed by cabal
 PATH="${PATH}:/usr/local/sbin"
 PATH="${PATH}:$HOME/Library/Python/2.7/bin" # pip/virtualenv location
 PATH="${PATH}:$HOME/.cargo/bin"
@@ -38,6 +45,7 @@ alias godvl='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias gdvl='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias dc='docker-compose'
 alias g='git'
+alias svenv='source venv/bin/activate'
 
 
 #  ================================= FZF =================================
