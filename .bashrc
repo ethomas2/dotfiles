@@ -45,6 +45,7 @@ alias godvl='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias gdvl='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias dc='docker-compose'
 alias g='git'
+alias gi='git'
 alias svenv='source venv/bin/activate'
 
 

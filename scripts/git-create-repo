@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# See https://gist.github.com/robwierzbowski/5430952/
+
+REPONAME=${PWD##*/}
+USER=ethomas2
+
+curl -u $USER:$GHTOKEN https://api.github.com/user/repos -d "{\"name\": \"${REPONAME}\", \"private\": false, \"has_issues\": true, \"has_downloads\": true, \"has_wiki\": false}"
+
+git remote add origin "git@github.com:$USER/$REPONAME.git"
+git push --set-upstream origin master:master
