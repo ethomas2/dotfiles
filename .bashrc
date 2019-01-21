@@ -35,8 +35,12 @@ alias dc='docker-compose'
 alias pbcopy='xclip -selection clipboard'
 alias pbpaste='xclip -selection clipboard -o'
 alias g='git'
+__git_complete g _git # https://stackoverflow.com/questions/9869227/git-autocomplete-in-bash-aliases
+alias gi='git'
+__git_complete g _git # https://stackoverflow.com/questions/9869227/git-autocomplete-in-bash-aliases
 alias v='vim'
 alias py36='~/.pyenv/versions/3.6.1/bin/python'
+alias cat='bat'
 
 
 #  ================================= FZF =================================

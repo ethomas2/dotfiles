@@ -1,7 +1,31 @@
 [user]
-	email = ethomas@box.com
+	email = evan@tempoautomation.com
 	name = Evan Thomas
-[merge]
-	tool = vimdiff
 [diff]
 	tool = vimdiff
+[core]
+	editor = vim
+[merge]
+	tool = vimdiff
+[alias]
+        ch = checkout
+        cho = checkout
+        chout = checkout
+        check = checkout
+
+        c = commit
+        co = commit
+        com = commit
+
+        b = branch
+        br = branch
+
+        f = fetch
+        fe = fetch
+
+        p = push
+        pu = push
+
+        dt = difftool
+        dtool = difftool
+        difft = difftool
