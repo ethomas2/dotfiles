@@ -1,6 +1,7 @@
 [user]
 	email = evan@tempoautomation.com
 	name = Evan Thomas
+
 [diff]
 	tool = vimdiff
 [core]

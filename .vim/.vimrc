@@ -260,3 +260,13 @@ xnoremap <leader>g "zy:exe "Ag ".@z.""<CR>
 
 let g:prettier#exec_cmd_path = "~/.config/yarn/global/node_modules/.bin/prettier"
 let g:prettier#exec_cmd_async = 1
+
+function! RunPython()
+  "clear any characters that have already been typed (if any)
+  execute "r !tmux send-keys -t right \"C-c\""
+  "clear screen
+  execute "r !tmux send-keys -t right \"C-l\""
+  execute "r !tmux send-keys -t right \"python main.py\" Enter"
+endfunction
+command! -nargs=* RunPython call RunPython()
+nnoremap <leader>x :call RunPython()<CR>

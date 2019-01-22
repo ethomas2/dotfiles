@@ -6,4 +6,3 @@ set completion-ignore-case on
 # tab complete usually requires you to click tab twice to disamgiguate
 set show-all-if-ambiguous on
 
-# Control-n: clear-screen # this is done in .bashrc instead
