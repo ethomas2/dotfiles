@@ -266,7 +266,7 @@ function! RunPython()
   execute "r !tmux send-keys -t right \"C-c\""
   "clear screen
   execute "r !tmux send-keys -t right \"C-l\""
-  execute "r !tmux send-keys -t right \"python main.py\" Enter"
+  execute "r !tmux send-keys -t right \"dc exec web python main.py\" Enter"
 endfunction
 command! -nargs=* RunPython call RunPython()
 nnoremap <leader>x :call RunPython()<CR>

@@ -20,6 +20,7 @@
 
         b = branch
         br = branch
+        bra = branch
 
         f = fetch
         fe = fetch
@@ -30,3 +31,6 @@
         dt = difftool
         dtool = difftool
         difft = difftool
+        dit = difftool
+
+        d = diff

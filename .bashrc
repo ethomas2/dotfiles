@@ -16,6 +16,7 @@ export PGDATA="/usr/local/var/postgres"
 export GOPATH=$HOME/go
 export MANPAGER="/bin/sh -c \"col -b | vim -c 'set ft=man ts=8 nomod nolist nonu noma' -\""
 export AWS_DEFAULT_REGION=us-west-2  # used by aws tools. Specifically sam (maybe others)
+export FCEDIT=vi
 
 
 
@@ -49,6 +50,7 @@ alias g='git'
 __git_complete g _git # https://stackoverflow.com/questions/9869227/git-autocomplete-in-bash-aliases
 alias gi='git'
 __git_complete g _git # https://stackoverflow.com/questions/9869227/git-autocomplete-in-bash-aliases
+alias svenv='source venv/bin/activate'
 alias v='vim'
 alias py36='~/.pyenv/versions/3.6.1/bin/python'
 alias cat='bat'
@@ -74,9 +76,10 @@ shopt -s histappend
 # After each command, append to the history file and reread it
 export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
 
-# consider
-# export HISTSIZE=100000                   # big big history
-# export HISTFILESIZE=100000               # big big history
+# My current .bash_history is 508 lines and 15644 bytes for an average of 30
+# bytes per line. Thus 10000 HISTSIZE is 30.7 KB
+export HISTSIZE=10000                   # big big history
+export HISTFILESIZE=10000               # big big history
 
 
 #  ================================= OTHER =================================
