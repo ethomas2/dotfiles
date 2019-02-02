@@ -1,0 +1,2 @@
+#!/bin/bash
+git cherry origin/develop | tail -1 | awk '{print $2}'

@@ -34,3 +34,5 @@
         dit = difftool
 
         d = diff
+
+        mt = mergetool
