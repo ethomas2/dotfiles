@@ -16,7 +16,6 @@ export PGDATA="/usr/local/var/postgres"
 export GOPATH=$HOME/go
 export MANPAGER="/bin/sh -c \"col -b | vim -c 'set ft=man ts=8 nomod nolist nonu noma' -\""
 export AWS_DEFAULT_REGION=us-west-2  # used by aws tools. Specifically sam (maybe others)
-export FCEDIT=vi
 
 
 
@@ -53,7 +52,6 @@ __git_complete g _git # https://stackoverflow.com/questions/9869227/git-autocomp
 alias svenv='source venv/bin/activate'
 alias v='vim'
 alias py36='~/.pyenv/versions/3.6.1/bin/python'
-alias cat='bat'
 
 
 #  ================================= FZF =================================
@@ -61,12 +59,11 @@ export FZF_DEFAULT_OPTS='
   -m -i
   --bind ctrl-d:page-down,ctrl-u:page-up
   --preview-window right:35%
+  --preview "[[ $(file --mime {}) =~ binary ]] &&
+                 echo {} is a binary file ||
+                 (bat --style "numbers,changes" --color=always {} ||
+                  head -500 {}) 2> /dev/null"
 '
-#   --preview "[[ $(file --mime {}) =~ binary ]] &&
-#                  echo {} is a binary file ||
-#                  (bat --style "numbers,changes" --color=always {} ||
-#                   head -500 {}) 2> /dev/null"
-# '
 
 
 #  ========================== HISTORY CONTROL  ==========================
