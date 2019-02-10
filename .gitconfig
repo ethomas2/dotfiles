@@ -1,7 +1,38 @@
 [user]
 	email = evanrthom@gmail.com
 	name = Evan Thomas
-[merge]
-	tool = vimdiff
+
 [diff]
 	tool = vimdiff
+[core]
+	editor = vim
+[merge]
+	tool = vimdiff
+[alias]
+        ch = checkout
+        cho = checkout
+        chout = checkout
+        check = checkout
+
+        c = commit
+        co = commit
+        com = commit
+
+        b = branch
+        br = branch
+        bra = branch
+
+        f = fetch
+        fe = fetch
+
+        p = push
+        pu = push
+
+        dt = difftool
+        dtool = difftool
+        difft = difftool
+        dit = difftool
+
+        d = diff
+
+        mt = mergetool

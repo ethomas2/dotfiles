@@ -1,0 +1,2 @@
+#!/bin/bash
+git cherry  ${1:-origin/develop} | awk '{print $2}' | while read -r line; do git --no-pager diff $line^..$line ; done

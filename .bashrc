@@ -8,6 +8,9 @@
 # brew bash completion stuff (bat, ag, pandoc). Idk if this even does anything
 [ -d /usr/local/etc/bash_completion. ] && source /usr/local/etc/bash_completion.d/*
 
+# brew bash completion stuff (bat, ag, pandoc). Idk if this even does anything
+[ -d /usr/local/etc/bash_completion. ] && source /usr/local/etc/bash_completion.d/*
+
 
 #  ================================= EXPORTS =================================
 export HISTCONTROL=ignoredups:ignorespace
@@ -17,7 +20,6 @@ export PGDATA="/usr/local/var/postgres"
 export GOPATH=$HOME/go
 export MANPAGER="/bin/sh -c \"col -b | vim -c 'set ft=man ts=8 nomod nolist nonu noma' -\""
 export AWS_DEFAULT_REGION=us-west-2  # used by aws tools. Specifically sam (maybe others)
-
 
 
 #  ============================== PATH CHANGES ==============================
@@ -44,22 +46,27 @@ alias godevel='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias godvl='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias gdvl='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias dc='docker-compose'
-alias g='git'
-alias gi='git'
-alias svenv='source venv/bin/activate'
 alias v='vim'
 alias py37='~/.pyenv/versions/3.7.0/bin/python'
+alias g='git'
+__git_complete g _git # https://stackoverflow.com/questions/9869227/git-autocomplete-in-bash-aliases
+alias gi='git'
+__git_complete g _git # https://stackoverflow.com/questions/9869227/git-autocomplete-in-bash-aliases
+alias svenv='source venv/bin/activate'
+alias v='vim'
+alias py36='~/.pyenv/versions/3.6.1/bin/python'
+alias svenv='source venv/bin/activate'
 
 
 #  ================================= FZF =================================
 export FZF_DEFAULT_OPTS='
   -m -i
   --bind ctrl-d:page-down,ctrl-u:page-up
+  --preview-window right:35%
   --preview "[[ $(file --mime {}) =~ binary ]] &&
                  echo {} is a binary file ||
                  (bat --style "numbers,changes" --color=always {} ||
                   head -500 {}) 2> /dev/null"
-  --preview-window right:35%
 '
 
 
@@ -71,9 +78,10 @@ shopt -s histappend
 # After each command, append to the history file and reread it
 export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
 
-# consider
-# export HISTSIZE=100000                   # big big history
-# export HISTFILESIZE=100000               # big big history
+# My current .bash_history is 508 lines and 15644 bytes for an average of 30
+# bytes per line. Thus 10000 HISTSIZE is 30.7 KB
+export HISTSIZE=10000                   # big big history
+export HISTFILESIZE=10000               # big big history
 
 
 #  ================================= OTHER =================================
