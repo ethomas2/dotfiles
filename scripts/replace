@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Bash doesn't let you do something like
+#      cat file | awk '{print $1}' > file
+# file will end up empty because because bash processes > first (clearing the
+# file), and then it does cat file (catting an empty file). This script lets
+# you do
+#      cat file | awk '{print $1}' | replace file
+
+if [ -z "$1" ]; then
+  echo -e "\033[31mMissing file name\033[m"
+  exit 1
+fi
+
+tmp=$(tempfile -p rplc)
+echo $tmp
+cat > $tmp
+mv $tmp "$1"
