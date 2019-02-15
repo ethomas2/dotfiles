@@ -1,2 +1,2 @@
 #!/bin/bash
-git cherry origin/develop | tail -1 | awk '{print $2}'
+git cherry origin/develop | head -1 | awk '{print $2}'
