@@ -38,8 +38,8 @@ export PATH
 
 
 #  ================================= ALIASES =================================
-alias lifx='/Users/ethomas/.customization/scripts/lifx-cmd/venv/bin/python /Users/ethomas/.customization/scripts/lifx-cmd/bin/lifx'
-alias lifx-discover='/Users/ethomas/.customization/scripts/lifx-cmd/venv/bin/python /Users/ethomas/.customization/scripts/lifx-cmd/bin/lifx-discover'
+alias lifx='/Users/ethomas/.dotfiles/scripts/lifx-cmd/venv/bin/python /Users/ethomas/.dotfiles/scripts/lifx-cmd/bin/lifx'
+alias lifx-discover='/Users/ethomas/.dotfiles/scripts/lifx-cmd/venv/bin/python /Users/ethomas/.dotfiles/scripts/lifx-cmd/bin/lifx-discover'
 alias ls='ls -G'
 alias nose='nosetests -v -x -s'
 alias godevel='/Users/ethomas/go/src/github.com/golang/go/bin/go'

@@ -36,3 +36,5 @@
         d = diff
 
         mt = mergetool
+
+        cp = cherry-pick

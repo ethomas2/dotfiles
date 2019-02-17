@@ -48,7 +48,10 @@ Plugin 'https://github.com/kana/vim-textobj-user'
 Plugin 'https://github.com/glts/vim-textobj-comment'
 Plugin 'https://github.com/wellle/targets.vim'
 Plugin 'https://github.com/coderifous/textobj-word-column.vim'
+Plugin 'https://github.com/bps/vim-textobj-python'
 
+" Other
+Plugin 'https://github.com/jgdavey/tslime.vim'
 call vundle#end()
 
 filetype plugin indent on    " required
@@ -193,18 +196,10 @@ let g:lion_create_maps = 1
 let g:lion_squeeze_spaces = 1
 let g:jsonnet_fmt_on_save = 0
 
-function! TmuxRun()
-    let [lnum1, col1] = getpos("'<")[1:2]
-    let [lnum2, col2] = getpos("'>")[1:2]
-    let lines = getline(lnum1, lnum2)
-    let lines[-1] = lines[-1][: col2 - 1]
-    let lines[0] = lines[0][col1 - 1:]
-    let output = join(lines, "\n")
-    " TODO: also substitute all instances of $
-    let cmd =  "r !tmux send-keys -t right \"" . substitute(output, '"', '\\"', "g") . "\" Enter"
-    execute cmd
-endfunction
-xnoremap <leader>r :call TmuxRun()<CR>
+vmap <C-c><C-c> <Plug>SendSelectionToTmux
+nmap <C-c><C-c> <Plug>NormalModeSendToTmux
+let g:tslime_always_current_session = 1
+let g:tslime_always_current_window = 1
 
 " Adapted from https://stackoverflow.com/questions/2974192/how-can-i-pare-down-vims-buffer-list-to-only-include-active-buffers
 command! -nargs=* CleanBuf call CloseHiddenBuffers()
@@ -270,3 +265,5 @@ function! RunPython()
 endfunction
 command! -nargs=* RunPython call RunPython()
 nnoremap <leader>x :call RunPython()<CR>
+
+nnoremap <C-B> :Buffers<CR>
