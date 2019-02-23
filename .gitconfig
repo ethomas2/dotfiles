@@ -38,3 +38,7 @@
         mt = mergetool
 
         cp = cherry-pick
+
+        r = rebase
+        rb = rebase
+        reb = rebase

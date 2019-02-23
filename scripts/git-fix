@@ -1,8 +1,0 @@
-#!/bin/bash
-if [ "$#" -eq 0 ]; then
-  git rebase --interactive --preserve-merges --keep-empty HEAD~10
-elif [ "$#" -eq 1 ]; then
-  git rebase --interactive --preserve-merges --keep-empty HEAD~$1
-else
-  echo "Illegal number of arguments"
-fi
