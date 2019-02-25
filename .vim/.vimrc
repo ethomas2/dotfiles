@@ -188,7 +188,9 @@ let g:go_list_type = "quickfix"
 let g:go_def_mode = 'godef'
 
 " from old vimrc
-set cryptmethod=blowfish
+if !has('nvim')
+  set cryptmethod=blowfish
+endif
 
 set ruler
 
