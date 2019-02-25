@@ -3,6 +3,10 @@
 [ -f ~/.marksrc ]                      && source ~/.marksrc
 [ -f ~/.fzf.bash ]                     && source ~/.fzf.bash
 [ -f ~/.dotfiles/secrets ]             && source ~/.dotfiles/secrets
+[ -f ~/.dotfiles/secrets ]             && source ~/.dotfiles/secrets
+
+# brew bash completion stuff (bat, ag, pandoc). Idk if this even does anything
+[ -d /usr/local/etc/bash_completion. ] && source /usr/local/etc/bash_completion.d/*
 
 # brew bash completion stuff (bat, ag, pandoc). Idk if this even does anything
 [ -d /usr/local/etc/bash_completion. ] && source /usr/local/etc/bash_completion.d/*
@@ -16,7 +20,6 @@ export PGDATA="/usr/local/var/postgres"
 export GOPATH=$HOME/go
 export MANPAGER="/bin/sh -c \"col -b | vim -c 'set ft=man ts=8 nomod nolist nonu noma' -\""
 export AWS_DEFAULT_REGION=us-west-2  # used by aws tools. Specifically sam (maybe others)
-
 
 
 #  ============================== PATH CHANGES ==============================
@@ -52,6 +55,7 @@ __git_complete g _git # https://stackoverflow.com/questions/9869227/git-autocomp
 alias svenv='source venv/bin/activate'
 alias v='vim'
 alias py36='~/.pyenv/versions/3.6.1/bin/python'
+alias svenv='source venv/bin/activate'
 
 
 #  ================================= FZF =================================
