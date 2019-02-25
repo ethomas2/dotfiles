@@ -1,6 +1,10 @@
 #!/bin/bash
-bold=[ -t 1 ] && `tput bold`
-normal=[ -t 1 ] && `tput sgr0`
+bold=""
+normal=""
+if [ -t 1 ]; then
+  bold=`tput bold`
+  normal=`tput sgr0`
+fi
 echo -n "${bold}branch :: *"
 git rev-parse --abbrev-ref HEAD
 echo -n "${normal}"
