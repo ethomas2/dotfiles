@@ -52,6 +52,8 @@ Plugin 'https://github.com/bps/vim-textobj-python'
 
 " Other
 Plugin 'https://github.com/jgdavey/tslime.vim'
+Plugin 'https://github.com/Konfekt/vim-alias'
+
 call vundle#end()
 
 filetype plugin indent on    " required
