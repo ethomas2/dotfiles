@@ -13,50 +13,54 @@
 
 " Things required for vundle
 set nocompatible              " be iMproved, required
-filetype off                  " required
 
 
-set rtp+=~/.vim/bundle/Vundle.vim
 set rtp+=~/.fzf
 set rtp+=~/.vim/bundle/vim-colors-solarized
-call vundle#begin()
 
-Plugin 'gmarik/vundle'
+" https://github.com/junegunn/vim-plug/wiki/tips#automatic-installation
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+ autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+call plug#begin('~/.vim/plugged')
 
 "Language IDE-like stuff
-Plugin 'fatih/vim-go'
-Plugin 'bitc/vim-hdevtools'
-Plugin 'https://github.com/dan-t/vim-hsimport'
-Plugin 'https://github.com/junegunn/fzf.vim'
-Plugin 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
+Plug 'fatih/vim-go'
+Plug 'bitc/vim-hdevtools'
+Plug 'https://github.com/dan-t/vim-hsimport'
+Plug 'https://github.com/junegunn/fzf.vim'
+Plug 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
 " consider https://github.com/romainl/ctags-patterns-for-javascript
 
 " Coloring/syntax highlighting
-Plugin 'https://github.com/leafgarland/typescript-vim'
-Plugin 'https://github.com/mxw/vim-jsx'
-Plugin 'https://github.com/altercation/vim-colors-solarized'
+Plug 'https://github.com/leafgarland/typescript-vim'
+Plug 'https://github.com/mxw/vim-jsx'
+Plug 'https://github.com/altercation/vim-colors-solarized'
 
 " Verbs
-Plugin 'tpope/vim-surround'
-Plugin 'https://github.com/tpope/vim-commentary'
-Plugin 'https://github.com/tommcdo/vim-lion'
+Plug 'tpope/vim-surround'
+Plug 'https://github.com/tpope/vim-commentary'
+Plug 'https://github.com/tommcdo/vim-lion'
 
 " Text objects
-Plugin 'https://github.com/kana/vim-textobj-entire'
-Plugin 'https://github.com/michaeljsmith/vim-indent-object'
-Plugin 'https://github.com/kana/vim-textobj-user'
-Plugin 'https://github.com/glts/vim-textobj-comment'
-Plugin 'https://github.com/wellle/targets.vim'
-Plugin 'https://github.com/coderifous/textobj-word-column.vim'
-Plugin 'https://github.com/bps/vim-textobj-python'
+Plug 'https://github.com/kana/vim-textobj-entire'
+Plug 'https://github.com/michaeljsmith/vim-indent-object'
+Plug 'https://github.com/kana/vim-textobj-user'
+Plug 'https://github.com/glts/vim-textobj-comment'
+Plug 'https://github.com/wellle/targets.vim'
+Plug 'https://github.com/coderifous/textobj-word-column.vim'
+Plug 'https://github.com/bps/vim-textobj-python'
 
 " Other
-Plugin 'https://github.com/jgdavey/tslime.vim'
-Plugin 'https://github.com/Konfekt/vim-alias'
+Plug 'https://github.com/jgdavey/tslime.vim'
+Plug 'https://github.com/Konfekt/vim-alias'
+call plug#end()
 
-call vundle#end()
 
-filetype plugin indent on    " required
+
 autocmd BufRead,BufNewFile *go setlocal filetype=go
 
 set noswapfile
