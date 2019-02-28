@@ -39,6 +39,12 @@ Plug 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
 Plug 'https://github.com/leafgarland/typescript-vim'
 Plug 'https://github.com/mxw/vim-jsx'
 Plug 'https://github.com/altercation/vim-colors-solarized'
+" Mostly so f strings get syntax highlighted
+Plug 'https://github.com/ethomas2/python-syntax', {
+  \ 'branch': 'normal-f-strings',
+  \ }
+let g:python_highlight_all = 1
+
 
 " Verbs
 Plug 'tpope/vim-surround'
@@ -47,7 +53,10 @@ Plug 'https://github.com/tommcdo/vim-lion'
 
 " Text objects
 Plug 'https://github.com/kana/vim-textobj-entire'
-Plug 'https://github.com/michaeljsmith/vim-indent-object'
+Plug 'https://github.com/ethomas2/vim-indent-object', {
+  \ 'branch': 'fix-bug',
+  \ }
+
 Plug 'https://github.com/kana/vim-textobj-user'
 Plug 'https://github.com/glts/vim-textobj-comment'
 Plug 'https://github.com/wellle/targets.vim'
@@ -56,7 +65,7 @@ Plug 'https://github.com/bps/vim-textobj-python'
 
 " Other
 Plug 'https://github.com/jgdavey/tslime.vim'
-Plug 'https://github.com/Konfekt/vim-alias'
+" Plug 'https://github.com/Konfekt/vim-alias'
 call plug#end()
 
 

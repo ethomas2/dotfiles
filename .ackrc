@@ -27,6 +27,7 @@
 --ignore-dir=assets
 --ignore-file=match:tags
 --ignore-file=match:ipynb
+--ignore-file=match:.log
 
 # Redefine js to include jsx, tsx and ts
 --type-set=js:ext:js,jsx,tsx,ts
