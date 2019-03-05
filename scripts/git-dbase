@@ -1,2 +1,6 @@
 #!/bin/bash
-git dt $(git base) "$@"
+if [ -t 1 ]; then
+  git difftool $(git base) "$@"
+else
+  git diff $(git base) "$@"
+fi

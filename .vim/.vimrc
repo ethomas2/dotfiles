@@ -33,7 +33,10 @@ Plug 'bitc/vim-hdevtools'
 Plug 'https://github.com/dan-t/vim-hsimport'
 Plug 'https://github.com/junegunn/fzf.vim'
 Plug 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
-" consider https://github.com/romainl/ctags-patterns-for-javascript
+Plug 'https://github.com/autozimu/LanguageClient-neovim', {
+    \ 'branch': 'next',
+    \ 'do': 'bash install.sh',
+    \ }
 
 " Coloring/syntax highlighting
 Plug 'https://github.com/leafgarland/typescript-vim'
@@ -56,7 +59,6 @@ Plug 'https://github.com/kana/vim-textobj-entire'
 Plug 'https://github.com/ethomas2/vim-indent-object', {
   \ 'branch': 'fix-bug',
   \ }
-
 Plug 'https://github.com/kana/vim-textobj-user'
 Plug 'https://github.com/glts/vim-textobj-comment'
 Plug 'https://github.com/wellle/targets.vim'
@@ -67,6 +69,16 @@ Plug 'https://github.com/bps/vim-textobj-python'
 Plug 'https://github.com/jgdavey/tslime.vim'
 " Plug 'https://github.com/Konfekt/vim-alias'
 call plug#end()
+
+let g:LanguageClient_serverCommands = {
+    \ 'python': ['pyls'],
+    \ }
+
+nnoremap <F5> :call LanguageClient_contextMenu()<CR>
+" Or map each action separately
+" nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
+nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
+nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
 
 
 
