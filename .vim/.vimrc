@@ -70,9 +70,9 @@ Plug 'https://github.com/jgdavey/tslime.vim'
 " Plug 'https://github.com/Konfekt/vim-alias'
 call plug#end()
 
-let g:LanguageClient_serverCommands = {
-    \ 'python': ['pyls'],
-    \ }
+" let g:LanguageClient_serverCommands = {
+"     \ 'python': ['pyls'],
+"     \ }
 
 nnoremap <F5> :call LanguageClient_contextMenu()<CR>
 " Or map each action separately
