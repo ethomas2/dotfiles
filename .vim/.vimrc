@@ -292,3 +292,15 @@ command! -nargs=* TSlimeReset unlet g:tslime
 if filereadable("local.vim")
   source local.vim
 endif
+
+inoremap :pdb import pdb; pdb.set_trace()
+inoremap ;pdb import pdb; pdb.set_trace()
+
+function! Dbase()
+  let l:path = expand('%')
+  :new
+  exe ".!git show $(git base):" . l:path
+  :windo diffthis
+endfunction
+
+command! -nargs=0 Dbase call Dbase()
