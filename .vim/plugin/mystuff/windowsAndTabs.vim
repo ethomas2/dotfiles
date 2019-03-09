@@ -1,7 +1,7 @@
 " Tab navigation like chrome
-noremap <S-tab> gT
-noremap <tab> gt
-noremap <C-t> :tabnew<CR>
+nnoremap <S-tab> gT
+nnoremap <tab> gt
+nnoremap <C-t> :tabnew<CR>
 
 
 "t change windows

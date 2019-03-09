@@ -304,3 +304,7 @@ function! Dbase()
 endfunction
 
 command! -nargs=0 Dbase call Dbase()
+
+" <tab> is remapped to gt, (which also overrides <C-I>), so remap <C-J> to
+" <C-I>/<tab>
+nnoremap <C-r> <tab>
