@@ -63,12 +63,28 @@ Plug 'https://github.com/kana/vim-textobj-user'
 Plug 'https://github.com/glts/vim-textobj-comment'
 Plug 'https://github.com/wellle/targets.vim'
 Plug 'https://github.com/coderifous/textobj-word-column.vim'
+let g:textobj_python_no_default_key_mappings = 1
 Plug 'https://github.com/bps/vim-textobj-python'
 
 " Other
 Plug 'https://github.com/jgdavey/tslime.vim'
 " Plug 'https://github.com/Konfekt/vim-alias'
 call plug#end()
+
+call textobj#user#map('python', {
+      \   'class': {
+      \     'select-a': '<buffer>al',
+      \     'select-i': '<buffer>il',
+      \     'move-n': '<buffer>]pl',
+      \     'move-p': '<buffer>[pl',
+      \   },
+      \   'function': {
+      \     'select-a': '<buffer>af',
+      \     'select-i': '<buffer>if',
+      \     'move-n': '<buffer>]pf',
+      \     'move-p': '<buffer>[pf',
+      \   }
+      \ })
 
 " let g:LanguageClient_serverCommands = {
 "     \ 'python': ['pyls'],
@@ -302,9 +318,16 @@ function! Dbase()
   exe ".!git show $(git base):" . l:path
   :windo diffthis
 endfunction
-
 command! -nargs=0 Dbase call Dbase()
+
+function! Dt()
+  let l:path = expand('%')
+  :new
+  exe ".!git show HEAD:" . l:path
+  :windo diffthis
+endfunction
+command! -nargs=0 Dt call Dt()
 
 " <tab> is remapped to gt, (which also overrides <C-I>), so remap <C-J> to
 " <C-I>/<tab>
-nnoremap <C-r> <tab>
+nnoremap <C-n> <tab>
