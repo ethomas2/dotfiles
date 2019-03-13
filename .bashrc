@@ -23,18 +23,18 @@ export AWS_DEFAULT_REGION=us-west-2  # used by aws tools. Specifically sam (mayb
 
 
 #  ============================== PATH CHANGES ==============================
-PATH="$PYENV_ROOT/bin:${PATH}"
-PATH="${PATH}:$HOME/scripts"
-PATH="${PATH}:$HOME/bin" # mostly for ack
-PATH="${PATH}:$HOME/go/bin"
-PATH="${PATH}:$HOME/.local/bin" # for haskell stuff
-PATH="${PATH}:$HOME/Library/Haskell/bin" # haskell stuff installed by cabal
-PATH="${PATH}:/usr/local/sbin"
-PATH="${PATH}:$HOME/Library/Python/2.7/bin" # pip/virtualenv location
-PATH="${PATH}:$HOME/.cargo/bin"
-PATH="${PATH}:~/.config/yarn/global/node_modules/.bin/" # for yarn binaries, ie prettier
-PATH="${PATH}:$PYENV_ROOT/bin"
 export PATH
+PATH="${PATH}:~/.config/yarn/global/node_modules/.bin/" # for yarn binaries, ie prettier
+PATH="${PATH}:$HOME/bin" # mostly for ack
+PATH="${PATH}:$HOME/.cargo/bin"
+PATH="${PATH}:$HOME/go/bin"
+PATH="${PATH}:$HOME/Library/Haskell/bin" # haskell stuff installed by cabal
+PATH="${PATH}:$HOME/Library/Python/2.7/bin" # pip/virtualenv location
+PATH="${PATH}:$HOME/.local/bin" # for haskell stuff
+PATH="${PATH}:$HOME/scripts"
+PATH="${PATH}:$PYENV_ROOT/bin"
+PATH="${PATH}:/usr/local/sbin"
+PATH="$PYENV_ROOT/bin:${PATH}"
 
 
 #  ================================= ALIASES =================================

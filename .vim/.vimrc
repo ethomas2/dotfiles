@@ -69,6 +69,7 @@ Plug 'https://github.com/bps/vim-textobj-python'
 " Other
 Plug 'https://github.com/jgdavey/tslime.vim'
 " Plug 'https://github.com/Konfekt/vim-alias'
+" consider https://github.com/mattboehm/vim-unstack
 call plug#end()
 
 call textobj#user#map('python', {
@@ -309,24 +310,31 @@ if filereadable("local.vim")
   source local.vim
 endif
 
-inoremap :pdb import pdb; pdb.set_trace()
-inoremap ;pdb import pdb; pdb.set_trace()
+inoremap <C-i>pdb import pdb; pdb.set_trace()
 
 function! Dbase()
   let l:path = expand('%')
+  let l:ft = &ft
   :new
   exe ".!git show $(git base):" . l:path
+  exe "set ft=" . l:ft
   :windo diffthis
 endfunction
 command! -nargs=0 Dbase call Dbase()
+command! -nargs=0 GDbase call Dbase()
+command! -nargs=0 Gdbase call Dbase()
 
-function! Dt()
+function! Gdiff()
   let l:path = expand('%')
+  let l:ft = &ft
   :new
   exe ".!git show HEAD:" . l:path
+  exe "set ft=" . l:ft
   :windo diffthis
 endfunction
-command! -nargs=0 Dt call Dt()
+command! -nargs=0 Gdiff call Gdiff()
+command! -nargs=0 Dt call Gdiff()
+command! -nargs=0 Gdt call Gdiff()
 
 " <tab> is remapped to gt, (which also overrides <C-I>), so remap <C-J> to
 " <C-I>/<tab>
