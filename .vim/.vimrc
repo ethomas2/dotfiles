@@ -310,7 +310,7 @@ if filereadable("local.vim")
   source local.vim
 endif
 
-inoremap <C-i>pdb import pdb; pdb.set_trace()
+inoremap <C-j>pdb import pdb; pdb.set_trace()
 
 function! Dbase()
   let l:path = expand('%')
@@ -324,17 +324,18 @@ command! -nargs=0 Dbase call Dbase()
 command! -nargs=0 GDbase call Dbase()
 command! -nargs=0 Gdbase call Dbase()
 
-function! Gdiff()
+function! Gdiff(...)
+  let commit = a:0 > 0 ? a:1 : "HEAD"
   let l:path = expand('%')
   let l:ft = &ft
   :new
-  exe ".!git show HEAD:" . l:path
+  exe ".!git show " . commit . ":" . l:path
   exe "set ft=" . l:ft
   :windo diffthis
 endfunction
-command! -nargs=0 Gdiff call Gdiff()
-command! -nargs=0 Dt call Gdiff()
-command! -nargs=0 Gdt call Gdiff()
+command! -nargs=? Gdiff call Gdiff(<f-args>)
+command! -nargs=? Dt call Gdiff(<f-args>)
+command! -nargs=? Gdt call Gdiff(<f-args>)
 
 " <tab> is remapped to gt, (which also overrides <C-I>), so remap <C-J> to
 " <C-I>/<tab>
