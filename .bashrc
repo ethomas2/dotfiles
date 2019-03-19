@@ -40,14 +40,12 @@ export PATH
 #  ================================= ALIASES =================================
 alias lifx='/home/evan/.dotfiles/scripts/lifx-cmd/venv/bin/python /home/evan/.dotfiles/scripts/lifx-cmd/bin/lifx'
 alias lifx-discover='/home/evan/.dotfiles/scripts/lifx-cmd/venv/bin/python /home/evan/.dotfiles/scripts/lifx-cmd/bin/lifx-discover'
-alias ls='ls --color=auto'
+alias ls='ls -G'
 alias nose='nosetests -v -x -s'
 alias godevel='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias godvl='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias gdvl='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias dc='docker-compose'
-alias pbcopy='xclip -selection clipboard'
-alias pbpaste='xclip -selection clipboard -o'
 alias g='git'
 __git_complete g _git # https://stackoverflow.com/questions/9869227/git-autocomplete-in-bash-aliases
 alias gi='git'
@@ -88,6 +86,3 @@ export HISTFILESIZE=10000               # big big history
 if [ -z "$TMUX" ]; then
   tmux
 fi
-
-# See http://linux-sxs.org/housekeeping/lscolors.html and https://github.com/seebi/dircolors-solarized
-eval `dircolors ~/.dotfiles/dircolors-solarized/dircolors.256dark`
