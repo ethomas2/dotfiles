@@ -94,8 +94,8 @@ call textobj#user#map('python', {
 nnoremap <F5> :call LanguageClient_contextMenu()<CR>
 " Or map each action separately
 " nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
-nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
-nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
+" nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
+" nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
 
 
 
@@ -231,7 +231,6 @@ let g:go_def_mapping_enabled = 0
 let g:go_list_type = "quickfix"
 let g:go_def_mode = 'godef'
 
-" from old vimrc
 if !has('nvim')
   set cryptmethod=blowfish
 endif
@@ -248,7 +247,6 @@ let g:tslime_always_current_session = 1
 let g:tslime_always_current_window = 1
 
 " Adapted from https://stackoverflow.com/questions/2974192/how-can-i-pare-down-vims-buffer-list-to-only-include-active-buffers
-command! -nargs=* CleanBuf call CloseHiddenBuffers()
 function! CloseHiddenBuffers()
   " figure out which buffers are visible in any tab
   let visible = {}
@@ -267,6 +265,8 @@ function! CloseHiddenBuffers()
   endfor
   echon "Deleted " . l:tally . " buffers"
 endfun
+command! -nargs=* CleanBuf call CloseHiddenBuffers()
+command! -nargs=* BufClean call CloseHiddenBuffers()
 
 " FZF Config
 function! s:build_quickfix_list(lines)
@@ -283,12 +283,6 @@ let g:fzf_layout = {'down': '45%'}
 
 command! -bang -nargs=* Ag
   \ call fzf#vim#ag(<q-args>, fzf#vim#with_preview('right:35%'))
-
-" command! -nargs=* -complete=dir Rg
-"   \ call fzf#vim#grep(
-"   \   "rg --column --line-number --no-heading --fixed-strings --smart-case --hidden --color=always --glob '!.git/**' --glob '!.hg/**' --glob '!**/*.ico' --glob '!**/*.png' --glob '!**/*.jpg' --glob '!**/*.jpeg' --glob '!**/*.zip' --glob '!**/*.tar.gz' --glob '!**/*.gif' --glob '!**/*.avi' --glob '!**/*.mp4' --glob '!**/*.mp3' --glob '!**/*.ogg' --glob '!**/*.tgz' --glob '!**/*.gz' --glob '!**/*.ctg.z' --glob '!**/*.bcmap' ".<q-args>, 1,
-"   \ fzf#vim#with_preview('right:35%'),
-"   \ )
 
 command! -bang -nargs=* Lines
   \ call fzf#vim#lines(<q-args>, fzf#vim#with_preview('right:35%'))
@@ -340,3 +334,9 @@ command! -nargs=? Gdt call Gdiff(<f-args>)
 " <tab> is remapped to gt, (which also overrides <C-I>), so remap <C-J> to
 " <C-I>/<tab>
 nnoremap <C-n> <tab>
+
+" For local replace
+nnoremap gr :%s/<C-R><C-w>//gc<left><left><left>
+
+" For global replace
+" nnoremap gR gD:%s/<C-R>///gc<left><left><left>
