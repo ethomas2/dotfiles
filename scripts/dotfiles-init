@@ -55,3 +55,4 @@ mkdir -p ~/notes      && (cd ~/notes; m notes)
 
 # install peek. See https://github.com/phw/peek#ubuntu
 # sudo apt install peek
+yarn global add javascript-typescript-langserver

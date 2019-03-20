@@ -53,7 +53,8 @@ __git_complete g _git # https://stackoverflow.com/questions/9869227/git-autocomp
 alias gi='git'
 __git_complete g _git # https://stackoverflow.com/questions/9869227/git-autocomplete-in-bash-aliases
 alias svenv='source venv/bin/activate'
-alias v='vim'
+alias v='nvim'
+alias nv='nvim'
 alias py36='~/.pyenv/versions/3.6.1/bin/python'
 alias svenv='source venv/bin/activate'
 

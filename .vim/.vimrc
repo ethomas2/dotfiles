@@ -87,15 +87,22 @@ call textobj#user#map('python', {
       \   }
       \ })
 
-" let g:LanguageClient_serverCommands = {
-"     \ 'python': ['pyls'],
-"     \ }
+let g:LanguageClient_serverCommands = {
+    \ 'python': ['pyls'],
+    \ 'javascript': ['javascript-typescript-stdio'],
+    \ 'javascript.jsx': ['javascript-typescript-stdio'],
+    \ }
+
+let g:LanguageClient_autoStart = 1
+autocmd FileType javascript setlocal omnifunc=LanguageClient#complete
+autocmd FileType javascript.jsx setlocal omnifunc=LanguageClient#complete
+
 
 nnoremap <F5> :call LanguageClient_contextMenu()<CR>
 " Or map each action separately
-" nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
-" nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
-" nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
+nnoremap gh :call LanguageClient#textDocument_hover()<CR>
+nnoremap gd :call LanguageClient#textDocument_definition()<CR>
+nnoremap gr :call LanguageClient#textDocument_rename()<CR>
 
 
 
@@ -157,6 +164,7 @@ augroup mygroup
 
   "if you change vimrc, resource it
   autocmd BufWritePost  .vimrc  source %
+  autocmd BufWritePost  local.vim  source %
   autocmd BufWritePost */plugin/mystuff/*.vim source %
 
   au FileType haskell nnoremap <silent> <buffer> <Leader>ht :HdevtoolsType<CR>
@@ -336,7 +344,7 @@ command! -nargs=? Gdt call Gdiff(<f-args>)
 nnoremap <C-n> <tab>
 
 " For local replace
-nnoremap gr :%s/<C-R><C-w>//gc<left><left><left>
+" nnoremap gr :%s/<C-R><C-w>//gc<left><left><left>
 
 " For global replace
 " nnoremap gR gD:%s/<C-R>///gc<left><left><left>

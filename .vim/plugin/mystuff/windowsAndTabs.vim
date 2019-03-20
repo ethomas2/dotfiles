@@ -30,8 +30,6 @@ nnoremap <silent> <C-Down> <C-w>-
 
 nnoremap <C-w>e <C-w>T
 
-nnoremap <leader>o :buffers<CR>:buffer<Space>
-
 "C-w H move buffer to left
 "C-w K move buffer to up ... etc
 "C-w r rotate windows
