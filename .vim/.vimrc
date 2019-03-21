@@ -313,6 +313,7 @@ if filereadable("local.vim")
 endif
 
 inoremap <C-j>pdb import pdb; pdb.set_trace()
+inoremap <C-j>mx nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
 
 function! Dbase()
   let l:path = expand('%')
