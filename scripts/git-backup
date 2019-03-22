@@ -1,0 +1,5 @@
+set -ex
+
+CUR_BRANCH=`git rev-parse --abbrev-ref HEAD`
+NEW_BRANCH="${CUR_BRANCH}_backup$(date +%Y%m%d%H%M)"
+git branch "$NEW_BRANCH"

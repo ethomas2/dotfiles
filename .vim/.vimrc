@@ -314,6 +314,7 @@ endif
 
 inoremap <C-j>pdb import pdb; pdb.set_trace()
 inoremap <C-j>mx nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
+inoremap <C-j>mk nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
 
 function! Dbase()
   let l:path = expand('%')
@@ -349,3 +350,17 @@ nnoremap <C-n> <tab>
 
 " For global replace
 " nnoremap gR gD:%s/<C-R>///gc<left><left><left>
+
+" disable GOD DAMN MOTHER FUCKING SCROLL WHEEL FOR THE FUCKING LOVE OF CHRIST
+noremap <LEFT> <nop>
+noremap <RIGHT> <nop>
+noremap <UP> <nop>
+noremap <DOWN> <nop>
+cnoremap <LEFT> <nop>
+cnoremap <RIGHT> <nop>
+cnoremap <UP> <nop>
+cnoremap <DOWN> <nop>
+inoremap <LEFT> <nop>
+inoremap <RIGHT> <nop>
+inoremap <UP> <nop>
+inoremap <DOWN> <nop>
