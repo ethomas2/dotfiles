@@ -70,6 +70,16 @@ export FZF_DEFAULT_OPTS='
                   head -500 {}) 2> /dev/null"
 '
 
+_important_dirs() {
+  [ -d ~/github.com ] && find ~/github.com -maxdepth 2 -mindepth 2 -type d
+  [ -d ~/.marks ] && find ~/.marks -type l -ls | awk '{print $NF}'
+}
+_fzf_important_dirs() {
+  _important_dirs | fzf
+}
+# deep black magic adopted from fzf's C-t
+# see https://github.com/junegunn/fzf/blob/315e568de006e80138f79c77d5508c7e4853e6b2/shell/key-bindings.bash#L77
+bind '"\C-j": " \C-u \C-a\C-k`_fzf_important_dirs`\e\C-e\C-y\C-a\C-y\ey\C-h\C-e\er \C-h"'
 
 #  ========================== HISTORY CONTROL  ==========================
 # See https://unix.stackexchange.com/questions/1288/preserve-bash-history-in-multiple-terminal-windows
@@ -92,3 +102,5 @@ fi
 
 # See http://linux-sxs.org/housekeeping/lscolors.html and https://github.com/seebi/dircolors-solarized
 eval `dircolors ~/.dotfiles/dircolors-solarized/dircolors.256dark`
+
+

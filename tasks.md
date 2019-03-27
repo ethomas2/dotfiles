@@ -4,3 +4,4 @@
 - [ ] Figure out how to populate quickfix list with one off things (ie just
       press enter on a line and append it to quickfix)
 - [ ] Let BLines use regex
+- [ ] Add Dlines which seaches through lines from git dbase
