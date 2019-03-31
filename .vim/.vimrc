@@ -63,22 +63,46 @@ Plug 'https://github.com/kana/vim-textobj-user'
 Plug 'https://github.com/glts/vim-textobj-comment'
 Plug 'https://github.com/wellle/targets.vim'
 Plug 'https://github.com/coderifous/textobj-word-column.vim'
+let g:textobj_python_no_default_key_mappings = 1
 Plug 'https://github.com/bps/vim-textobj-python'
 
 " Other
 Plug 'https://github.com/jgdavey/tslime.vim'
 " Plug 'https://github.com/Konfekt/vim-alias'
+" consider https://github.com/mattboehm/vim-unstack
 call plug#end()
 
-" let g:LanguageClient_serverCommands = {
-"     \ 'python': ['pyls'],
-"     \ }
+call textobj#user#map('python', {
+      \   'class': {
+      \     'select-a': '<buffer>al',
+      \     'select-i': '<buffer>il',
+      \     'move-n': '<buffer>]pl',
+      \     'move-p': '<buffer>[pl',
+      \   },
+      \   'function': {
+      \     'select-a': '<buffer>af',
+      \     'select-i': '<buffer>if',
+      \     'move-n': '<buffer>]pf',
+      \     'move-p': '<buffer>[pf',
+      \   }
+      \ })
+
+let g:LanguageClient_serverCommands = {
+    \ 'python': ['pyls'],
+    \ 'javascript': ['javascript-typescript-stdio'],
+    \ 'javascript.jsx': ['javascript-typescript-stdio'],
+    \ }
+
+let g:LanguageClient_autoStart = 1
+autocmd FileType javascript setlocal omnifunc=LanguageClient#complete
+autocmd FileType javascript.jsx setlocal omnifunc=LanguageClient#complete
+
 
 nnoremap <F5> :call LanguageClient_contextMenu()<CR>
 " Or map each action separately
-" nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
-nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
-nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
+nnoremap gh :call LanguageClient#textDocument_hover()<CR>
+nnoremap gd :call LanguageClient#textDocument_definition()<CR>
+nnoremap gr :call LanguageClient#textDocument_rename()<CR>
 
 
 
@@ -140,6 +164,7 @@ augroup mygroup
 
   "if you change vimrc, resource it
   autocmd BufWritePost  .vimrc  source %
+  autocmd BufWritePost  local.vim  source %
   autocmd BufWritePost */plugin/mystuff/*.vim source %
 
   au FileType haskell nnoremap <silent> <buffer> <Leader>ht :HdevtoolsType<CR>
@@ -214,7 +239,6 @@ let g:go_def_mapping_enabled = 0
 let g:go_list_type = "quickfix"
 let g:go_def_mode = 'godef'
 
-" from old vimrc
 if !has('nvim')
   set cryptmethod=blowfish
 endif
@@ -231,7 +255,6 @@ let g:tslime_always_current_session = 1
 let g:tslime_always_current_window = 1
 
 " Adapted from https://stackoverflow.com/questions/2974192/how-can-i-pare-down-vims-buffer-list-to-only-include-active-buffers
-command! -nargs=* CleanBuf call CloseHiddenBuffers()
 function! CloseHiddenBuffers()
   " figure out which buffers are visible in any tab
   let visible = {}
@@ -250,6 +273,8 @@ function! CloseHiddenBuffers()
   endfor
   echon "Deleted " . l:tally . " buffers"
 endfun
+command! -nargs=* CleanBuf call CloseHiddenBuffers()
+command! -nargs=* BufClean call CloseHiddenBuffers()
 
 " FZF Config
 function! s:build_quickfix_list(lines)
@@ -266,12 +291,6 @@ let g:fzf_layout = {'down': '45%'}
 
 command! -bang -nargs=* Ag
   \ call fzf#vim#ag(<q-args>, fzf#vim#with_preview('right:35%'))
-
-" command! -nargs=* -complete=dir Rg
-"   \ call fzf#vim#grep(
-"   \   "rg --column --line-number --no-heading --fixed-strings --smart-case --hidden --color=always --glob '!.git/**' --glob '!.hg/**' --glob '!**/*.ico' --glob '!**/*.png' --glob '!**/*.jpg' --glob '!**/*.jpeg' --glob '!**/*.zip' --glob '!**/*.tar.gz' --glob '!**/*.gif' --glob '!**/*.avi' --glob '!**/*.mp4' --glob '!**/*.mp3' --glob '!**/*.ogg' --glob '!**/*.tgz' --glob '!**/*.gz' --glob '!**/*.ctg.z' --glob '!**/*.bcmap' ".<q-args>, 1,
-"   \ fzf#vim#with_preview('right:35%'),
-"   \ )
 
 command! -bang -nargs=* Lines
   \ call fzf#vim#lines(<q-args>, fzf#vim#with_preview('right:35%'))
@@ -293,18 +312,49 @@ if filereadable("local.vim")
   source local.vim
 endif
 
-inoremap :pdb import pdb; pdb.set_trace()
-inoremap ;pdb import pdb; pdb.set_trace()
+inoremap <C-j>pdb import pdb; pdb.set_trace()
+inoremap <C-j>mx nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
+inoremap <C-j>mk nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
 
 function! Dbase()
   let l:path = expand('%')
+  let l:ft = &ft
   :new
   exe ".!git show $(git base):" . l:path
+  exe "set ft=" . l:ft
   :windo diffthis
 endfunction
-
 command! -nargs=0 Dbase call Dbase()
+command! -nargs=0 GDbase call Dbase()
+command! -nargs=0 Gdbase call Dbase()
+
+function! Gdiff(...)
+  let commit = a:0 > 0 ? a:1 : "HEAD"
+  let l:path = expand('%')
+  let l:ft = &ft
+  :new
+  exe ".!git show " . commit . ":" . l:path
+  exe "set ft=" . l:ft
+  :windo diffthis
+endfunction
+command! -nargs=? Gdiff call Gdiff(<f-args>)
+command! -nargs=? Dt call Gdiff(<f-args>)
+command! -nargs=? Gdt call Gdiff(<f-args>)
 
 " <tab> is remapped to gt, (which also overrides <C-I>), so remap <C-J> to
 " <C-I>/<tab>
-nnoremap <C-r> <tab>
+nnoremap <C-n> <tab>
+
+" For local replace
+" nnoremap gr :%s/<C-R><C-w>//gc<left><left><left>
+
+" For global replace
+" nnoremap gR gD:%s/<C-R>///gc<left><left><left>
+
+" disable GOD DAMN MOTHER FUCKING SCROLL WHEEL FOR THE FUCKING LOVE OF CHRIST
+noremap <UP> <nop>
+noremap <DOWN> <nop>
+cnoremap <UP> <nop>
+cnoremap <DOWN> <nop>
+inoremap <UP> <nop>
+inoremap <DOWN> <nop>

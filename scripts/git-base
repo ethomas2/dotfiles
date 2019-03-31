@@ -1,3 +1,13 @@
 #!/bin/bash
-myoldest=$(git cherry origin/develop | head -1 | awk '{print $2}')
+
+# Grep for ^+ because sometimes git cherry has a bunch of minuses and plusses
+# git cherry origin/develop
+# - d6058eae3859e0917a8722a4aad859c56ecbe718
+# - 7800939fdac8381744812613cfdae985db470d13
+# + 6a16b11219b388e82d820047012ccce2554b5581
+# + c90947cbebed5c5e914c09630e642c969e585881
+# + 3fc0403cf66a1a2b0aa0078ffa6267bc194565af
+
+
+myoldest=$(git cherry origin/develop | grep "^+" | head -1 | awk '{print $2}')
 git log $myoldest -2 --format='%H' | tail -1

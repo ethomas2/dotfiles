@@ -23,18 +23,18 @@ export AWS_DEFAULT_REGION=us-west-2  # used by aws tools. Specifically sam (mayb
 
 
 #  ============================== PATH CHANGES ==============================
-PATH="$PYENV_ROOT/bin:${PATH}"
-PATH="${PATH}:$HOME/scripts"
-PATH="${PATH}:$HOME/bin" # mostly for ack
-PATH="${PATH}:$HOME/go/bin"
-PATH="${PATH}:$HOME/.local/bin" # for haskell stuff
-PATH="${PATH}:$HOME/Library/Haskell/bin" # haskell stuff installed by cabal
-PATH="${PATH}:/usr/local/sbin"
-PATH="${PATH}:$HOME/Library/Python/2.7/bin" # pip/virtualenv location
-PATH="${PATH}:$HOME/.cargo/bin"
-PATH="${PATH}:~/.config/yarn/global/node_modules/.bin/" # for yarn binaries, ie prettier
-PATH="${PATH}:$PYENV_ROOT/bin"
 export PATH
+PATH="${PATH}:~/.config/yarn/global/node_modules/.bin/" # for yarn binaries, ie prettier
+PATH="${PATH}:$HOME/bin" # mostly for ack
+PATH="${PATH}:$HOME/.cargo/bin"
+PATH="${PATH}:$HOME/go/bin"
+PATH="${PATH}:$HOME/Library/Haskell/bin" # haskell stuff installed by cabal
+PATH="${PATH}:$HOME/Library/Python/2.7/bin" # pip/virtualenv location
+PATH="${PATH}:$HOME/.local/bin" # for haskell stuff
+PATH="${PATH}:$HOME/scripts"
+PATH="${PATH}:$PYENV_ROOT/bin"
+PATH="${PATH}:/usr/local/sbin"
+PATH="$PYENV_ROOT/bin:${PATH}"
 
 
 #  ================================= ALIASES =================================
@@ -51,7 +51,8 @@ __git_complete g _git # https://stackoverflow.com/questions/9869227/git-autocomp
 alias gi='git'
 __git_complete g _git # https://stackoverflow.com/questions/9869227/git-autocomplete-in-bash-aliases
 alias svenv='source venv/bin/activate'
-alias v='vim'
+alias v='nvim'
+alias nv='nvim'
 alias py36='~/.pyenv/versions/3.6.1/bin/python'
 alias svenv='source venv/bin/activate'
 
@@ -67,6 +68,16 @@ export FZF_DEFAULT_OPTS='
                   head -500 {}) 2> /dev/null"
 '
 
+_important_dirs() {
+  [ -d ~/github.com ] && find ~/github.com -maxdepth 2 -mindepth 2 -type d
+  [ -d ~/.marks ] && find ~/.marks -type l -ls | awk '{print $NF}'
+}
+_fzf_important_dirs() {
+  _important_dirs | fzf
+}
+# deep black magic adopted from fzf's C-t
+# see https://github.com/junegunn/fzf/blob/315e568de006e80138f79c77d5508c7e4853e6b2/shell/key-bindings.bash#L77
+bind '"\C-j": " \C-u \C-a\C-k`_fzf_important_dirs`\e\C-e\C-y\C-a\C-y\ey\C-h\C-e\er \C-h"'
 
 #  ========================== HISTORY CONTROL  ==========================
 # See https://unix.stackexchange.com/questions/1288/preserve-bash-history-in-multiple-terminal-windows
