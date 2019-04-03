@@ -1,0 +1,2 @@
+#!/bin/bash
+hub issue -c ethomas2 --include-pulls -s all "@#"
