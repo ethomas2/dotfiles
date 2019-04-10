@@ -79,7 +79,7 @@ _fzf_important_dirs() {
 }
 # deep black magic adopted from fzf's C-t
 # see https://github.com/junegunn/fzf/blob/315e568de006e80138f79c77d5508c7e4853e6b2/shell/key-bindings.bash#L77
-bind '"\C-j": " \C-u \C-a\C-k`_fzf_important_dirs`\e\C-e\C-y\C-a\C-y\ey\C-h\C-e\er \C-h"'
+# bind '"\C-j": " \C-u \C-a\C-k`_fzf_important_dirs`\e\C-e\C-y\C-a\C-y\ey\C-h\C-e\er \C-h"'
 
 _all_dirs_and_files() {
   echo /etc/hosts &&
