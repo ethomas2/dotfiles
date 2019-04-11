@@ -32,6 +32,7 @@ PATH="${PATH}:$HOME/Library/Haskell/bin" # haskell stuff installed by cabal
 PATH="${PATH}:$HOME/Library/Python/2.7/bin" # pip/virtualenv location
 PATH="${PATH}:$HOME/.local/bin" # for haskell stuff and pyls
 PATH="${PATH}:$HOME/scripts"
+PATH="${PATH}:$HOME/scripts/git-scripts"
 PATH="${PATH}:$PYENV_ROOT/bin"
 PATH="${PATH}:/usr/local/sbin"
 PATH="$PYENV_ROOT/bin:${PATH}"
