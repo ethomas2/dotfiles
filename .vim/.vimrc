@@ -313,6 +313,7 @@ if filereadable("local.vim")
 endif
 
 inoremap <C-j>pdb import pdb; pdb.set_trace()
+inoremap <C-j>rdb from celery.contrib import rdb; rdb.set_trace()
 inoremap <C-j>mx nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
 inoremap <C-j>mk nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
 
