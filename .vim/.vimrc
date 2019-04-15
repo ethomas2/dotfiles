@@ -33,10 +33,20 @@ Plug 'bitc/vim-hdevtools'
 Plug 'https://github.com/dan-t/vim-hsimport'
 Plug 'https://github.com/junegunn/fzf.vim'
 Plug 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
-Plug 'https://github.com/autozimu/LanguageClient-neovim', {
-    \ 'branch': 'next',
-    \ 'do': 'bash install.sh',
-    \ }
+" Plug 'https://github.com/autozimu/LanguageClient-neovim', {
+"     \ 'branch': 'next',
+"     \ 'do': 'bash install.sh',
+"     \ }
+Plug 'https://github.com/vim-syntastic/syntastic'
+" Reccomended settings from https://github.com/vim-syntastic/syntastic#3-recommended-settings
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+Plug 'https://github.com/Valloric/YouCompleteMe'
 
 " Coloring/syntax highlighting
 Plug 'https://github.com/leafgarland/typescript-vim'
@@ -339,8 +349,9 @@ function! Gdiff(...)
   :windo diffthis
 endfunction
 command! -nargs=? Gdiff call Gdiff(<f-args>)
-command! -nargs=? Dt call Gdiff(<f-args>)
+cnoreabbrev gdiff Gdiff
 command! -nargs=? Gdt call Gdiff(<f-args>)
+cnoreabbrev gdt Gdt
 
 " <tab> is remapped to gt, (which also overrides <C-I>), so remap <C-J> to
 " <C-I>/<tab>
@@ -359,3 +370,5 @@ cnoremap <UP> <nop>
 cnoremap <DOWN> <nop>
 inoremap <UP> <nop>
 inoremap <DOWN> <nop>
+
+cnoreabbrev sr SyntasticReset
