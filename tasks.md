@@ -1,3 +1,5 @@
+- [ ] Consider ALE over syntastic
+
 - [ ] Figure out how to populate quickfix list with one off things (ie just
       press enter on a line and append it to quickfix)
 - [ ] Make command to add to next unusued mark
