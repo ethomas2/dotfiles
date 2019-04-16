@@ -33,20 +33,25 @@ Plug 'bitc/vim-hdevtools'
 Plug 'https://github.com/dan-t/vim-hsimport'
 Plug 'https://github.com/junegunn/fzf.vim'
 Plug 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
-" Plug 'https://github.com/autozimu/LanguageClient-neovim', {
-"     \ 'branch': 'next',
-"     \ 'do': 'bash install.sh',
-"     \ }
 Plug 'https://github.com/vim-syntastic/syntastic'
 " Reccomended settings from https://github.com/vim-syntastic/syntastic#3-recommended-settings
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
+" set statusline+=%#warningmsg#
+" set statusline+=%{SyntasticStatuslineFlag()}
+" set statusline+=%*
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
-Plug 'https://github.com/Valloric/YouCompleteMe'
+" let g:syntastic_python_checkers = ['mypy', 'flake8']
+
+" This is poorly done. See https://valloric.github.io/YouCompleteMe/#full-installation-guide
+" installing cmake is hard. Consider installing from source or getting the
+" premade binaries https://cmake.org/download/
+Plug 'https://github.com/Valloric/YouCompleteMe', {
+  \ 'do': 'sudo apt install build-essential cmake python3-dev' +
+  \ 'cd ~/.dotfiles/.vim/plugged/YouCompleteMe && python3 install.py --clang-completer',
+  \ }
+Plug 'https://github.com/scrooloose/nerdtree'
 
 " Coloring/syntax highlighting
 Plug 'https://github.com/leafgarland/typescript-vim'
@@ -78,8 +83,9 @@ Plug 'https://github.com/bps/vim-textobj-python'
 
 " Other
 Plug 'https://github.com/jgdavey/tslime.vim'
-" Plug 'https://github.com/Konfekt/vim-alias'
+" consider Plug 'https://github.com/Konfekt/vim-alias'
 " consider https://github.com/mattboehm/vim-unstack
+" consider https://github.com/airblade/vim-gitgutter " (for patch adding)
 call plug#end()
 
 call textobj#user#map('python', {
@@ -97,22 +103,12 @@ call textobj#user#map('python', {
       \   }
       \ })
 
-let g:LanguageClient_serverCommands = {
-    \ 'python': ['pyls'],
-    \ 'javascript': ['javascript-typescript-stdio'],
-    \ 'javascript.jsx': ['javascript-typescript-stdio'],
-    \ }
-
-let g:LanguageClient_autoStart = 1
-autocmd FileType javascript setlocal omnifunc=LanguageClient#complete
-autocmd FileType javascript.jsx setlocal omnifunc=LanguageClient#complete
+" https://github.com/palantir/tslint/issues/427
+let g:syntastic_typescript_checkers = ['tslint']
+" let g:syntastic_typescript_tslint_args = "--config frontent/tslint.json"
 
 
-nnoremap <F5> :call LanguageClient_contextMenu()<CR>
-" Or map each action separately
-nnoremap gh :call LanguageClient#textDocument_hover()<CR>
-nnoremap gd :call LanguageClient#textDocument_definition()<CR>
-nnoremap gr :call LanguageClient#textDocument_rename()<CR>
+nnoremap gd :YcmCompleter GoToDefinition<CR>
 
 
 
@@ -128,12 +124,8 @@ let mapleader=" "
 "set foldlevelstart=99
 
 
-" Change colorscheme from default to ron
-colorscheme ron
-
 " Turn on line numbering. Turn it on and of with set number and set number!
 set nu
-" set rnu
 
 
 " Stop vim from inserting two periods after formatting something with gq
@@ -217,12 +209,10 @@ set backspace=indent,eol,start
 
 
 "test functions
-noremap mm =
 nnoremap <silent> <Leader>n  :set rnu!<CR>
 set splitright
 nnoremap n /<CR>
 nnoremap N ?<CR>
-"let g:syntastic_python_python_exec = 'python3'
 
 
 command! -nargs=0 Fold :set foldmethod=indent
@@ -372,3 +362,4 @@ inoremap <UP> <nop>
 inoremap <DOWN> <nop>
 
 cnoreabbrev sr SyntasticReset
+cnoreabbrev nt NERDTreeToggle
