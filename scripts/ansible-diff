@@ -4,9 +4,15 @@
 # [difftool "vimdiff"]
 #     cmd = ansible-diff $LOCAL $REMOTE $BASE
 
-git check-attr  -a "$3" | grep "diff: ansible-vault" >/dev/null 2>&1
+git check-attr diff "$3" | grep "ansible-vault" >/dev/null 2>&1
 if [ $? -eq 0 ]; then
   # This is a vault file. ansible-vault view the file before diffing
+
+  which ansible-vault
+  if [ $? -eq 1 ]; then
+    echo -ne  "\033[31mCould not find ansible-vault in \$PATH\033[m"
+    exit 1
+  fi
 
   tmp1=$(mktemp /tmp/diff.XXXXXX)
   tmp2=$(mktemp /tmp/diff.XXXXXX)
