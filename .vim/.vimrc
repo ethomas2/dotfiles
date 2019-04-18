@@ -83,6 +83,7 @@ Plug 'https://github.com/bps/vim-textobj-python'
 
 " Other
 Plug 'https://github.com/jgdavey/tslime.vim'
+Plug 'https://github.com/jceb/vim-editqf'
 " consider Plug 'https://github.com/Konfekt/vim-alias'
 " consider https://github.com/mattboehm/vim-unstack
 " consider https://github.com/airblade/vim-gitgutter " (for patch adding)
@@ -363,3 +364,5 @@ inoremap <DOWN> <nop>
 
 cnoreabbrev sr SyntasticReset
 cnoreabbrev nt NERDTreeToggle
+
+command! -nargs=0 QAdd caddexpr expand("%") . ":" . line(".") .  ":" . getline(".")
