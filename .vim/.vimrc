@@ -317,6 +317,7 @@ inoremap <C-j>pdb import pdb; pdb.set_trace()
 inoremap <C-j>rdb from celery.contrib import rdb; rdb.set_trace()
 inoremap <C-j>mx nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
 inoremap <C-j>mk nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
+inoremap <C-j>x nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
 
 function! Dbase()
   let l:path = expand('%')
@@ -330,18 +331,21 @@ command! -nargs=0 Dbase call Dbase()
 command! -nargs=0 GDbase call Dbase()
 command! -nargs=0 Gdbase call Dbase()
 
-function! Gdiff(...)
+function! Gdt(...)
   let commit = a:0 > 0 ? a:1 : "HEAD"
   let l:path = expand('%')
   let l:ft = &ft
+  let l:orig_window = winnr()
+  :windo diffoff
+  exe "normal! " . l:orig_window . "\<C-W>\<C-W>"
+  :diffthis
   :new
   exe ".!git show " . commit . ":" . l:path
   exe "set ft=" . l:ft
-  :windo diffthis
+  :diffthis
+  exe ":normal! \<C-W>p"
 endfunction
-command! -nargs=? Gdiff call Gdiff(<f-args>)
-cnoreabbrev gdiff Gdiff
-command! -nargs=? Gdt call Gdiff(<f-args>)
+command! -nargs=? Gdt call Gdt(<f-args>)
 cnoreabbrev gdt Gdt
 
 " <tab> is remapped to gt, (which also overrides <C-I>), so remap <C-J> to
@@ -349,10 +353,10 @@ cnoreabbrev gdt Gdt
 nnoremap <C-n> <tab>
 
 " For local replace
-" nnoremap gr :%s/<C-R><C-w>//gc<left><left><left>
+nnoremap gr :%s/<C-R><C-w>//gc<left><left><left>
 
 " For global replace
-" nnoremap gR gD:%s/<C-R>///gc<left><left><left>
+nnoremap gR gD:%s/<C-R>///gc<left><left><left>
 
 " disable GOD DAMN MOTHER FUCKING SCROLL WHEEL FOR THE FUCKING LOVE OF CHRIST
 noremap <UP> <nop>
