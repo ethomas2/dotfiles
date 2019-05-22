@@ -11,7 +11,6 @@
 # brew bash completion stuff (bat, ag, pandoc). Idk if this even does anything
 [ -d /usr/local/etc/bash_completion. ] && source /usr/local/etc/bash_completion.d/*
 
-
 #  ================================= EXPORTS =================================
 export HISTCONTROL=ignoredups:ignorespace
 export TERM=xterm-256color
@@ -114,4 +113,6 @@ fi
 # See http://linux-sxs.org/housekeeping/lscolors.html and https://github.com/seebi/dircolors-solarized
 eval `dircolors ~/.dotfiles/dircolors-solarized/dircolors.256dark`
 
-
+# I have no idea what is setting PGPASSWORD, but something somewhere is setting
+# it
+unset PGPASSWORD

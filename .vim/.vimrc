@@ -308,6 +308,9 @@ let g:prettier#exec_cmd_async = 1
 nnoremap <C-B> :Buffers<CR>
 
 command! -nargs=* TSlimeReset unlet g:tslime
+cnoreabbrev tr TSlimeReset
+cnoreabbrev ts TSlimeReset
+cnoreabbrev tsr TSlimeReset
 
 if filereadable("local.vim")
   source local.vim
