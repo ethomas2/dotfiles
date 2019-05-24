@@ -216,8 +216,6 @@ nnoremap n /<CR>
 nnoremap N ?<CR>
 
 
-command! -nargs=0 Fold :set foldmethod=indent
-
 let g:textobj_comment_no_default_key_mappings = 1
 xmap agc <Plug>(textobj-comment-a)
 omap agc <Plug>(textobj-comment-a)
@@ -323,7 +321,8 @@ inoremap <C-j>mk nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><lef
 inoremap <C-j>x nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
 
 function! Dbase()
-  let l:path = expand('%')
+  " fnamemodify: https://stackoverflow.com/a/24463362/4993041
+  let l:path = fnamemodify(expand("%"), ":~:.")
   let l:ft = &ft
   :new
   exe ".!git show $(git base):" . l:path
@@ -336,7 +335,8 @@ command! -nargs=0 Gdbase call Dbase()
 
 function! Gdt(...)
   let commit = a:0 > 0 ? a:1 : "HEAD"
-  let l:path = expand('%')
+  " fnamemodify: https://stackoverflow.com/a/24463362/4993041
+  let l:path = fnamemodify(expand("%"), ":~:.")
   let l:ft = &ft
   let l:orig_window = winnr()
   :windo diffoff

@@ -1,0 +1,8 @@
+#!/bin/bash
+set -euo pipefail
+
+file_path="$1"
+org_and_repo=$(git remote -v | head -1 | awk '{print $2}' | cut -d: -f2 | sed 's/.git$//g')
+# See https://stackoverflow.com/a/44750379/4993041
+default_branch=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+browse https://github.com/$org_and_repo/blob/$default_branch/$file_path
