@@ -25,5 +25,6 @@ if [ ! -d $dir ]; then
   mkdir -p ~/github.com/$org/
   git clone $repo_url ~/github.com/$org/$repo
   echo $dir
+  cd $dir
 fi
 

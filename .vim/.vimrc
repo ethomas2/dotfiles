@@ -33,6 +33,8 @@ Plug 'bitc/vim-hdevtools'
 Plug 'https://github.com/dan-t/vim-hsimport'
 Plug 'https://github.com/junegunn/fzf.vim'
 Plug 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
+" Plug 'https://github.com/neoclide/coc.nvim'
+" Plug 'https://github.com/w0rp/ale'
 Plug 'https://github.com/vim-syntastic/syntastic'
 " Reccomended settings from https://github.com/vim-syntastic/syntastic#3-recommended-settings
 " set statusline+=%#warningmsg#
@@ -68,6 +70,7 @@ let g:python_highlight_all = 1
 Plug 'tpope/vim-surround'
 Plug 'https://github.com/tpope/vim-commentary'
 Plug 'https://github.com/tommcdo/vim-lion'
+Plug 'https://github.com/machakann/vim-swap'
 
 " Text objects
 Plug 'https://github.com/kana/vim-textobj-entire'
@@ -84,8 +87,9 @@ Plug 'https://github.com/bps/vim-textobj-python'
 " Other
 Plug 'https://github.com/jgdavey/tslime.vim'
 Plug 'https://github.com/jceb/vim-editqf'
+Plug 'https://github.com/ethomas2/vim-unstack' " can't get this to work
+Plug 'https://github.com/mattboehm/vim-accordion'
 " consider Plug 'https://github.com/Konfekt/vim-alias'
-" consider https://github.com/mattboehm/vim-unstack
 " consider https://github.com/airblade/vim-gitgutter " (for patch adding)
 call plug#end()
 
@@ -110,6 +114,7 @@ let g:syntastic_typescript_checkers = ['tslint']
 
 
 nnoremap gd :YcmCompleter GoToDefinition<CR>
+nnoremap gy :YcmCompleter GetType<CR>
 
 
 
@@ -373,3 +378,6 @@ cnoreabbrev sr SyntasticReset
 cnoreabbrev nt NERDTreeToggle
 
 command! -nargs=0 QAdd caddexpr expand("%") . ":" . line(".") .  ":" . getline(".")
+
+let g:unstack_populate_quickfix = 1
+let g:unstack_layout = "none"

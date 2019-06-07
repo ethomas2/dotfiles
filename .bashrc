@@ -18,13 +18,13 @@ export PYENV_ROOT="$HOME/.pyenv"
 export PGDATA="/usr/local/var/postgres"
 export GOPATH=$HOME/go
 export MANPAGER="/bin/sh -c \"col -b | vim -c 'set ft=man ts=8 nomod nolist nonu noma' -\""
-export AWS_DEFAULT_REGION=us-west-2  # used by aws tools. Specifically sam (maybe others)
+# export AWS_DEFAULT_REGION=us-west-2  # used by aws tools. Specifically sam (maybe others)
 
 
 #  ============================== PATH CHANGES ==============================
 export PATH
 PATH="${PATH}:~/.config/yarn/global/node_modules/.bin/" # for yarn binaries, ie prettier
-PATH="${PATH}:$HOME/bin" # mostly for ack
+PATH="${PATH}:$HOME/bin" # mostly for ack. Also direnv
 PATH="${PATH}:$HOME/.cargo/bin"
 PATH="${PATH}:$HOME/go/bin"
 PATH="${PATH}:$HOME/Library/Haskell/bin" # haskell stuff installed by cabal
@@ -116,3 +116,5 @@ eval `dircolors ~/.dotfiles/dircolors-solarized/dircolors.256dark`
 # I have no idea what is setting PGPASSWORD, but something somewhere is setting
 # it
 unset PGPASSWORD
+
+eval "$(direnv hook bash)"
