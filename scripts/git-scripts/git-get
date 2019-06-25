@@ -2,20 +2,24 @@
 set -eo pipefail
 
 repo_url="$1"
-org_and_repo=$(echo $repo_url  | cut -d: -f2 | sed 's/.git$//g')
 
-org=$(echo $org_and_repo | cut -d'/' -f1)
-repo=$(echo $org_and_repo | cut -d/ -f2)
 
-if [ -z $org ]; then
-  echo -e """\033[31mCould not parse org from $repo_url
-arg must be of the form git@github.com:zingales/CodeReview.git\033[m"
-  exit 1
-fi
-
-if [ -z $repo ]; then
-  echo -e """\033[31mCould not parse repo from $repo_url
-arg must be of the form git@github.com:zingales/CodeReview.git\033[m"
+regex1="^git@github.com:(\w+)/(\w+).git$"
+regex2="^http[s]?://github.com/(\w+)/(\w+)$"
+if [[ $repo_url =~ $regex1 ]]; then
+  org="${BASH_REMATCH[1]}"
+  repo="${BASH_REMATCH[2]}"
+elif [[ $repo_url =~ $regex2 ]]; then
+  org="${BASH_REMATCH[1]}"
+  repo="${BASH_REMATCH[2]}"
+else
+  echo -e """\033[31mCould not parse $repo_url
+url must be of the form
+git@github.com:zingales/CodeReview.git
+or
+https://github.com/Elucidation/tensorflow_chessbot
+\033[m
+"
   exit 1
 fi
 
@@ -26,5 +30,6 @@ if [ ! -d $dir ]; then
   git clone $repo_url ~/github.com/$org/$repo
   echo $dir
   cd $dir
+else
+  echo -e "\033[32mRepo already exists!! $dir\033[m"
 fi
-
