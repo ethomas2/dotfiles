@@ -89,6 +89,9 @@ Plug 'https://github.com/jgdavey/tslime.vim'
 Plug 'https://github.com/jceb/vim-editqf'
 Plug 'https://github.com/ethomas2/vim-unstack' " can't get this to work
 Plug 'https://github.com/mattboehm/vim-accordion'
+Plug 'https://github.com/tpope/vim-fugitive'
+" Plug 'https://github.com/dhruvasagar/vim-table-mode'
+" Removed bc I realized I can just use lion
 " consider Plug 'https://github.com/Konfekt/vim-alias'
 " consider https://github.com/airblade/vim-gitgutter " (for patch adding)
 call plug#end()
@@ -114,7 +117,10 @@ let g:syntastic_typescript_checkers = ['tslint']
 
 
 nnoremap gd :YcmCompleter GoToDefinition<CR>
+nnoremap gD :YcmCompleter GoTo<CR>
 nnoremap gy :YcmCompleter GetType<CR>
+nnoremap gY :YcmCompleter GoToType<CR>
+nnoremap gf :YcmCompleter FixIt<CR>
 
 
 
@@ -311,15 +317,13 @@ let g:prettier#exec_cmd_async = 1
 nnoremap <C-B> :Buffers<CR>
 
 command! -nargs=* TSlimeReset unlet g:tslime
-cnoreabbrev tr TSlimeReset
 cnoreabbrev ts TSlimeReset
-cnoreabbrev tsr TSlimeReset
 
 if filereadable("local.vim")
   source local.vim
 endif
 
-inoremap <C-j>pdb import pdb; pdb.set_trace()
+inoremap <C-j>pdb import pdb; pdb.set_trace()  # noqa: E702
 inoremap <C-j>rdb from celery.contrib import rdb; rdb.set_trace()
 inoremap <C-j>mx nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
 inoremap <C-j>mk nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
@@ -377,7 +381,10 @@ inoremap <DOWN> <nop>
 cnoreabbrev sr SyntasticReset
 cnoreabbrev nt NERDTreeToggle
 
-command! -nargs=0 QAdd caddexpr expand("%") . ":" . line(".") .  ":" . getline(".")
+" command! -nargs=0 QAdd caddexpr expand("%") . ":" . line(".") .  ":" . getline(".")
 
 let g:unstack_populate_quickfix = 1
 let g:unstack_layout = "none"
+
+" when command buffer gets too big do some combination of <C-w>_ and set
+" cmdheight=1

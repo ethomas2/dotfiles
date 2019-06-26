@@ -5,6 +5,13 @@
 [diff]
 	tool = nvimdiff
 
+[merge]
+	tool = nvimdiff
+
+
+[mergetool "nvimdiff"]
+        cmd = "nvim -d \"$LOCAL\" \"$REMOTE\""
+
 [difftool "nvimdiff"]
         cmd = "nvim -d \"$LOCAL\" \"$REMOTE\""
 
@@ -15,8 +22,6 @@
 
 [core]
 	editor = nvim
-[merge]
-	tool = nvimdiff
 [alias]
         ch = checkout
         cho = checkout
