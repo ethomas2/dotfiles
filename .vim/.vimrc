@@ -90,6 +90,7 @@ Plug 'https://github.com/jceb/vim-editqf'
 Plug 'https://github.com/ethomas2/vim-unstack' " can't get this to work
 Plug 'https://github.com/mattboehm/vim-accordion'
 Plug 'https://github.com/tpope/vim-fugitive'
+Plug 'https://github.com/tpope/vim-rhubarb'
 " Plug 'https://github.com/dhruvasagar/vim-table-mode'
 " Removed bc I realized I can just use lion
 " consider Plug 'https://github.com/Konfekt/vim-alias'
@@ -116,11 +117,12 @@ let g:syntastic_typescript_checkers = ['tslint']
 " let g:syntastic_typescript_tslint_args = "--config frontent/tslint.json"
 
 
-nnoremap gd :YcmCompleter GoToDefinition<CR>
-nnoremap gD :YcmCompleter GoTo<CR>
+nnoremap gd :YcmCompleter GoTo<CR>
+nnoremap gD :YcmCompleter GoToDefinition<CR>
 nnoremap gy :YcmCompleter GetType<CR>
 nnoremap gY :YcmCompleter GoToType<CR>
-nnoremap gf :YcmCompleter FixIt<CR>
+nnoremap gx :YcmCompleter FixIt<CR>
+nnoremap go :YcmCompleter GetDoc<CR>
 
 
 
@@ -379,6 +381,8 @@ inoremap <UP> <nop>
 inoremap <DOWN> <nop>
 
 cnoreabbrev sr SyntasticReset
+cnoreabbrev st SyntasticToggleMode
+
 cnoreabbrev nt NERDTreeToggle
 
 " command! -nargs=0 QAdd caddexpr expand("%") . ":" . line(".") .  ":" . getline(".")

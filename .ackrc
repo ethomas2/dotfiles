@@ -28,6 +28,7 @@
 --ignore-file=match:tags
 --ignore-file=match:ipynb
 --ignore-file=match:.log
+--ignore-dir=.direnv
 
 # Common local files
 --ignore-file=match:tasks.md

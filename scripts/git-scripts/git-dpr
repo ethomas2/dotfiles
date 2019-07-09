@@ -13,4 +13,10 @@ shas=$(echo $response | jq -r '.[] | .sha')
 first=$(echo $shas | awk '{print $1}')
 last=$(echo $shas | awk '{print $NF}')
 shift
-git diff "$@" $first..$last
+
+if [ -t 1 ]; then
+  git difftool $first^..$last "$@"
+else
+  git diff $first^..$last "$@"
+fi
+
