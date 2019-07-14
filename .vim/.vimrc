@@ -91,6 +91,13 @@ Plug 'https://github.com/ethomas2/vim-unstack' " can't get this to work
 Plug 'https://github.com/mattboehm/vim-accordion'
 Plug 'https://github.com/tpope/vim-fugitive'
 Plug 'https://github.com/tpope/vim-rhubarb'
+Plug 'https://github.com/kshenoy/vim-signature'
+let g:SignatureMarkLineHL = 'Search' " Consider other highlight groups. This one is sort of annoying
+let g:SignatureMarkTextHL = 'None'
+let g:SignatureForceRemoveGlobal = 1 " See https://github.com/kshenoy/vim-signature/issues/72
+
+
+" Consider defining your own fn instead http://vimdoc.sourceforge.net/htmldoc/sign.html
 " Plug 'https://github.com/dhruvasagar/vim-table-mode'
 " Removed bc I realized I can just use lion
 " consider Plug 'https://github.com/Konfekt/vim-alias'
@@ -330,6 +337,9 @@ inoremap <C-j>rdb from celery.contrib import rdb; rdb.set_trace()
 inoremap <C-j>mx nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
 inoremap <C-j>mk nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
 inoremap <C-j>x nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
+inoremap <C-j>log import logging; logger = logging.getLogger(__name__)  # noqa: E702
+inoremap <C-j>tr logger.info(f'TRACE ')<left><left>
+
 
 function! Dbase()
   " fnamemodify: https://stackoverflow.com/a/24463362/4993041
@@ -392,3 +402,15 @@ let g:unstack_layout = "none"
 
 " when command buffer gets too big do some combination of <C-w>_ and set
 " cmdheight=1
+
+function! SaveTempFile()
+  let l:fname = system('tempfile -s .vim')
+  echo l:fname
+  :exe ":w! " . l:fname
+endfunction
+command! -nargs=0 SaveTempFile call SaveTempFile()
+cnoreabbrev wt SaveTempFile
+
+" see https://stackoverflow.com/a/11450865/4993041
+" only clears global marks
+command! -nargs=0 ClearMarks delmarks A-Z | SignatureRefresh
