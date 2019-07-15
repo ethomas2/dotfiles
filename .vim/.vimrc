@@ -345,10 +345,15 @@ function! Dbase()
   " fnamemodify: https://stackoverflow.com/a/24463362/4993041
   let l:path = fnamemodify(expand("%"), ":~:.")
   let l:ft = &ft
+  let l:orig_window = winnr()
+  :windo diffoff
+  exe "normal! " . l:orig_window . "\<C-W>\<C-W>"
+  :diffthis
   :new
   exe ".!git show $(git base):" . l:path
   exe "set ft=" . l:ft
-  :windo diffthis
+  :diffthis
+  exe ":normal! \<C-W>p"
 endfunction
 command! -nargs=0 Dbase call Dbase()
 command! -nargs=0 GDbase call Dbase()
