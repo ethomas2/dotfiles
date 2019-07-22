@@ -33,10 +33,27 @@ Plug 'bitc/vim-hdevtools'
 Plug 'https://github.com/dan-t/vim-hsimport'
 Plug 'https://github.com/junegunn/fzf.vim'
 Plug 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
-Plug 'https://github.com/autozimu/LanguageClient-neovim', {
-    \ 'branch': 'next',
-    \ 'do': 'bash install.sh',
-    \ }
+" Plug 'https://github.com/neoclide/coc.nvim'
+" Plug 'https://github.com/w0rp/ale'
+Plug 'https://github.com/vim-syntastic/syntastic'
+" Reccomended settings from https://github.com/vim-syntastic/syntastic#3-recommended-settings
+" set statusline+=%#warningmsg#
+" set statusline+=%{SyntasticStatuslineFlag()}
+" set statusline+=%*
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+" let g:syntastic_python_checkers = ['mypy', 'flake8']
+
+" This is poorly done. See https://valloric.github.io/YouCompleteMe/#full-installation-guide
+" installing cmake is hard. Consider installing from source or getting the
+" premade binaries https://cmake.org/download/
+Plug 'https://github.com/Valloric/YouCompleteMe', {
+  \ 'do': 'sudo apt install build-essential cmake python3-dev' +
+  \ 'cd ~/.dotfiles/.vim/plugged/YouCompleteMe && python3 install.py --clang-completer',
+  \ }
+Plug 'https://github.com/scrooloose/nerdtree'
 
 " Coloring/syntax highlighting
 Plug 'https://github.com/leafgarland/typescript-vim'
@@ -53,6 +70,7 @@ let g:python_highlight_all = 1
 Plug 'tpope/vim-surround'
 Plug 'https://github.com/tpope/vim-commentary'
 Plug 'https://github.com/tommcdo/vim-lion'
+Plug 'https://github.com/machakann/vim-swap'
 
 " Text objects
 Plug 'https://github.com/kana/vim-textobj-entire'
@@ -68,8 +86,22 @@ Plug 'https://github.com/bps/vim-textobj-python'
 
 " Other
 Plug 'https://github.com/jgdavey/tslime.vim'
-" Plug 'https://github.com/Konfekt/vim-alias'
-" consider https://github.com/mattboehm/vim-unstack
+Plug 'https://github.com/jceb/vim-editqf'
+Plug 'https://github.com/ethomas2/vim-unstack' " can't get this to work
+Plug 'https://github.com/mattboehm/vim-accordion'
+Plug 'https://github.com/tpope/vim-fugitive'
+Plug 'https://github.com/tpope/vim-rhubarb'
+Plug 'https://github.com/kshenoy/vim-signature'
+let g:SignatureMarkLineHL = 'Search' " Consider other highlight groups. This one is sort of annoying
+let g:SignatureMarkTextHL = 'None'
+let g:SignatureForceRemoveGlobal = 1 " See https://github.com/kshenoy/vim-signature/issues/72
+
+
+" Consider defining your own fn instead http://vimdoc.sourceforge.net/htmldoc/sign.html
+" Plug 'https://github.com/dhruvasagar/vim-table-mode'
+" Removed bc I realized I can just use lion
+" consider Plug 'https://github.com/Konfekt/vim-alias'
+" consider https://github.com/airblade/vim-gitgutter " (for patch adding)
 call plug#end()
 
 call textobj#user#map('python', {
@@ -87,22 +119,17 @@ call textobj#user#map('python', {
       \   }
       \ })
 
-let g:LanguageClient_serverCommands = {
-    \ 'python': ['pyls'],
-    \ 'javascript': ['javascript-typescript-stdio'],
-    \ 'javascript.jsx': ['javascript-typescript-stdio'],
-    \ }
-
-let g:LanguageClient_autoStart = 1
-autocmd FileType javascript setlocal omnifunc=LanguageClient#complete
-autocmd FileType javascript.jsx setlocal omnifunc=LanguageClient#complete
+" https://github.com/palantir/tslint/issues/427
+let g:syntastic_typescript_checkers = ['tslint']
+" let g:syntastic_typescript_tslint_args = "--config frontent/tslint.json"
 
 
-nnoremap <F5> :call LanguageClient_contextMenu()<CR>
-" Or map each action separately
-nnoremap gh :call LanguageClient#textDocument_hover()<CR>
-nnoremap gd :call LanguageClient#textDocument_definition()<CR>
-nnoremap gr :call LanguageClient#textDocument_rename()<CR>
+nnoremap gd :YcmCompleter GoTo<CR>
+nnoremap gD :YcmCompleter GoToDefinition<CR>
+nnoremap gy :YcmCompleter GetType<CR>
+nnoremap gY :YcmCompleter GoToType<CR>
+nnoremap gx :YcmCompleter FixIt<CR>
+nnoremap go :YcmCompleter GetDoc<CR>
 
 
 
@@ -118,12 +145,8 @@ let mapleader=" "
 "set foldlevelstart=99
 
 
-" Change colorscheme from default to ron
-colorscheme ron
-
 " Turn on line numbering. Turn it on and of with set number and set number!
 set nu
-" set rnu
 
 
 " Stop vim from inserting two periods after formatting something with gq
@@ -207,15 +230,11 @@ set backspace=indent,eol,start
 
 
 "test functions
-noremap mm =
 nnoremap <silent> <Leader>n  :set rnu!<CR>
 set splitright
 nnoremap n /<CR>
 nnoremap N ?<CR>
-"let g:syntastic_python_python_exec = 'python3'
 
-
-command! -nargs=0 Fold :set foldmethod=indent
 
 let g:textobj_comment_no_default_key_mappings = 1
 xmap agc <Plug>(textobj-comment-a)
@@ -307,49 +326,66 @@ let g:prettier#exec_cmd_async = 1
 nnoremap <C-B> :Buffers<CR>
 
 command! -nargs=* TSlimeReset unlet g:tslime
+cnoreabbrev ts TSlimeReset
 
 if filereadable("local.vim")
   source local.vim
 endif
 
-inoremap <C-j>pdb import pdb; pdb.set_trace()
+inoremap <C-j>pdb import pdb; pdb.set_trace()  # noqa: E702
+inoremap <C-j>rdb from celery.contrib import rdb; rdb.set_trace()
 inoremap <C-j>mx nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
 inoremap <C-j>mk nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
+inoremap <C-j>x nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
+inoremap <C-j>log import logging; logger = logging.getLogger(__name__)  # noqa: E702
+inoremap <C-j>tr logger.info(f'TRACE ')<left><left>
+
 
 function! Dbase()
-  let l:path = expand('%')
+  " fnamemodify: https://stackoverflow.com/a/24463362/4993041
+  let l:path = fnamemodify(expand("%"), ":~:.")
   let l:ft = &ft
+  let l:orig_window = winnr()
+  :windo diffoff
+  exe "normal! " . l:orig_window . "\<C-W>\<C-W>"
+  :diffthis
   :new
   exe ".!git show $(git base):" . l:path
   exe "set ft=" . l:ft
-  :windo diffthis
+  :diffthis
+  exe ":normal! \<C-W>p"
 endfunction
 command! -nargs=0 Dbase call Dbase()
 command! -nargs=0 GDbase call Dbase()
 command! -nargs=0 Gdbase call Dbase()
 
-function! Gdiff(...)
+function! Gdt(...)
   let commit = a:0 > 0 ? a:1 : "HEAD"
-  let l:path = expand('%')
+  " fnamemodify: https://stackoverflow.com/a/24463362/4993041
+  let l:path = fnamemodify(expand("%"), ":~:.")
   let l:ft = &ft
+  let l:orig_window = winnr()
+  :windo diffoff
+  exe "normal! " . l:orig_window . "\<C-W>\<C-W>"
+  :diffthis
   :new
   exe ".!git show " . commit . ":" . l:path
   exe "set ft=" . l:ft
-  :windo diffthis
+  :diffthis
+  exe ":normal! \<C-W>p"
 endfunction
-command! -nargs=? Gdiff call Gdiff(<f-args>)
-command! -nargs=? Dt call Gdiff(<f-args>)
-command! -nargs=? Gdt call Gdiff(<f-args>)
+command! -nargs=? Gdt call Gdt(<f-args>)
+cnoreabbrev gdt Gdt
 
 " <tab> is remapped to gt, (which also overrides <C-I>), so remap <C-J> to
 " <C-I>/<tab>
 nnoremap <C-n> <tab>
 
 " For local replace
-" nnoremap gr :%s/<C-R><C-w>//gc<left><left><left>
+nnoremap gr :%s/<C-R><C-w>//gc<left><left><left>
 
 " For global replace
-" nnoremap gR gD:%s/<C-R>///gc<left><left><left>
+nnoremap gR gD:%s/<C-R>///gc<left><left><left>
 
 " disable GOD DAMN MOTHER FUCKING SCROLL WHEEL FOR THE FUCKING LOVE OF CHRIST
 noremap <UP> <nop>
@@ -358,3 +394,28 @@ cnoremap <UP> <nop>
 cnoremap <DOWN> <nop>
 inoremap <UP> <nop>
 inoremap <DOWN> <nop>
+
+cnoreabbrev sr SyntasticReset
+cnoreabbrev st SyntasticToggleMode
+
+cnoreabbrev nt NERDTreeToggle
+
+" command! -nargs=0 QAdd caddexpr expand("%") . ":" . line(".") .  ":" . getline(".")
+
+let g:unstack_populate_quickfix = 1
+let g:unstack_layout = "none"
+
+" when command buffer gets too big do some combination of <C-w>_ and set
+" cmdheight=1
+
+function! SaveTempFile()
+  let l:fname = system('tempfile -s .vim')
+  echo l:fname
+  :exe ":w! " . l:fname
+endfunction
+command! -nargs=0 SaveTempFile call SaveTempFile()
+cnoreabbrev wt SaveTempFile
+
+" see https://stackoverflow.com/a/11450865/4993041
+" only clears global marks
+command! -nargs=0 ClearMarks delmarks A-Z | SignatureRefresh

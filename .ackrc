@@ -28,6 +28,17 @@
 --ignore-file=match:tags
 --ignore-file=match:ipynb
 --ignore-file=match:.log
+--ignore-dir=.direnv
+
+# Common local files
+--ignore-file=match:tasks.md
+--ignore-file=match:notes
+--ignore-file=match:notes.md
+--ignore-file=match:record.md
+--ignore-dir=utility
+--ignore-dir=utility.tmp
+--ignore-dir=scrap
+--ignore-file=match:quickfix.list
 
 # Redefine js to include jsx, tsx and ts
 --type-set=js:ext:js,jsx,tsx,ts

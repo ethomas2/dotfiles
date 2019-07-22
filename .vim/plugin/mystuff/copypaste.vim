@@ -7,7 +7,6 @@ function! ClipboardCopy()
     let output = join(lines, "\n")
     let _ = system('xclip -selection clipboard', output)
 endfunction
-xnoremap <leader>y :call ClipboardCopy()<CR>
 xnoremap <leader>c :call ClipboardCopy()<CR>
 
 

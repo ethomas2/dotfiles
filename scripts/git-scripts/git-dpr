@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -euo pipefail
+
+repo_full_name=$(git remote get-url origin | awk -F: '{print $2}' | sed "s/.git//")
+
+response=$(curl -s -L \
+  https://api.github.com/repos/$repo_full_name/pulls/$1/commits \
+  -H "Accept: application/vnd.github.v3+json" \
+  -H "Authorization: Token $GHTOKEN")
+
+shas=$(echo $response | jq -r '.[] | .sha')
+first=$(echo $shas | awk '{print $1}')
+last=$(echo $shas | awk '{print $NF}')
+shift
+
+if [ -t 1 ]; then
+  git difftool $first^..$last "$@"
+else
+  git diff $first^..$last "$@"
+fi
+

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+browse=false
+while getopts ":b" opt; do
+  case ${opt} in
+    b ) # process option a
+      browse=true
+      ;;
+    \? ) echo "Usage: cmd [-h] [-t]"
+      ;;
+  esac
+done
+
+if [[ $browse = true ]];  then
+  hub browse -- "pulls/ethomas2"
+else
+ hub issue -c ethomas2 --include-pulls -s all "@#"
+fi

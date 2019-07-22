@@ -1,0 +1,2 @@
+#!/bin/bash
+hub browse -- "pulls/review-requested/ethomas2"

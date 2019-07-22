@@ -1,0 +1,35 @@
+#!/bin/bash
+set -eo pipefail
+
+repo_url="$1"
+
+
+regex1="^git@github.com:(\w+)/(\w+).git$"
+regex2="^http[s]?://github.com/(\w+)/(\w+)$"
+if [[ $repo_url =~ $regex1 ]]; then
+  org="${BASH_REMATCH[1]}"
+  repo="${BASH_REMATCH[2]}"
+elif [[ $repo_url =~ $regex2 ]]; then
+  org="${BASH_REMATCH[1]}"
+  repo="${BASH_REMATCH[2]}"
+else
+  echo -e """\033[31mCould not parse $repo_url
+url must be of the form
+git@github.com:zingales/CodeReview.git
+or
+https://github.com/Elucidation/tensorflow_chessbot
+\033[m
+"
+  exit 1
+fi
+
+dir=~/github.com/$org/$repo
+
+if [ ! -d $dir ]; then
+  mkdir -p ~/github.com/$org/
+  git clone $repo_url ~/github.com/$org/$repo
+  echo $dir
+  cd $dir
+else
+  echo -e "\033[32mRepo already exists!! $dir\033[m"
+fi

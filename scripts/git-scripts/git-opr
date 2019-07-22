@@ -1,0 +1,9 @@
+#!/bin/bash
+set -euo pipefail
+branch=${1:-$(git tb)}
+prnum=$(hub pr list -h $branch | cm 1 | sed 's/#//g')
+if [ -z "$prnum" ]; then
+  echo -e "\033[31mCould not find pr number for branch \"$branch\"\033[m"
+  exit 1
+fi
+hub browse -- "pull/$prnum"
