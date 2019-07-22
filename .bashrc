@@ -3,13 +3,16 @@
 [ -f ~/.marksrc ]                      && source ~/.marksrc
 [ -f ~/.fzf.bash ]                     && source ~/.fzf.bash
 [ -f ~/.dotfiles/secrets ]             && source ~/.dotfiles/secrets
-[ -f ~/.dotfiles/secrets ]             && source ~/.dotfiles/secrets
 
 # brew bash completion stuff (bat, ag, pandoc). Idk if this even does anything
 [ -d /usr/local/etc/bash_completion. ] && source /usr/local/etc/bash_completion.d/*
 
-# brew bash completion stuff (bat, ag, pandoc). Idk if this even does anything
+#  brew bash completion stuff (bat, ag, pandoc). Idk if this even does anything
 [ -d /usr/local/etc/bash_completion. ] && source /usr/local/etc/bash_completion.d/*
+
+if [ -f ~/.dotfiles/.bashrc.mac ] && [ $(uname -s) == "Darwin"]; then
+  source ~/.dotfiles/.bashrc.mac
+fi
 
 
 #  ================================= EXPORTS =================================
@@ -30,17 +33,17 @@ PATH="${PATH}:$HOME/.cargo/bin"
 PATH="${PATH}:$HOME/go/bin"
 PATH="${PATH}:$HOME/Library/Haskell/bin" # haskell stuff installed by cabal
 PATH="${PATH}:$HOME/Library/Python/2.7/bin" # pip/virtualenv location
-PATH="${PATH}:$HOME/.local/bin" # for haskell stuff
+PATH="${PATH}:$HOME/.local/bin" # for haskell stuff and pyls
 PATH="${PATH}:$HOME/scripts"
+PATH="${PATH}:$HOME/scripts/git-scripts"
 PATH="${PATH}:$PYENV_ROOT/bin"
 PATH="${PATH}:/usr/local/sbin"
 PATH="$PYENV_ROOT/bin:${PATH}"
 
 
 #  ================================= ALIASES =================================
-alias lifx='/home/evan/.dotfiles/scripts/lifx-cmd/venv/bin/python /home/evan/.dotfiles/scripts/lifx-cmd/bin/lifx'
-alias lifx-discover='/home/evan/.dotfiles/scripts/lifx-cmd/venv/bin/python /home/evan/.dotfiles/scripts/lifx-cmd/bin/lifx-discover'
-alias ls='ls -G'
+alias lifx='~/.dotfiles/scripts/lifx-cmd/venv/bin/python ~/.dotfiles/scripts/lifx-cmd/bin/lifx'
+alias lifx-discover='~/.dotfiles/scripts/lifx-cmd/venv/bin/python ~/.dotfiles/scripts/lifx-cmd/bin/lifx-discover'
 alias nose='nosetests -v -x -s'
 alias godevel='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias godvl='/Users/ethomas/go/src/github.com/golang/go/bin/go'
@@ -77,7 +80,7 @@ _fzf_important_dirs() {
 }
 # deep black magic adopted from fzf's C-t
 # see https://github.com/junegunn/fzf/blob/315e568de006e80138f79c77d5508c7e4853e6b2/shell/key-bindings.bash#L77
-bind '"\C-j": " \C-u \C-a\C-k`_fzf_important_dirs`\e\C-e\C-y\C-a\C-y\ey\C-h\C-e\er \C-h"'
+# bind '"\C-j": " \C-u \C-a\C-k`_fzf_important_dirs`\e\C-e\C-y\C-a\C-y\ey\C-h\C-e\er \C-h"'
 
 #  ========================== HISTORY CONTROL  ==========================
 # See https://unix.stackexchange.com/questions/1288/preserve-bash-history-in-multiple-terminal-windows
