@@ -339,7 +339,7 @@ inoremap <C-j>mk nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><lef
 inoremap <C-j>x nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
 inoremap <C-j>log import logging; logger = logging.getLogger(__name__)  # noqa: E702
 inoremap <C-j>tr logger.info(f'TRACE ')<left><left>
-
+inoremap <C-j>hist <Esc>!!cat ~/.vim/snippets/hist<CR>}i
 
 function! Dbase()
   " fnamemodify: https://stackoverflow.com/a/24463362/4993041
@@ -410,7 +410,6 @@ let g:unstack_layout = "none"
 
 function! SaveTempFile()
   let l:fname = system('tempfile -s .vim')
-  echo l:fname
   :exe ":w! " . l:fname
 endfunction
 command! -nargs=0 SaveTempFile call SaveTempFile()
