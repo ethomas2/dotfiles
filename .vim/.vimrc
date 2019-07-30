@@ -44,6 +44,7 @@ let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
+" let g:syntastic_typescript_checkers = ['docker-compose exec -e AIRBNB_STYLE_ENABLED webpack ./node_modules/eslint/bin/eslint.js']
 " let g:syntastic_python_checkers = ['mypy', 'flake8']
 
 " This is poorly done. See https://valloric.github.io/YouCompleteMe/#full-installation-guide

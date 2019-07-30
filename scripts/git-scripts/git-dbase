@@ -1,4 +1,5 @@
 #!/bin/bash
+
 if [ -t 1 ]; then
   git difftool $(git base) "$@"
 else
