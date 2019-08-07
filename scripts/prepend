@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+  echo -e "\033[31mMust provide prefix\033[m"
+fi
+prefix=$1
+
+while read -r line; do
+  echo "$prefix$line"
+done

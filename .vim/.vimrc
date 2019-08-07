@@ -34,8 +34,10 @@ Plug 'https://github.com/dan-t/vim-hsimport'
 Plug 'https://github.com/junegunn/fzf.vim'
 Plug 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
 " Plug 'https://github.com/neoclide/coc.nvim'
-" Plug 'https://github.com/w0rp/ale'
-Plug 'https://github.com/vim-syntastic/syntastic'
+Plug 'https://github.com/dense-analysis/ale'
+" Consider https://github.com/neoclide/coc-tabnine and https://www.theverge.com/2019/7/24/20708542/coding-autocompleter-deep-tabnine-ai-deep-learning-smart-compose
+let b:ale_linters = ['flake8', 'eslint', 'tslint']
+" Plug 'https://github.com/vim-syntastic/syntastic'
 " Reccomended settings from https://github.com/vim-syntastic/syntastic#3-recommended-settings
 " set statusline+=%#warningmsg#
 " set statusline+=%{SyntasticStatuslineFlag()}
@@ -396,8 +398,9 @@ cnoremap <DOWN> <nop>
 inoremap <UP> <nop>
 inoremap <DOWN> <nop>
 
-cnoreabbrev sr SyntasticReset
-cnoreabbrev st SyntasticToggleMode
+" cnoreabbrev sr SyntasticReset
+" cnoreabbrev st SyntasticToggleMode
+command! -nargs=0 AT ALEToggle
 
 cnoreabbrev nt NERDTreeToggle
 

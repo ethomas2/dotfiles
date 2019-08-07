@@ -1,0 +1,5 @@
+def hist(arr):
+  d = {}
+  for x in arr:
+      d[x] = d.get(x, 0) + 1
+  return d

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -eo pipefail
+remote_refs=$(git branch --all | sed 's/^\s\+//g' | grep "^remotes/origin" | grep -v HEAD)
+tracked_refs=$(git remote show origin | grep -Po "pushes to \K\b.*\b" | awk '{print $1}')
+remote_refs_to_delete=$(echo "$remote_refs" | grep -vf <(echo "$tracked_refs" | prepend "^remotes/origin/"))
+echo "$remote_refs_to_delete" | prepend "refs/" | prepend "delete " | git update-ref --stdin

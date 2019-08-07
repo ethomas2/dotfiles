@@ -3,9 +3,9 @@ set -eo pipefail
 
 repo_url="$1"
 
-
-regex1="^git@github.com:(\w+)/(\w+).git$"
-regex2="^http[s]?://github.com/(\w+)/(\w+)$"
+valid_chars="[a-zA-Z_-]"
+regex1="^git@github.com:($valid_chars+)/($valid_chars+).git$"
+regex2="^http[s]?://github.com/($valid_chars+)/($valid_chars+)$"
 if [[ $repo_url =~ $regex1 ]]; then
   org="${BASH_REMATCH[1]}"
   repo="${BASH_REMATCH[2]}"
@@ -27,7 +27,7 @@ dir=~/github.com/$org/$repo
 
 if [ ! -d $dir ]; then
   mkdir -p ~/github.com/$org/
-  git clone $repo_url ~/github.com/$org/$repo
+  git clone git@github.com:$org/$repo.git ~/github.com/$org/$repo
   echo $dir
   cd $dir
 else

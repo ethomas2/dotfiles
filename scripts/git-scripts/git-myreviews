@@ -1,2 +1,7 @@
 #!/bin/bash
-hub browse -- "pulls/review-requested/ethomas2"
+
+if [ "$1" == "--not-ready" ]; then
+  hub browse -- "pulls?utf8=%E2%9C%93&q=is%3Aopen+is%3Apr+review-requested%3Aethomas2+-label%3A%22Ready+to+Deploy%22+"
+else
+  hub browse -- "pulls/review-requested/ethomas2"
+fi

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Given a relative path output it's absolut path. I.e.
+# echo ./vim/plugin/mystuff/remaps.vim returns /home/evan/.dotfiles/.vim/plugin/mystuff/remaps.vim
+# This will break in mac. For mac consider
+# echo "$(pwd)/$(cat)"
+
+echo "$(readlink -f $(cat))"
