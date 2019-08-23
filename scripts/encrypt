@@ -1,0 +1,7 @@
+#!/bin/bash
+set -euo pipefail
+
+
+# -salt flag is actually redundant. It's salted even if you omit the -salt
+# flag. To encrypt without salt use -nosalt
+openssl aes-256-cbc -a -salt -in "$1" -out "$2"
