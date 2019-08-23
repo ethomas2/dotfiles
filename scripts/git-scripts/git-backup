@@ -8,7 +8,7 @@ if [ "$1" == "--create" ] || [ "$1" = "-c" ]; then
   git branch "$NEW_BRANCH"
   echo "$NEW_BRANCH"
 elif [ "$1" == "--latest" ] || [ "$1" == "-l" ]; then
-  echo $(git br | grep $(git tb) | grep "_backup-" | sort | tail -1)
+  echo $(git br | grep $(git tb) |  grep -v "\*" | grep "_backup-" | sort | tail -1)
 else
   echo -e "\033[31mInvalid argument. Must provide --create or --latest\033[m"
   exit 1

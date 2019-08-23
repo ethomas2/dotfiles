@@ -33,7 +33,7 @@ Plug 'bitc/vim-hdevtools'
 Plug 'https://github.com/dan-t/vim-hsimport'
 Plug 'https://github.com/junegunn/fzf.vim'
 Plug 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
-" Plug 'https://github.com/neoclide/coc.nvim'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'https://github.com/dense-analysis/ale'
 " Consider https://github.com/neoclide/coc-tabnine and https://www.theverge.com/2019/7/24/20708542/coding-autocompleter-deep-tabnine-ai-deep-learning-smart-compose
 let b:ale_linters = ['flake8', 'eslint', 'tslint']
@@ -340,9 +340,13 @@ inoremap <C-j>rdb from celery.contrib import rdb; rdb.set_trace()
 inoremap <C-j>mx nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
 inoremap <C-j>mk nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
 inoremap <C-j>x nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
-inoremap <C-j>log import logging; logger = logging.getLogger(__name__)  # noqa: E702
+inoremap <C-j>ilog import logging; logger = logging.getLogger(__name__)  # noqa: E702
 inoremap <C-j>tr logger.info(f'TRACE ')<left><left>
+inoremap <C-j>log logger.info(f'TRACE ')<left><left>
 inoremap <C-j>hist <Esc>!!cat ~/.vim/snippets/hist<CR>}i
+inoremap <C-j>tbl <Esc>!!cat ~/.vim/snippets/tbl<CR>}}}o<esc>o
+inoremap <C-j>table <Esc>!!cat ~/.vim/snippets/tbl<CR>}}}o<esc>o
+
 
 function! Dbase()
   " fnamemodify: https://stackoverflow.com/a/24463362/4993041

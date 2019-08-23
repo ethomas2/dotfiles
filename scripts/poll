@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+
+import argparse
+import datetime
+import os
+import subprocess
+import time
+import textwrap
+
+# Future improvements:
+#  - only travel down into directory if directory modificaiton time has changed
+#  - monitor your own cpu usage (ps -o '%cpu' -p <thispid>), alert or increase
+#    time.sleep interval if cpu is high
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    '-f', help='file with list of files to monitor', dest='file', type=str)
+parser.add_argument('command', nargs='+')
+args = parser.parse_args()
+
+proc = subprocess.run(['git', 'ls-files'], check=True, stdout=subprocess.PIPE)
+files = list(filter(None, open(args.file).read().splitlines()))
+command = ' '.join(args.command)
+
+# initialize modification_times
+# map from filepath (including directories) to modification time
+modification_times = {}
+for filepath in files:
+    mtime = os.stat(filepath).st_mtime
+    modification_times[filepath] = mtime
+
+
+def run_command(file_changed):
+    print(textwrap.dedent(f"""
+        {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+        { ', '.join(files_changed[:5])}
+        {command}
+    """))
+    proc = subprocess.run(
+        command, shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT
+    )
+    if proc.returncode != 0:
+        print(f'\033[31mCommand exitied {proc.returncode}\033[m')
+        print(f'\033[31m{proc.stdout.decode()}\033[m')
+    else:
+        print(proc.stdout.decode())
+
+
+while True:
+    files_changed = []
+    for filepath in files:
+        mtime = os.stat(filepath).st_mtime
+        if mtime != modification_times.get(filepath):
+            files_changed.append(filepath)
+            modification_times[filepath] = mtime
+
+    if files_changed != []:
+        run_command(files_changed)
+    time.sleep(1)

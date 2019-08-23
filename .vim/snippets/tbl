@@ -1,0 +1,18 @@
+def table(arr, table_only=False):
+    arr = [list(map(str, row)) for row in arr]
+    cols = zip(*arr)
+    col_widths = [max(map(len, col)) for col in cols]
+
+    padded_tbl = [
+        [item + ' '*(col_width - len(item))
+         for item, col_width in zip(row, col_widths)]
+        for row in arr
+    ]
+
+    if table_only:
+        return padded_tbl
+    else:
+        return '\n'.join(
+            '| ' + ' | '.join(row) + ' |'
+            for row in padded_tbl
+        )
