@@ -1,0 +1,7 @@
+#!/bin/bash
+
+git log $(git base)..HEAD --reverse --format=%h | while read -r line; do
+  git log -1 $line --oneline
+  git diff $line^..$line --name-only | prepend "  "
+  echo
+done

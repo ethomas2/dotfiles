@@ -1,8 +1,5 @@
 "When moving to a new vim
 "Copy vimrc
-"Install vundle https://github.com/gmarik/vundle#about
-"run :BundleInstall Syntastic
-"run :BundleInstall Valloric/YouCompleteMe (you may have to install vim from source to to get this working)
 "compile you complete me
 "remove dumb 80 character line limit from ~/.vim/bundle/YouCompleteMe/style_format.sh
 "run :Bundleinstall terryma/vim-multiple-cursors
@@ -33,10 +30,30 @@ Plug 'bitc/vim-hdevtools'
 Plug 'https://github.com/dan-t/vim-hsimport'
 Plug 'https://github.com/junegunn/fzf.vim'
 Plug 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
+
+" consider https://github.com/mhartington/nvim-typescript
+" Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" function! s:check_back_space() abort
+"     let col = col('.') - 1
+"     return !col || getline('.')[col - 1]  =~ '\s'
+" endfunction
+"
+" inoremap <silent><expr> <TAB>
+"               \ pumvisible() ? "\<C-n>" :
+"               \ <SID>check_back_space() ? "\<TAB>" :
+"               \ coc#refresh()
+"
+" inoremap <silent><expr> <S-TAB>
+"               \ pumvisible() ? "\<C-p>" :
+"               \ <SID>check_back_space() ? "\<TAB>" :
+"               \ coc#refresh()
+
+
 Plug 'https://github.com/dense-analysis/ale'
-" Consider https://github.com/neoclide/coc-tabnine and https://www.theverge.com/2019/7/24/20708542/coding-autocompleter-deep-tabnine-ai-deep-learning-smart-compose
-let b:ale_linters = ['flake8', 'eslint', 'tslint']
+let g:ale_echo_msg_format = '%linter% :: %s'
+let g:ale_linters = {'python': ['flake8', 'mypy']}
+
 " Plug 'https://github.com/vim-syntastic/syntastic'
 " Reccomended settings from https://github.com/vim-syntastic/syntastic#3-recommended-settings
 " set statusline+=%#warningmsg#
@@ -46,8 +63,6 @@ let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
-" let g:syntastic_typescript_checkers = ['docker-compose exec -e AIRBNB_STYLE_ENABLED webpack ./node_modules/eslint/bin/eslint.js']
-" let g:syntastic_python_checkers = ['mypy', 'flake8']
 
 " This is poorly done. See https://valloric.github.io/YouCompleteMe/#full-installation-guide
 " installing cmake is hard. Consider installing from source or getting the
@@ -56,6 +71,8 @@ Plug 'https://github.com/Valloric/YouCompleteMe', {
   \ 'do': 'sudo apt install build-essential cmake python3-dev' +
   \ 'cd ~/.dotfiles/.vim/plugged/YouCompleteMe && python3 install.py --clang-completer',
   \ }
+let g:ycm_enable_diagnostic_signs = 0
+
 Plug 'https://github.com/scrooloose/nerdtree'
 
 " Coloring/syntax highlighting
@@ -67,7 +84,8 @@ Plug 'https://github.com/ethomas2/python-syntax', {
   \ 'branch': 'normal-f-strings',
   \ }
 let g:python_highlight_all = 1
-
+Plug 'https://github.com/lifepillar/pgsql.vim'
+let g:sql_type_default = 'pgsql'
 
 " Verbs
 Plug 'tpope/vim-surround'
@@ -123,13 +141,15 @@ call textobj#user#map('python', {
       \ })
 
 " https://github.com/palantir/tslint/issues/427
-let g:syntastic_typescript_checkers = ['tslint']
+" let g:syntastic_typescript_checkers = ['tslint']
 " let g:syntastic_typescript_tslint_args = "--config frontent/tslint.json"
 
 
 nnoremap gd :YcmCompleter GoTo<CR>
+" nmap <silent> gd <Plug>(coc-definition)
 nnoremap gD :YcmCompleter GoToDefinition<CR>
 nnoremap gy :YcmCompleter GetType<CR>
+" nmap <silent> gy <Plug>(coc-type-definition)
 nnoremap gY :YcmCompleter GoToType<CR>
 nnoremap gx :YcmCompleter FixIt<CR>
 nnoremap go :YcmCompleter GetDoc<CR>
@@ -379,6 +399,7 @@ function! Gdt(...)
   exe ".!git show " . commit . ":" . l:path
   exe "set ft=" . l:ft
   :diffthis
+  " BufUnload function() { normal! l:orig_window "\<C-W>\<C-W>"; }
   exe ":normal! \<C-W>p"
 endfunction
 command! -nargs=? Gdt call Gdt(<f-args>)
@@ -425,4 +446,6 @@ cnoreabbrev wt SaveTempFile
 
 " see https://stackoverflow.com/a/11450865/4993041
 " only clears global marks
-command! -nargs=0 ClearMarks delmarks A-Z | SignatureRefresh
+command! -nargs=0 ClearMarks delmarks A-Za-z | SignatureRefresh
+
+set clipboard^=unnamedplus
