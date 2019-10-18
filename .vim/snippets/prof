@@ -1,0 +1,12 @@
+import cProfile, contextlib, os
+@contextlib.contextmanager
+def profile(filename=None, *args, **kwargs):
+    profile = cProfile.Profile(*args, **kwargs)
+    profile.enable()
+    yield
+    profile.disable()
+    if filename:
+        print('writing to profile path')
+        profile.dump_stats(os.path.expanduser(filename))
+    else:
+        profile.print_stats()
