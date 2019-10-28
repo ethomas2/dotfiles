@@ -1,2 +1,2 @@
 #!/bin/bash
-psql -h localhost -U tempocom-staging "$@"
+psql -h localhost -U $SCRIPTS_DB_USER "$@"
