@@ -30,7 +30,8 @@ Plug 'bitc/vim-hdevtools'
 Plug 'https://github.com/dan-t/vim-hsimport'
 Plug 'https://github.com/junegunn/fzf.vim'
 Plug 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
-
+" Plug 'https://github.com/airblade/vim-gitgutter'
+" let g:gitgutter_enabled = 0
 
 " consider https://github.com/mhartington/nvim-typescript
 " Plug 'neoclide/coc.nvim', {'branch': 'release'}
@@ -450,3 +451,8 @@ cnoreabbrev wt SaveTempFile
 command! -nargs=0 ClearMarks delmarks A-Za-z | SignatureRefresh
 
 set clipboard^=unnamedplus
+" from https://stackoverflow.com/questions/4256697/vim-search-and-highlight-but-do-not-jump
+nnoremap <silent> <Leader>s :let @/='\<<C-R>=expand("<cword>")<CR>\>'<CR>:set hls<CR>
+nnoremap <silent> <Leader>h :set nohls<CR>
+
+command! -nargs=0 NoScroll diffoff | windo set nocursorbind | windo set noscrollbind
