@@ -30,6 +30,10 @@ Plug 'bitc/vim-hdevtools'
 Plug 'https://github.com/dan-t/vim-hsimport'
 Plug 'https://github.com/junegunn/fzf.vim'
 Plug 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
+Plug 'https://github.com/rust-lang/rust.vim'
+let g:rustfmt_autosave = 1
+Plug 'https://github.com/tell-k/vim-autopep8'
+let g:autopep8_disable_show_diff=1
 " Plug 'https://github.com/airblade/vim-gitgutter'
 " let g:gitgutter_enabled = 0
 
@@ -346,11 +350,15 @@ xnoremap <leader>g "zy:exe "Ag ".@z.""<CR>
 
 let g:prettier#exec_cmd_path = "~/.config/yarn/global/node_modules/.bin/prettier"
 let g:prettier#exec_cmd_async = 1
+let g:prettier#autoformat = 0
+" autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.vue,*.yaml,*.html PrettierAsync
 
 nnoremap <C-B> :Buffers<CR>
 
 command! -nargs=* TSlimeReset unlet g:tslime
-cnoreabbrev ts TSlimeReset
+command! -nargs=* TS unlet g:tslime
+command! -nargs=* Ts unlet g:tslime
+" cnoreabbrev ts TSlimeReset
 
 if filereadable("local.vim")
   source local.vim

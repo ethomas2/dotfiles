@@ -6,4 +6,4 @@
 *venv
 *.config
 *.conf
-
+.mypy_cache

@@ -21,7 +21,6 @@ export MANPAGER="/bin/sh -c \"col -b | vim -c 'set ft=man ts=8 nomod nolist nonu
 
 
 #  ============================== PATH CHANGES ==============================
-export PATH
 PATH="${PATH}:~/.config/yarn/global/node_modules/.bin/" # for yarn binaries, ie prettier
 PATH="${PATH}:$HOME/bin" # mostly for ack. Also direnv
 PATH="${PATH}:$HOME/.cargo/bin"
@@ -34,7 +33,7 @@ PATH="${PATH}:$HOME/scripts/git-scripts"
 PATH="${PATH}:$PYENV_ROOT/bin"
 PATH="${PATH}:/usr/local/sbin"
 PATH="$PYENV_ROOT/bin:${PATH}"
-
+export PATH
 
 #  ================================= ALIASES =================================
 alias lifx='/home/evan/.dotfiles/scripts/lifx-cmd/venv/bin/python /home/evan/.dotfiles/scripts/lifx-cmd/bin/lifx'
