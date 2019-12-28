@@ -1,13 +1,3 @@
-"When moving to a new vim
-"Copy vimrc
-"compile you complete me
-"remove dumb 80 character line limit from ~/.vim/bundle/YouCompleteMe/style_format.sh
-"run :Bundleinstall terryma/vim-multiple-cursors
-"download vim fanfingtastic and put in ~/.vim/plugins
-"
-":CtrlPClearCache
-
-
 " Things required for vundle
 set nocompatible              " be iMproved, required
 
@@ -37,46 +27,7 @@ let g:autopep8_disable_show_diff=1
 " Plug 'https://github.com/airblade/vim-gitgutter'
 " let g:gitgutter_enabled = 0
 
-" consider https://github.com/mhartington/nvim-typescript
-" Plug 'neoclide/coc.nvim', {'branch': 'release'}
-" function! s:check_back_space() abort
-"     let col = col('.') - 1
-"     return !col || getline('.')[col - 1]  =~ '\s'
-" endfunction
-"
-" inoremap <silent><expr> <TAB>
-"               \ pumvisible() ? "\<C-n>" :
-"               \ <SID>check_back_space() ? "\<TAB>" :
-"               \ coc#refresh()
-"
-" inoremap <silent><expr> <S-TAB>
-"               \ pumvisible() ? "\<C-p>" :
-"               \ <SID>check_back_space() ? "\<TAB>" :
-"               \ coc#refresh()
 
-
-Plug 'https://github.com/dense-analysis/ale'
-let g:ale_echo_msg_format = '%linter% :: %s'
-let g:ale_linters = {'python': ['flake8', 'mypy']}
-
-" Plug 'https://github.com/vim-syntastic/syntastic'
-" Reccomended settings from https://github.com/vim-syntastic/syntastic#3-recommended-settings
-" set statusline+=%#warningmsg#
-" set statusline+=%{SyntasticStatuslineFlag()}
-" set statusline+=%*
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
-
-" This is poorly done. See https://valloric.github.io/YouCompleteMe/#full-installation-guide
-" installing cmake is hard. Consider installing from source or getting the
-" premade binaries https://cmake.org/download/
-Plug 'https://github.com/Valloric/YouCompleteMe', {
-  \ 'do': 'sudo apt install build-essential cmake python3-dev' +
-  \ 'cd ~/.dotfiles/.vim/plugged/YouCompleteMe && python3 install.py --clang-completer',
-  \ }
-let g:ycm_enable_diagnostic_signs = 0
 
 Plug 'https://github.com/scrooloose/nerdtree'
 
@@ -130,6 +81,7 @@ let g:SignatureForceRemoveGlobal = 1 " See https://github.com/kshenoy/vim-signat
 " consider https://github.com/airblade/vim-gitgutter " (for patch adding)
 call plug#end()
 
+
 call textobj#user#map('python', {
       \   'class': {
       \     'select-a': '<buffer>al',
@@ -145,20 +97,6 @@ call textobj#user#map('python', {
       \   }
       \ })
 
-" https://github.com/palantir/tslint/issues/427
-" let g:syntastic_typescript_checkers = ['tslint']
-" let g:syntastic_typescript_tslint_args = "--config frontent/tslint.json"
-
-
-nnoremap gd :YcmCompleter GoTo<CR>
-" nmap <silent> gd <Plug>(coc-definition)
-nnoremap gD :YcmCompleter GoToDefinition<CR>
-nnoremap gy :YcmCompleter GetType<CR>
-" nmap <silent> gy <Plug>(coc-type-definition)
-nnoremap gY :YcmCompleter GoToType<CR>
-nnoremap gx :YcmCompleter FixIt<CR>
-nnoremap go :YcmCompleter GetDoc<CR>
-
 
 
 autocmd BufRead,BufNewFile *go setlocal filetype=go
@@ -166,11 +104,6 @@ autocmd BufRead,BufNewFile *go setlocal filetype=go
 set noswapfile
 
 let mapleader=" "
-
-"set backspace=indent,eol,start
-"set foldmethod=indent
-"set foldlevel=99
-"set foldlevelstart=99
 
 
 " Turn on line numbering. Turn it on and of with set number and set number!
@@ -364,19 +297,6 @@ if filereadable("local.vim")
   source local.vim
 endif
 
-inoremap <C-j>pdb import pdb; pdb.set_trace()  # noqa: E702
-inoremap <C-j>rdb from celery.contrib import rdb; rdb.set_trace()
-inoremap <C-j>mx nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
-inoremap <C-j>mk nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
-inoremap <C-j>x nnoremap < <backspace>leader>x :Tmux < <backspace>CR><left><left><left><left>
-inoremap <C-j>ilog import logging; logger = logging.getLogger(__name__)  # noqa: E702
-inoremap <C-j>tr logger.info(f'TRACE ')<left><left>
-inoremap <C-j>log logger.info(f'TRACE ')<left><left>
-inoremap <C-j>hist <Esc>!!cat ~/.vim/snippets/hist<CR>}i
-inoremap <C-j>tbl <Esc>!!cat ~/.vim/snippets/tbl<CR>}}}o<esc>o
-inoremap <C-j>table <Esc>!!cat ~/.vim/snippets/tbl<CR>}}}o<esc>o
-inoremap <C-j>prof <Esc>!!cat ~/.vim/snippets/prof<CR>}o<esc>0i
-
 
 function! Dbase()
   " fnamemodify: https://stackoverflow.com/a/24463362/4993041
@@ -433,16 +353,9 @@ cnoremap <DOWN> <nop>
 inoremap <UP> <nop>
 inoremap <DOWN> <nop>
 
-" cnoreabbrev sr SyntasticReset
-" cnoreabbrev st SyntasticToggleMode
-command! -nargs=0 AT ALEToggle
-
 cnoreabbrev nt NERDTreeToggle
 
 " command! -nargs=0 QAdd caddexpr expand("%") . ":" . line(".") .  ":" . getline(".")
-
-let g:unstack_populate_quickfix = 1
-let g:unstack_layout = "none"
 
 " when command buffer gets too big do some combination of <C-w>_ and set
 " cmdheight=1
@@ -458,7 +371,9 @@ cnoreabbrev wt SaveTempFile
 " only clears global marks
 command! -nargs=0 ClearMarks delmarks A-Za-z | SignatureRefresh
 
+let g:loaded_clipboard_provider = 1
 set clipboard^=unnamedplus
+
 " from https://stackoverflow.com/questions/4256697/vim-search-and-highlight-but-do-not-jump
 nnoremap <silent> <Leader>s :let @/='\<<C-R>=expand("<cword>")<CR>\>'<CR>:set hls<CR>
 nnoremap <silent> <Leader>h :set nohls<CR>
