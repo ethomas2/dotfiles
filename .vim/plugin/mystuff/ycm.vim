@@ -8,11 +8,11 @@
 "   \ }
 " let g:ycm_enable_diagnostic_signs = 0
 "
-nnoremap gd :YcmCompleter GoTo<CR>
-" nmap <silent> gd <Plug>(coc-definition)
-nnoremap gD :YcmCompleter GoToDefinition<CR>
-nnoremap gy :YcmCompleter GetType<CR>
-" nmap <silent> gy <Plug>(coc-type-definition)
-nnoremap gY :YcmCompleter GoToType<CR>
-nnoremap gx :YcmCompleter FixIt<CR>
-nnoremap go :YcmCompleter GetDoc<CR>
+" nnoremap gd :YcmCompleter GoTo<CR>
+" " nmap <silent> gd <Plug>(coc-definition)
+" nnoremap gD :YcmCompleter GoToDefinition<CR>
+" nnoremap gy :YcmCompleter GetType<CR>
+" " nmap <silent> gy <Plug>(coc-type-definition)
+" nnoremap gY :YcmCompleter GoToType<CR>
+" nnoremap gx :YcmCompleter FixIt<CR>
+" nnoremap go :YcmCompleter GetDoc<CR>
