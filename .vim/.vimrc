@@ -14,7 +14,11 @@ endif
 
 call plug#begin('~/.vim/plugged')
 
-"Language IDE-like stuff
+" Language/IDE like things
+Plug 'https://github.com/dense-analysis/ale'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
+
 Plug 'fatih/vim-go'
 Plug 'bitc/vim-hdevtools'
 Plug 'https://github.com/dan-t/vim-hsimport'
@@ -24,8 +28,6 @@ Plug 'https://github.com/rust-lang/rust.vim'
 let g:rustfmt_autosave = 1
 Plug 'https://github.com/tell-k/vim-autopep8'
 let g:autopep8_disable_show_diff=1
-" Plug 'https://github.com/airblade/vim-gitgutter'
-" let g:gitgutter_enabled = 0
 
 
 
@@ -58,8 +60,6 @@ Plug 'https://github.com/kana/vim-textobj-user'
 Plug 'https://github.com/glts/vim-textobj-comment'
 Plug 'https://github.com/wellle/targets.vim'
 Plug 'https://github.com/coderifous/textobj-word-column.vim'
-let g:textobj_python_no_default_key_mappings = 1
-Plug 'https://github.com/bps/vim-textobj-python'
 
 " Other
 Plug 'https://github.com/jgdavey/tslime.vim'
@@ -72,30 +72,11 @@ Plug 'https://github.com/kshenoy/vim-signature'
 let g:SignatureMarkLineHL = 'Search' " Consider other highlight groups. This one is sort of annoying
 let g:SignatureMarkTextHL = 'None'
 let g:SignatureForceRemoveGlobal = 1 " See https://github.com/kshenoy/vim-signature/issues/72
-
-
-" Consider defining your own fn instead http://vimdoc.sourceforge.net/htmldoc/sign.html
-" Plug 'https://github.com/dhruvasagar/vim-table-mode'
-" Removed bc I realized I can just use lion
-" consider Plug 'https://github.com/Konfekt/vim-alias'
-" consider https://github.com/airblade/vim-gitgutter " (for patch adding)
 call plug#end()
 
+"
 
-call textobj#user#map('python', {
-      \   'class': {
-      \     'select-a': '<buffer>al',
-      \     'select-i': '<buffer>il',
-      \     'move-n': '<buffer>]pl',
-      \     'move-p': '<buffer>[pl',
-      \   },
-      \   'function': {
-      \     'select-a': '<buffer>af',
-      \     'select-i': '<buffer>if',
-      \     'move-n': '<buffer>]pf',
-      \     'move-p': '<buffer>[pf',
-      \   }
-      \ })
+
 
 
 
