@@ -360,3 +360,5 @@ nnoremap <silent> <Leader>s :let @/='\<<C-R>=expand("<cword>")<CR>\>'<CR>:set hl
 nnoremap <silent> <Leader>h :set nohls<CR>
 
 command! -nargs=0 NoScroll diffoff | windo set nocursorbind | windo set noscrollbind
+
+cnoremap <C-a> <C-b>
