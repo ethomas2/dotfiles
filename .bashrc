@@ -55,9 +55,14 @@ alias v='nvim'
 alias nv='nvim'
 alias py36='~/.pyenv/versions/3.6.1/bin/python'
 alias svenv='source venv/bin/activate'
+alias cat='bat'
 
 
 #  ================================= FZF =================================
+export FZF_DEFAULT_COMMAND="fd"
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+
+
 export FZF_DEFAULT_OPTS='
   -m -i
   --bind ctrl-d:page-down,ctrl-u:page-up
@@ -116,3 +121,20 @@ eval `dircolors ~/.dotfiles/dircolors-solarized/dircolors.256dark`
 unset PGPASSWORD
 
 eval "$(direnv hook bash)"
+
+
+
+# https://askubuntu.com/a/670600
+reset=$(tput sgr0)
+bold=$(tput bold)
+black=$(tput setaf 0)
+red=$(tput setaf 1)
+green=$(tput setaf 2)
+yellow=$(tput setaf 3)
+magenta=$(tput setaf 5)
+white=$(tput setaf 7)
+blue=$(tput setaf 4)
+cyan=$(tput setaf 6)
+user_color=$magenta
+PS1="\[$reset\]\[$cyan\][ \[$bold\]\[$user_color\]\u@\h\
+\[$reset\]\[$blue\]\W\[$cyan\] ] \[$reset\]\[$reset\]\\$\[$reset\] "
