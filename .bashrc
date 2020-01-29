@@ -16,7 +16,7 @@ export TERM=xterm-256color
 export PYENV_ROOT="$HOME/.pyenv"
 export PGDATA="/usr/local/var/postgres"
 export GOPATH=$HOME/go
-export MANPAGER="/bin/sh -c \"col -b | vim -c 'set ft=man ts=8 nomod nolist nonu noma' -\""
+export MANPAGER="/bin/sh -c \"col -b | nvim -c 'set ft=man ts=8 nomod nolist nonu noma' -\""
 # export AWS_DEFAULT_REGION=us-west-2  # used by aws tools. Specifically sam (maybe others)
 
 

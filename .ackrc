@@ -10,6 +10,7 @@
 
 # python stuff
 --ignore-file=match:.coverage
+--ignore-file=match:.test_durations.csv  # from pytest i think? ALso why doesn't this work?
 --ignore-dir=venv
 
 # go stuff
@@ -48,4 +49,8 @@
 # Redefine css to include scss
 --type-set=css:ext:css,scss
 
+# Other stuff
+--ignore-dir=.idea
 --type-add=ts:ext:ts # Idk if this is useful
+
+

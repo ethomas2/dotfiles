@@ -9,12 +9,22 @@ set -euxo pipefail
 
 # clone method
 _tempdir=$(mktemp -d --suffix=-git-fs)
+branch_prefix="zzz-git-fs"
 (
-  commit_or_branch=${1:-zzz-origin-develop}
+  commit_or_branch=${1:-origin/develop}
+  is_branch=$(git branch | grep "$commit_or_branch" >/dev/null 2>&1; echo $?)
+  if [ $is_branch != "0" ]; then
+    branch="$branch_prefix-$commit_or_branch"
+    echo "$commit_or_branch is not a branch, creating branch $branch"
+    git br "$branch" $commit_or_branch
+  else
+    echo "$commit_or_branch is already a branch. Proceeding $branch"
+    branch=$commit_or_branch
+  fi
+  echo $is_branch
   remote_url=$(git remote get-url origin)
   local_url=$(pwd)
-  git branch -f zzz-origin-develop origin/develop
-  git clone --origin "local" --single-branch -b $commit_or_branch $local_url $_tempdir
+  git clone --origin "local" --single-branch -b $branch $local_url $_tempdir
   (
     cd $_tempdir
     git remote add upstream $remote_url
