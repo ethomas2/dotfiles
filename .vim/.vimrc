@@ -35,6 +35,8 @@ Plug 'https://github.com/scrooloose/nerdtree'
 
 " Coloring/syntax highlighting
 Plug 'https://github.com/leafgarland/typescript-vim'
+autocmd BufNewFile,BufRead *.tsx set filetype=typescript.tsx " hack to make coc.vim work with tsx files
+" Plug 'https://github.com/HerringtonDarkholme/yats.vim'
 Plug 'https://github.com/mxw/vim-jsx'
 Plug 'https://github.com/altercation/vim-colors-solarized'
 " Mostly so f strings get syntax highlighted
@@ -279,6 +281,8 @@ if filereadable("local.vim")
 endif
 
 
+command! -nargs=0 NoScroll diffoff | windo set nocursorbind | windo set noscrollbind
+
 function! Dbase()
   " fnamemodify: https://stackoverflow.com/a/24463362/4993041
   let l:path = fnamemodify(expand("%"), ":~:.")
@@ -291,6 +295,7 @@ function! Dbase()
   exe ".!git show $(git base):" . l:path
   exe "set ft=" . l:ft
   :diffthis
+  au BufUnload <buffer> windo NoScroll
   exe ":normal! \<C-W>p"
 endfunction
 command! -nargs=0 Dbase call Dbase()
@@ -310,6 +315,7 @@ function! Gdt(...)
   exe ".!git show " . commit . ":" . l:path
   exe "set ft=" . l:ft
   :diffthis
+  au BufUnload <buffer> windo NoScroll
   " BufUnload function() { normal! l:orig_window "\<C-W>\<C-W>"; }
   exe ":normal! \<C-W>p"
 endfunction
@@ -359,6 +365,5 @@ set clipboard^=unnamedplus
 nnoremap <silent> <Leader>s :let @/='\<<C-R>=expand("<cword>")<CR>\>'<CR>:set hls<CR>
 nnoremap <silent> <Leader>h :set nohls<CR>
 
-command! -nargs=0 NoScroll diffoff | windo set nocursorbind | windo set noscrollbind
 
 cnoremap <C-a> <C-b>

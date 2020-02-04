@@ -1,0 +1,15 @@
+# cat ./script.sh
+#    cat tempocom/apps/factory/mpi.py 1>/dev/null || exit 125
+#    grep dnp_parts tempocom/apps/factory/mpi.py
+#    ext=$?
+#    echo "Exit status $ext"
+#    exit $ext
+
+# git bisect reset
+# git cho develop
+# git bisect start HEAD 53e06a05 --
+
+git bisect run ./script.sh
+  -- or --
+git bisect run "some command"
+
