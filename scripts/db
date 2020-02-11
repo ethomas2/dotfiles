@@ -1,2 +1,0 @@
-#!/bin/bash
-PGPASSWORD=$SCRIPTS_DB_PASSWORD psql -h localhost -U $SCRIPTS_DB_USER "$@"
