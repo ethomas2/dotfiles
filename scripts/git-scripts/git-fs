@@ -18,7 +18,7 @@ branch_prefix="zzz-git-fs"
     echo "$commit_or_branch is not a branch, creating branch $branch"
     git br "$branch" $commit_or_branch
   else
-    echo "$commit_or_branch is already a branch. Proceeding $branch"
+    echo "$commit_or_branch is already a branch. Proceeding"
     branch=$commit_or_branch
   fi
   echo $is_branch

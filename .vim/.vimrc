@@ -322,6 +322,18 @@ endfunction
 command! -nargs=? Gdt call Gdt(<f-args>)
 cnoreabbrev gdt Gdt
 
+
+function! Gshow(...)
+  let commit = a:1
+  " fnamemodify: https://stackoverflow.com/a/24463362/4993041
+  let l:path = fnamemodify(expand("%"), ":~:.")
+  let l:ft = &ft
+  :new
+  exe ".!git show " . commit . ":" . l:path
+  exe "set ft=" . l:ft
+endfunction
+command! -nargs=? Gshow call Gdt(<f-args>)
+
 " <tab> is remapped to gt, (which also overrides <C-I>), so remap <C-J> to
 " <C-I>/<tab>
 nnoremap <C-n> <tab>
