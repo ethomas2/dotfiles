@@ -28,6 +28,7 @@ branch_prefix="zzz-git-fs"
   (
     cd $_tempdir
     git remote add upstream $remote_url
+    git remote add origin $remote_url
     # git remote add local $local_url
   )
 ) >/dev/null
