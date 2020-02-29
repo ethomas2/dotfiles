@@ -1,0 +1,6 @@
+alias ls='ls --color=auto'
+alias pbcopy='xclip -selection clipboard'
+alias pbpaste='xclip -selection clipboard -o'
+
+# See http://linux-sxs.org/housekeeping/lscolors.html and https://github.com/seebi/dircolors-solarized
+eval `dircolors ~/.dotfiles/dircolors-solarized/dircolors.256dark`

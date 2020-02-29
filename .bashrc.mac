@@ -1,0 +1,2 @@
+# mac specific settings
+alias ls='ls -G'
