@@ -11,6 +11,7 @@
 [ -d /usr/local/etc/bash_completion. ] && source /usr/local/etc/bash_completion.d/*
 
 [ $(uname -s) = "Darwin" ] && source ~/.dotfiles/.bashrc.mac
+[ $(uname -s) = "Linux" ] && source ~/.dotfiles/.bashrc.linux
 
 #  ================================= EXPORTS =================================
 export HISTCONTROL=ignoredups:ignorespace
