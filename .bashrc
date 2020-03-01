@@ -56,7 +56,6 @@ alias v='nvim'
 alias nv='nvim'
 alias py36='~/.pyenv/versions/3.6.1/bin/python'
 alias svenv='source venv/bin/activate'
-alias cat='bat'
 
 
 #  ================================= FZF =================================
