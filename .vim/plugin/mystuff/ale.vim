@@ -4,6 +4,7 @@ let g:ale_pattern_options = {
 \   '.*py$': {'ale_enabled': 0},
 \   '.*ts$': {'ale_enabled': 0},
 \   '.*tsx$': {'ale_enabled': 0},
+\   '.*go$': {'ale_enabled': 0},
 \}
 
 command! -nargs=0 AT ALEToggle

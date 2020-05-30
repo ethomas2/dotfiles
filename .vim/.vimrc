@@ -33,6 +33,8 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 
 Plug 'fatih/vim-go'
+let g:go_fmt_command = "goimports"
+
 Plug 'bitc/vim-hdevtools'
 Plug 'https://github.com/dan-t/vim-hsimport'
 Plug 'https://github.com/junegunn/fzf.vim'
@@ -60,6 +62,9 @@ Plug 'https://github.com/ethomas2/python-syntax', {
 let g:python_highlight_all = 1
 Plug 'https://github.com/lifepillar/pgsql.vim'
 let g:sql_type_default = 'pgsql'
+Plug 'https://github.com/hashivim/vim-terraform'
+let g:terraform_fmt_on_save=1
+
 
 " Verbs
 Plug 'tpope/vim-surround'
@@ -79,6 +84,8 @@ Plug 'https://github.com/coderifous/textobj-word-column.vim'
 
 " Other
 Plug 'https://github.com/jgdavey/tslime.vim'
+Plug 'https://github.com/tpope/vim-dispatch'
+Plug 'https://github.com/kassio/neoterm'
 Plug 'https://github.com/jceb/vim-editqf'
 Plug 'https://github.com/ethomas2/vim-unstack' " can't get this to work
 Plug 'https://github.com/mattboehm/vim-accordion'
@@ -88,7 +95,9 @@ Plug 'https://github.com/kshenoy/vim-signature'
 let g:SignatureMarkLineHL = 'Search' " Consider other highlight groups. This one is sort of annoying
 let g:SignatureMarkTextHL = 'None'
 let g:SignatureForceRemoveGlobal = 1 " See https://github.com/kshenoy/vim-signature/issues/72
+" Plug 'https://github.com/jiangmiao/auto-pairs'
 call plug#end()
+
 
 "
 
@@ -228,6 +237,7 @@ let g:jsonnet_fmt_on_save = 0
 
 vmap <C-c><C-c> <Plug>SendSelectionToTmux
 nmap <C-c><C-c> <Plug>NormalModeSendToTmux
+nmap <C-c><C-q> :Tmux q<CR>
 let g:tslime_always_current_session = 1
 let g:tslime_always_current_window = 1
 
@@ -393,3 +403,12 @@ nnoremap <silent> <Leader>h :set nohls<CR>
 
 
 cnoremap <C-a> <C-b>
+
+" https://vim.fandom.com/wiki/Simplifying_regular_expressions_using_magic_and_no-magic
+" cnoremap %s/ %smagic/
+" cnoremap \>s/ \>smagic/
+
+autocmd BufNewFile,BufRead .envrc set filetype=sh
+
+command! -nargs=0 Tasks :tabnew /home/evan/github.com/tempoautomation/digital-factory/tasks.md
+

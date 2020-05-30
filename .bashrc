@@ -9,6 +9,7 @@
 
 # brew bash completion stuff (bat, ag, pandoc). Idk if this even does anything
 [ -d /usr/local/etc/bash_completion. ] && source /usr/local/etc/bash_completion.d/*
+[ -d ~/.gvm/scripts/gvm ] && source ~/.gvm/scripts/gvm
 
 [ $(uname -s) = "Darwin" ] && source ~/.dotfiles/.bashrc.mac
 [ $(uname -s) = "Linux" ] && source ~/.dotfiles/.bashrc.linux
@@ -18,6 +19,7 @@ export HISTCONTROL=ignoredups:ignorespace
 export TERM=xterm-256color
 export PYENV_ROOT="$HOME/.pyenv"
 export PGDATA="/usr/local/var/postgres"
+export GOHOME=$HOME/go
 export GOPATH=$HOME/go
 export MANPAGER="/bin/sh -c \"col -b | nvim -c 'set ft=man ts=8 nomod nolist nonu noma' -\""
 # export AWS_DEFAULT_REGION=us-west-2  # used by aws tools. Specifically sam (maybe others)
@@ -57,6 +59,7 @@ alias v='nvim'
 alias nv='nvim'
 alias py36='~/.pyenv/versions/3.6.1/bin/python'
 alias svenv='source venv/bin/activate'
+alias tf='terraform'
 
 
 #  ================================= FZF =================================
@@ -136,3 +139,9 @@ cyan=$(tput setaf 6)
 user_color=$magenta
 PS1="\[$reset\]\[$cyan\][ \[$bold\]\[$user_color\]\u@\h\
 \[$reset\]\[$blue\]\W\[$cyan\] ] \[$reset\]\[$reset\]\\$\[$reset\] "
+
+
+eval "$(pipenv --completion)"
+
+
+[[ -s "/home/evan/.gvm/scripts/gvm" ]] && source "/home/evan/.gvm/scripts/gvm"

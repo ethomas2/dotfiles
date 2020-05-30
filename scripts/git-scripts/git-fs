@@ -10,8 +10,9 @@ set -euxo pipefail
 # clone method
 _tempdir=$(mktemp -d --suffix=-git-fs)
 branch_prefix="zzz-git-fs"
+default_branch=${DEFAULT_GIT_BRANCH:-git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/@@'}
 (
-  commit_or_branch=${1:-origin/develop}
+  commit_or_branch=${1:-$default_branch}
   is_branch=$(git branch | grep "$commit_or_branch" >/dev/null 2>&1; echo $?)
   if [ $is_branch != "0" ]; then
     branch="$branch_prefix-$commit_or_branch"
