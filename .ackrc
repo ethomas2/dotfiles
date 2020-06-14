@@ -54,3 +54,4 @@
 --type-add=ts:ext:ts # Idk if this is useful
 --ignore-dir=match:.aws-sam
 --ignore-dir=match:.tempocom
+--ignore-file=match:yarn.lock

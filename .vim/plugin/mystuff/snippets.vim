@@ -10,3 +10,8 @@ inoremap <C-j>hist <Esc>!!cat ~/.vim/snippets/hist<CR>}i
 inoremap <C-j>tbl <Esc>!!cat ~/.vim/snippets/tbl<CR>}}}o<esc>o
 inoremap <C-j>table <Esc>!!cat ~/.vim/snippets/tbl<CR>}}}o<esc>o
 inoremap <C-j>prof <Esc>!!cat ~/.vim/snippets/prof<CR>}o<esc>0i
+
+
+inoremap <C-j>pset \pset null 'Ø'
+inoremap <C-j>eset Ø
+inoremap <C-j>null Ø

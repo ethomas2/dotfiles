@@ -412,3 +412,4 @@ autocmd BufNewFile,BufRead .envrc set filetype=sh
 
 command! -nargs=0 Tasks :tabnew /home/evan/github.com/tempoautomation/digital-factory/tasks.md
 
+command! -nargs=0 NT :NERDTree expand('%:p:h')

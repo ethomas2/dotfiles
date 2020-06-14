@@ -3,7 +3,7 @@ set -eo pipefail
 
 repo_url="$1"
 
-valid_chars="[a-zA-Z_-]"
+valid_chars="[a-zA-Z_0-9-]"
 regex1="^git@github.com:($valid_chars+)/($valid_chars+).git$"
 regex2="^http[s]?://github.com/($valid_chars+)/($valid_chars+)$"
 if [[ $repo_url =~ $regex1 ]]; then
