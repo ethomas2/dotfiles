@@ -1,0 +1,35 @@
+#!/bin/bash
+
+ARG1=""
+if [ "$1" == "ws" ]; then
+  ARG1=workspace
+  shift
+elif [ "$1" == "ap" ]; then
+  ARG1=apply
+  shift
+elif [ "$1" == "a" ]; then
+  ARG1=apply
+  shift
+elif [ "$1" == "p" ]; then
+  ARG1=plan
+  shift
+elif [ "$1" == "pl" ]; then
+  ARG1=plan
+  shift
+elif [ "$1" == "d" ]; then
+  ARG1=destroy
+  shift
+elif [ "$1" == "ds" ]; then
+  ARG1=destroy
+  shift
+fi
+
+
+if [ -z "$TFWRAPPER_WORKING_DIR" ]; then
+  terraform $ARG1 "$@"
+else
+  (
+    cd $TFWRAPPER_WORKING_DIR
+    terraform $ARG1 "$@"
+  )
+fi
