@@ -26,10 +26,10 @@ fi
 
 
 if [ -z "$TFWRAPPER_WORKING_DIR" ]; then
-  terraform $ARG1 "$@"
+  terraform "$ARG1" "$@"
 else
   (
     cd $TFWRAPPER_WORKING_DIR
-    terraform $ARG1 "$@"
+    terraform "$ARG1" "$@"
   )
 fi

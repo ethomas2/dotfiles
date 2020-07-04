@@ -9,14 +9,14 @@ set rtp+=~/.vim/bundle/vim-colors-solarized
 " Figure out the system Python for Neovim.
 " From https://github.com/neovim/neovim/issues/1887
 " Necessary for :Black
-if exists("$VIRTUAL_ENV")
-    let g:python_host_prog=substitute(system("which -a python3 | head -n2 | tail -n1"), '\n', '', 'g')
-    let g:python3_host_prog=substitute(system("which -a python3 | head -n2 | tail -n1"), '\n', '', 'g')
-else
-    let g:python_host_prog=substitute(system("which python3"), '\n', '', 'g')
-    let g:python3_host_prog=substitute(system("which python3"), '\n', '', 'g')
-endif
-let g:python3_host_prog='/usr/bin/python3'
+" if exists("$VIRTUAL_ENV")
+"     let g:python_host_prog=substitute(system("which -a python3 | head -n2 | tail -n1"), '\n', '', 'g')
+"     let g:python3_host_prog=substitute(system("which -a python3 | head -n2 | tail -n1"), '\n', '', 'g')
+" else
+"     let g:python_host_prog=substitute(system("which python3"), '\n', '', 'g')
+"     let g:python3_host_prog=substitute(system("which python3"), '\n', '', 'g')
+" endif
+" let g:python3_host_prog='/usr/bin/python3'
 
 " https://github.com/junegunn/vim-plug/wiki/tips#automatic-installation
 if empty(glob('~/.vim/autoload/plug.vim'))
@@ -39,6 +39,7 @@ Plug 'bitc/vim-hdevtools'
 Plug 'https://github.com/dan-t/vim-hsimport'
 Plug 'https://github.com/junegunn/fzf.vim'
 Plug 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
+" let g:black_linelength = 79
 " Plug 'psf/black'
 Plug 'https://github.com/rust-lang/rust.vim'
 let g:rustfmt_autosave = 1
@@ -413,3 +414,14 @@ autocmd BufNewFile,BufRead .envrc set filetype=sh
 command! -nargs=0 Tasks :tabnew /home/evan/github.com/tempoautomation/digital-factory/tasks.md
 
 command! -nargs=0 NT :NERDTree expand('%:p:h')
+
+nnoremap <leader>gn :g/./norm<space>
+xnoremap <leader>gn :g/./norm<space>
+nnoremap <leader>gvn :v/./norm<space>
+xnoremap <leader>gvn :v/./norm<space>
+
+" function! Black()
+"   silent execute ":!black " . expand("%:p")
+"   silent execute ":e"
+" endfunction
+" command! -nargs=0 Black call Black()

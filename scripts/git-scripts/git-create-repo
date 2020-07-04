@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -euxo pipefail
+
+function errAndQuit() {
+  echo -e "\033[31mCurrent directory is not an initialized git repository with a commit\033[m"
+  echo -e "\033[31mPlease initialize repository with \"git init\"\033[m"
+  echo -e "\033[31mand make at least one commit\033[m"
+  exit 1
+}
+
+if [ ! -d .git ]; then
+  errAndQuit
+fi
+
+set +e
+git log -1 > /dev/null 2>&1
+HAS_COMMIT=$?
+set -e
+if [ "$HAS_COMMIT" -ne "0" ]; then
+  errAndQuit
+fi
+
+
+REPO_NAME=$(pwd | awk -F/ '{print $NF}')
+
+ghresp=$(curl -X POST -s -L \
+  https://api.github.com/user/repos \
+  -H "Accept: application/vnd.github.v3+json" \
+  -H "Authorization: Token $GHTOKEN" \
+  -d "{\"name\": \"$REPO_NAME\"}")
+
+ssh_url=$(echo $ghresp | jq -r '.ssh_url')
+
+git remote add origin $ssh_url
+git push -u origin master:master
