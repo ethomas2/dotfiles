@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# stolen from https://stackoverflow.com/questions/37986523/how-can-i-create-a-stopwatch-in-bash
+now=$(date +%s)sec; watch -n0.1 -p TZ=UTC date --date now-$now +%H:%M:%S.%N

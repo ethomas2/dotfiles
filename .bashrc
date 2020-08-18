@@ -38,6 +38,7 @@ PATH="${PATH}:$HOME/scripts/git-scripts"
 PATH="${PATH}:$PYENV_ROOT/bin"
 PATH="${PATH}:/usr/local/sbin"
 PATH="$PYENV_ROOT/bin:${PATH}"
+PATH="${PATH}:/home/evan/github.com/tempoautomation/talos-tools"
 export PATH
 
 #  ================================= ALIASES =================================

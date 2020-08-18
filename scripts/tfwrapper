@@ -27,6 +27,9 @@ fi
 
 if [ -z "$TFWRAPPER_WORKING_DIR" ]; then
   terraform "$ARG1" "$@"
+elif [ ! -d "$TFWRAPPER_WORKING_DIR" ]; then
+  echo -e "\033[31mInvalid directory $TFWRAPPER_WORKING_DIR\033"
+  exit 1
 else
   (
     cd $TFWRAPPER_WORKING_DIR

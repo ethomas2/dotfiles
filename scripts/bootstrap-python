@@ -1,6 +1,14 @@
+#!/bin/bash
+
 /home/evan/.pyenv/shims/python3.8 -m venv venv
-echo "source venv/bin/activate" > .envrc
+echo "source venv/bin/activate" >> .envrc
 source venv/bin/activate
 pip install flake8
 pip install mypy
 pip install black
+pip install jedi
+
+cat <<EOF >> pyproject.toml
+[tool.black]
+line-length = 79
+EOF

@@ -99,13 +99,6 @@ let g:SignatureForceRemoveGlobal = 1 " See https://github.com/kshenoy/vim-signat
 " Plug 'https://github.com/jiangmiao/auto-pairs'
 call plug#end()
 
-
-"
-
-
-
-
-
 autocmd BufRead,BufNewFile *go setlocal filetype=go
 
 set noswapfile
@@ -280,14 +273,27 @@ let g:fzf_layout = {'down': '45%'}
 command! -bang -nargs=* Ag
   \ call fzf#vim#ag(<q-args>, fzf#vim#with_preview('right:35%'))
 
+
+" command! -nargs=* -complete=dir Rg
+"   \ call fzf#vim#grep(
+"   \   "rg --column --line-number --no-heading --fixed-strings --smart-case --hidden --color=always --glob '!.git/**' --glob '!.hg/**' --glob '!**/*.ico' --glob '!**/*.png' --glob '!**/*.jpg' --glob '!**/*.jpeg' --glob '!**/*.zip' --glob '!**/*.tar.gz' --glob '!**/*.gif' --glob '!**/*.avi' --glob '!**/*.mp4' --glob '!**/*.mp3' --glob '!**/*.ogg' --glob '!**/*.tgz' --glob '!**/*.gz' --glob '!**/*.ctg.z' --glob '!**/*.bcmap' ".<q-args>, 1,
+"   \ fzf#vim#with_preview('right:35%'),
+"   \ )
+
+command! -nargs=* -complete=dir Rg
+  \ call fzf#vim#grep(
+  \   "rg --column --line-number --no-heading --fixed-strings --smart-case --hidden --color=always ".<q-args>, 1,
+  \ fzf#vim#with_preview('right:35%'),
+  \ )
+
 command! -bang -nargs=* Lines
   \ call fzf#vim#lines(<q-args>, fzf#vim#with_preview('right:35%'))
 
 " Immediately trigger a search for the current keyword if there is one
-nnoremap <expr> <leader>g (expand("<cword>") ==? "") ? ":Ag " : ":Ag \<C-r>\<C-w><CR>"
+nnoremap <expr> <leader>g (expand("<cword>") ==? "") ? ":Rg " : ":Rg \<C-r>\<C-w><CR>"
 
 " Immediately trigger a search for the current selection if there is one
-xnoremap <leader>g "zy:exe "Ag ".@z.""<CR>
+xnoremap <leader>g "zy:exe "Rg ".@z.""<CR>
 
 let g:prettier#exec_cmd_path = "~/.config/yarn/global/node_modules/.bin/prettier"
 let g:prettier#exec_cmd_async = 1
@@ -400,6 +406,9 @@ set clipboard^=unnamedplus
 
 " from https://stackoverflow.com/questions/4256697/vim-search-and-highlight-but-do-not-jump
 nnoremap <silent> <Leader>s :let @/='\<<C-R>=expand("<cword>")<CR>\>'<CR>:set hls<CR>
+xnoremap <silent> <Leader>s "zy<CR>:let @/='<C-R>z'<CR>:set hls<CR>
+" xnoremap <silent> <Leader>s "/y<CR>:let @/='<C-R>z'<CR>:set hls<CR>
+" xnoremap <silent> <Leader>s "zy:let @/='\<<C-R>z'<CR>
 nnoremap <silent> <Leader>h :set nohls<CR>
 
 
@@ -420,8 +429,11 @@ xnoremap <leader>gn :g/./norm<space>
 nnoremap <leader>gvn :v/./norm<space>
 xnoremap <leader>gvn :v/./norm<space>
 
-" function! Black()
-"   silent execute ":!black " . expand("%:p")
-"   silent execute ":e"
-" endfunction
-" command! -nargs=0 Black call Black()
+command! -nargs=0 FoldPython :%g/^\s*def/norm f)jzfii
+
+command! -nargs=* JQ :%!jq <args>
+command! -nargs=* Jq :%!jq <args>
+
+command! -nargs=1 Ft :set ft=<args>
+
+command! -nargs=0 Ws :w !sudo tee %
