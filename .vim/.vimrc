@@ -424,10 +424,10 @@ command! -nargs=0 Tasks :tabnew /home/evan/github.com/tempoautomation/digital-fa
 
 command! -nargs=0 NT :NERDTree expand('%:p:h')
 
-nnoremap <leader>gn :g/./norm<space>
-xnoremap <leader>gn :g/./norm<space>
-nnoremap <leader>gvn :v/./norm<space>
-xnoremap <leader>gvn :v/./norm<space>
+" nnoremap <leader>gn :g/./norm<space>
+" xnoremap <leader>gn :g/./norm<space>
+" nnoremap <leader>gvn :v/./norm<space>
+" xnoremap <leader>gvn :v/./norm<space>
 
 command! -nargs=0 FoldPython :%g/^\s*def/norm f)jzfii
 
@@ -437,3 +437,8 @@ command! -nargs=* Jq :%!jq <args>
 command! -nargs=1 Ft :set ft=<args>
 
 command! -nargs=0 Ws :w !sudo tee %
+
+command! -nargs=0 PyD2J :%!python -c 'import sys, json; print(json.dumps(eval(sys.stdin.read().strip())))'
+
+command! -nargs=0 BgLight :set background=light
+command! -nargs=0 BgDark :set background=dark

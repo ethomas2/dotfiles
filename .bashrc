@@ -3,6 +3,7 @@
 [ -f ~/.marksrc ]                      && source ~/.marksrc
 [ -f ~/.fzf.bash ]                     && source ~/.fzf.bash
 [ -f ~/.dotfiles/secrets ]             && source ~/.dotfiles/secrets
+[ -f ~/.temporc ]                      && source ~/.temporc
 
 # brew bash completion stuff (bat, ag, pandoc). Idk if this even does anything
 [ -d /usr/local/etc/bash_completion. ] && source /usr/local/etc/bash_completion.d/*
@@ -61,6 +62,7 @@ alias nv='nvim'
 alias py36='~/.pyenv/versions/3.6.1/bin/python'
 alias svenv='source venv/bin/activate'
 alias tf='tfwrapper'
+alias gs='git s'
 
 
 #  ================================= FZF =================================
@@ -114,7 +116,7 @@ export HISTFILESIZE=10000               # big big history
 
 
 #  ================================= OTHER =================================
-if [ -z "$TMUX" ]; then
+if [ -z "$TMUX" ] && [ -t 1 ]; then
   tmux
 fi
 
@@ -146,3 +148,6 @@ eval "$(pipenv --completion)"
 
 
 [[ -s "/home/evan/.gvm/scripts/gvm" ]] && source "/home/evan/.gvm/scripts/gvm"
+
+LINES=$(cat /home/evan/file | wc -l)
+echo $LINES >> /home/evan/file

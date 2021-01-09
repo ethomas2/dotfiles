@@ -1,14 +1,22 @@
 #!/bin/bash
+set -euxo pipefail
 
-/home/evan/.pyenv/shims/python3.8 -m venv venv
-echo "source venv/bin/activate" >> .envrc
+[ -d venv ] || /home/evan/.pyenv/versions/3.9.0/bin/python -m venv venv
+
+if [ ! -f .envrc ] || [ -z `grep "source venv/bin/activate" .envrc` ]; then
+  echo "source venv/bin/activate" >> .envrc
+  direnv allow
+fi
+
 source venv/bin/activate
 pip install flake8
 pip install mypy
 pip install black
 pip install jedi
 
-cat <<EOF >> pyproject.toml
+if [ ! -f pyproject.toml ] || [ -z `grep tool.black pyproject.toml` ]; then
+  cat <<EOF >> pyproject.toml
 [tool.black]
 line-length = 79
 EOF
+fi

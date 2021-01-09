@@ -55,3 +55,6 @@
 --ignore-dir=match:.aws-sam
 --ignore-dir=match:.tempocom
 --ignore-file=match:yarn.lock
+
+# Terraform
+--ignore-dir=.terraform

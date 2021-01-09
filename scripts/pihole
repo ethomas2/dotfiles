@@ -8,12 +8,14 @@
 # IPv6="${IPv6:-$IPv6_LOOKUP}"  # use $IPv6, if set, otherwise IP_LOOKUP
 # DOCKER_CONFIGS="$(pwd)"  # Default of directory you run this from, update to where ever.
 
-ServerIP=$(curl api.ipify)
-WEBPASSWORD=muttley1
+set -euxo pipefail
+
+ServerIP=$(curl https://api.ipify.org)
+WEBPASSWORD=password
 DOCKER_CONFIGS=$(pwd)
 
-echo "### Make sure your IPs are correct, hard code ServerIP ENV VARs if necessary\nIP: ${IP}\nIPv6: ${IPv6}"
-docker run -d \
+echo "### Make sure your IPs are correct, hard code ServerIP ENV VARs if necessary\nIP: ${ServerIP}"
+docker run --rm \
     --name pihole \
     -p 53:53/tcp -p 53:53/udp \
     -p 67:67/udp \
@@ -21,11 +23,9 @@ docker run -d \
     -p 443:443 \
     -v "${DOCKER_CONFIGS}/pihole/:/etc/pihole/" \
     -v "${DOCKER_CONFIGS}/dnsmasq.d/:/etc/dnsmasq.d/" \
-    -e ServerIP="${IP}" \
-    # -e ServerIPv6="${IPv6}" \
-    --restart=unless-stopped \
+    -e ServerIP=$ServerIP \
     --cap-add=NET_ADMIN \
     diginc/pi-hole:latest
 
-echo -n "Your password for https://${IP}/admin/ is "
-docker logs pihole 2> /dev/null | grep 'password:'
+# echo -n "Your password for https://${IP}/admin/ is "
+# docker logs pihole 2> /dev/null | grep 'password:'
