@@ -37,6 +37,7 @@ let g:go_fmt_command = "goimports"
 
 Plug 'bitc/vim-hdevtools'
 Plug 'https://github.com/dan-t/vim-hsimport'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'https://github.com/junegunn/fzf.vim'
 Plug 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
 " let g:black_linelength = 79

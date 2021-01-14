@@ -19,7 +19,8 @@ nmap <silent> gw <Plug>(coc-references)
 
 
 " nnoremap <expr><C-f> coc#util#has_float() ? coc#util#float_scroll(1) : "\<C-f>"
-nnoremap <expr><C-n> coc#util#has_float() ? coc#util#float_scroll(0) : "\<C-b>"
+" nnoremap <expr><C-n> coc#util#has_float() ? coc#util#float_scroll(0) : "\<C-b>"
+nnoremap <expr><C-n> <Plug>coc-float-jump
 
 command! -nargs=0 CocNextErr :call CocAction('diagnosticNext')<CR>
 command! -nargs=0 CocPrevErr :call CocAction('diagnosticPrevious')<CR>
