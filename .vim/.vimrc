@@ -27,8 +27,8 @@ endif
 
 call plug#begin('~/.vim/plugged')
 
-" Language/IDE like things
-Plug 'https://github.com/dense-analysis/ale'
+" " Language/IDE like things
+" Plug 'https://github.com/dense-analysis/ale' " REally slow on mac
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 
@@ -41,7 +41,7 @@ Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'https://github.com/junegunn/fzf.vim'
 Plug 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
 " let g:black_linelength = 79
-" Plug 'psf/black'
+Plug 'psf/black'
 Plug 'https://github.com/rust-lang/rust.vim'
 let g:rustfmt_autosave = 1
 Plug 'https://github.com/tell-k/vim-autopep8'
@@ -403,7 +403,7 @@ cnoreabbrev wt SaveTempFile
 command! -nargs=0 ClearMarks delmarks A-Za-z | SignatureRefresh
 
 let g:loaded_clipboard_provider = 1
-set clipboard^=unnamedplus
+" set clipboard^=unnamedplus
 
 " from https://stackoverflow.com/questions/4256697/vim-search-and-highlight-but-do-not-jump
 nnoremap <silent> <Leader>s :let @/='\<<C-R>=expand("<cword>")<CR>\>'<CR>:set hls<CR>

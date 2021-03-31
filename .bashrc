@@ -20,7 +20,6 @@ export HISTCONTROL=ignoredups:ignorespace
 export TERM=xterm-256color
 export PYENV_ROOT="$HOME/.pyenv"
 export PGDATA="/usr/local/var/postgres"
-export GOHOME=$HOME/go
 export GOPATH=$HOME/go
 export MANPAGER="/bin/sh -c \"col -b | nvim -c 'set ft=man ts=8 nomod nolist nonu noma' -\""
 # export AWS_DEFAULT_REGION=us-west-2  # used by aws tools. Specifically sam (maybe others)
@@ -50,12 +49,14 @@ alias godevel='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias godvl='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias gdvl='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias dc='docker-compose'
-alias pbcopy='xclip -selection clipboard'
-alias pbpaste='xclip -selection clipboard -o'
+# alias pbcopy='xclip -selection clipboard'
+# alias pbpaste='xclip -selection clipboard -o'
 alias g='git'
 __git_complete g _git # https://stackoverflow.com/questions/9869227/git-autocomplete-in-bash-aliases
 alias gi='git'
 __git_complete g _git # https://stackoverflow.com/questions/9869227/git-autocomplete-in-bash-aliases
+
+alias kb='kubectl'
 alias svenv='source venv/bin/activate'
 alias v='nvim'
 alias nv='nvim'
@@ -94,12 +95,13 @@ _fzf_important_dirs() {
 _all_dirs_and_files() {
   echo /etc/hosts &&
   find $HOME/.ssh &&
-  find $HOME -type d -iname '.*' -prune -o -type d -iname node_modules -prune -o -true
+  find $HOME/github.com -type d -maxdepth 2
 }
 _fzf_all_dirs_and_files() {
   _all_dirs | fzf
 }
-# bind '"\C-o": " \C-u \C-a\C-k`_fzf_important_dirs`\e\C-e\C-y\C-a\C-y\ey\C-h\C-e\er \C-h"'
+# bind '"\C-j": " \C-u \C-a\C-k`_fzf_important_dirs`\e\C-e\C-y\C-a\C-y\ey\C-h\C-e\er \C-h"'
+# bind '"\C-j": " \C-u \C-a\C-k`_fzf_important_dirs`\e\C-e\C-y\C-a\C-y\ey\C-h\C-e\er \C-h"'
 
 #  ========================== HISTORY CONTROL  ==========================
 # See https://unix.stackexchange.com/questions/1288/preserve-bash-history-in-multiple-terminal-windows
@@ -143,11 +145,10 @@ user_color=$magenta
 PS1="\[$reset\]\[$cyan\][ \[$bold\]\[$user_color\]\u@\h\
 \[$reset\]\[$blue\]\W\[$cyan\] ] \[$reset\]\[$reset\]\\$\[$reset\] "
 
-
-eval "$(pipenv --completion)"
+# eval "$(pipenv --completion)"
 
 
 [[ -s "/home/evan/.gvm/scripts/gvm" ]] && source "/home/evan/.gvm/scripts/gvm"
 
-LINES=$(cat /home/evan/file | wc -l)
-echo $LINES >> /home/evan/file
+# LINES=$(cat /home/evan/file | wc -l)
+# echo $LINES >> /home/evan/file
