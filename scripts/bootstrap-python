@@ -21,3 +21,10 @@ if [ ! -f pyproject.toml ] || [ -z `grep tool.black pyproject.toml` ]; then
 line-length = 79
 EOF
 fi
+
+if [ ! -f pytest.ini ]; then
+  cat <<EOF >> pytest.ini
+[pytest]
+addopts = -s -x
+EOF
+fi

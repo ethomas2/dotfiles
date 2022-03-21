@@ -21,44 +21,60 @@
     cachetextconv = true
 
 [core]
-	editor = nvim
+    editor = nvim
+	excludesfile = /Users/ethomas/.gitignore
+
 [alias]
-        ch = checkout
-        cho = checkout
-        chout = checkout
-        check = checkout
+  ch = checkout
+  cho = checkout
+  com = commit
+  br = branch
+  f = fetch
+  pu = push
+  dt = difftool
+  d = diff
+  mt = mergetool
+  cp = cherry-pick
+  r = rebase
+  rb = rebase
+  reb = rebase
 
-        c = commit
-        co = commit
-        com = commit
+  ; ch = checkout
+  ; cho = checkout
+  ; chout = checkout
+  ; check = checkout
 
-        b = branch
-        br = branch
-        bra = branch
+  ; c = commit
+  ; co = commit
+  ; com = commit
 
-        f = fetch
-        fe = fetch
+  ; b = branch
+  ; br = branch
+  ; bra = branch
 
-        p = push
-        pu = push
+  ; f = fetch
+  ; fe = fetch
 
-        dt = difftool
-        dtool = difftool
-        difft = difftool
-        dit = difftool
+  ; p = push
+  ; pu = push
 
-        d = diff
+  ; dt = difftool
+  ; dtool = difftool
+  ; difft = difftool
+  ; dit = difftool
 
-        mt = mergetool
+  ; d = diff
 
-        cp = cherry-pick
+  ; mt = mergetool
 
-        r = rebase
-        rb = rebase
-        reb = rebase
+  ; cp = cherry-pick
 
-        a = add
-        ad = add
+  ; r = rebase
+  ; rb = rebase
+  ; reb = rebase
 
-        rs = reset
-        res = reset
+  ; a = add
+  ; ad = add
+
+  ; rs = reset
+  ; res = reset

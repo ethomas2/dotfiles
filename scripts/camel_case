@@ -10,13 +10,13 @@ def to_camel_case(s0):
     if is_kebab_case:
         words = s0.split('-')
         return (
-            words[0] + ''.join(w.title() for w in words[1:]) if words
+            words[0].lower() + ''.join(w.title() for w in words[1:]) if words
             else ''
         )
     elif is_snake_case:
         words = s0.split('_')
         return (
-            words[0] + ''.join(w.title() for w in words[1:]) if words
+            words[0].lower() + ''.join(w.title() for w in words[1:]) if words
             else ''
         )
     else:

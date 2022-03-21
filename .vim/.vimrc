@@ -443,3 +443,28 @@ command! -nargs=0 PyD2J :%!python -c 'import sys, json; print(json.dumps(eval(sy
 
 command! -nargs=0 BgLight :set background=light
 command! -nargs=0 BgDark :set background=dark
+
+function! RunThis()
+  let l:filepath = expand('%:p')
+
+  if &filetype == "python"
+    let l:cmd = "python"
+  elseif &filetype == "sh"
+    let l:cmd = "bash"
+  elseif &filetype == "go"
+    let l:cmd = "go run"
+  elseif &filetype == "haskell"
+    let l:cmd = "runhaskell"
+  elseif &filetype == "javascript.jsx"
+    let l:cmd = "node"
+  else
+    echo "Unknown filetype " . &filetype . " and no command passed in"
+    return
+  endif
+
+  execute "Tmux time " . l:cmd . " " . l:filepath
+endfunction
+
+nnoremap <leader>t :call RunThis()<CR>
+
+nnoremap <leader>d :call system("tmux send-keys -t " . g:tslime['pane'] . " C-d")<CR>
