@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+
+FILEPATH=${1:-NO_ARG_PROVIDED}
+if [ $FILEPATH == NO_ARG_PROVIDED ]; then
+  echo -e "\033[31mMust provide filepath as first arg\033[m"
+  exit 1
+fi
+
+BINARY=$(basename $FILEPATH)
+TMPDIR=/tmp/rustrun-out
+mkdir -p $TMPDIR
+
+rustc  -o $TMPDIR/$BINARY $FILEPATH && $TMPDIR/$BINARY

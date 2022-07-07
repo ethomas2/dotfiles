@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -euo pipefail
+
+
+# stolen from https://notes.tweakblogs.net/blog/7955/using-netcat-to-build-a-simple-tcp-proxy-in-linux.html
+
+if [ $# != 3 ]; then
+  echo -e "\033[31musage: $0 <src-port> <dst-host> <dst-port>\033[m"
+  exit 1
+fi
+
+SRC_PORT="$1"
+DST_HOST="$2"
+DST_PORT="$3"
+
+TMP=$(mktemp -d)
+
+BACK="$TMP/fifo"
+REQ="$TMP/req"
+RESP="$TMP/resp"
+
+mkfifo "$BACK"
+mkfifo "$REQ"
+mkfifo "$RESP"
+
+# cat "$REQ" | sed 's/^/=> /g' &
+# cat "$RESP" | sed 's/^/<= /g' &
+
+
+nc -l localhost "$SRC_PORT" <$BACK | tee $REQ | nc "$DST_HOST" "$DST_PORT" | tee $RESP  > $BACK

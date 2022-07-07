@@ -17,6 +17,8 @@ function! ExecuteScript(...)
     let l:cmd="python"
   elseif &filetype == "sh"
     let l:cmd="bash"
+  elseif &filetype == "javascript.jsx"
+    let l:cmd = "node"
   else
     echo "unknown filetype " . &filetype . " and no command passed in"
     return

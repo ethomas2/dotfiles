@@ -52,6 +52,7 @@ let g:autopep8_disable_show_diff=1
 Plug 'https://github.com/scrooloose/nerdtree'
 
 " Coloring/syntax highlighting
+Plug 'jparise/vim-graphql'
 Plug 'https://github.com/leafgarland/typescript-vim'
 autocmd BufNewFile,BufRead *.tsx set filetype=typescript.tsx " hack to make coc.vim work with tsx files
 " Plug 'https://github.com/HerringtonDarkholme/yats.vim'
@@ -457,6 +458,8 @@ function! RunThis()
     let l:cmd = "runhaskell"
   elseif &filetype == "javascript.jsx"
     let l:cmd = "node"
+  elseif &filetype == "rust"
+    let l:cmd = "rustrun"
   else
     echo "Unknown filetype " . &filetype . " and no command passed in"
     return

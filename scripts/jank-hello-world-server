@@ -1,0 +1,11 @@
+#!/bin/bash
+
+echo """HTTP/1.0 200 OK
+Date: Fri, 07 May 2021 16:09:35 GMT
+Content-type: text/html; charset=utf-8
+Content-Length: 6
+
+hello
+ """ | nc -l localhost 8000
+
+# echo "hello" | nc -l localhost 8000
