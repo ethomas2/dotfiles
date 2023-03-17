@@ -3,4 +3,4 @@
 docker run --rm -it \
   -e POSTGRES_PASSWORD=password -e POSTGRES_USER=evan -e POSTGRES_DB=evan \
   -p 5432:5432 \
-  postgres:12.2
+  postgres:15.1

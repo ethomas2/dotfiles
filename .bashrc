@@ -153,3 +153,10 @@ PS1="\[$reset\]\[$cyan\][ \[$bold\]\[$user_color\]\u@\h\
 
 # LINES=$(cat /home/evan/file | wc -l)
 # echo $LINES >> /home/evan/file
+export HOMEBREW_NO_AUTO_UPDATE=1
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/ethomas/Downloads/google-cloud-sdk/path.bash.inc' ]; then . '/Users/ethomas/Downloads/google-cloud-sdk/path.bash.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/ethomas/Downloads/google-cloud-sdk/completion.bash.inc' ]; then . '/Users/ethomas/Downloads/google-cloud-sdk/completion.bash.inc'; fi

@@ -95,6 +95,7 @@ Plug 'https://github.com/mattboehm/vim-accordion'
 Plug 'https://github.com/tpope/vim-fugitive'
 Plug 'https://github.com/tpope/vim-rhubarb'
 Plug 'https://github.com/kshenoy/vim-signature'
+Plug 'https://github.com/fisadev/vim-isort'
 let g:SignatureMarkLineHL = 'Search' " Consider other highlight groups. This one is sort of annoying
 let g:SignatureMarkTextHL = 'None'
 let g:SignatureForceRemoveGlobal = 1 " See https://github.com/kshenoy/vim-signature/issues/72
