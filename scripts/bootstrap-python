@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euxo pipefail
 
-[ -d venv ] || ~/.pyenv/versions/3.9.1/bin/python -m venv venv
+[ -d venv ] || ~/.pyenv/versions/3.11.2/bin/python -m venv venv
 
 if [ ! -f .envrc ] || [ -z `grep "source venv/bin/activate" .envrc` ]; then
   echo "source venv/bin/activate" >> .envrc

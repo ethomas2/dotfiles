@@ -40,6 +40,7 @@ PATH="${PATH}:$PYENV_ROOT/bin"
 PATH="${PATH}:/usr/local/sbin"
 PATH="$PYENV_ROOT/bin:${PATH}"
 PATH="${PATH}:/home/evan/github.com/tempoautomation/talos-tools"
+PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 export PATH
 
 #  ================================= ALIASES =================================
@@ -160,3 +161,5 @@ if [ -f '/Users/ethomas/Downloads/google-cloud-sdk/path.bash.inc' ]; then . '/Us
 
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/ethomas/Downloads/google-cloud-sdk/completion.bash.inc' ]; then . '/Users/ethomas/Downloads/google-cloud-sdk/completion.bash.inc'; fi
+eval "$(/opt/homebrew/bin/brew shellenv)"
+. "$HOME/.cargo/env"
