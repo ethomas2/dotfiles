@@ -12,7 +12,8 @@ while getopts ":b" opt; do
 done
 
 if [[ $browse = true ]];  then
-  hub browse -- "pulls/ethomas2"
+  hub browse -- "pulls/ethomas-hrp"
 else
- hub issue -c ethomas2 --include-pulls -s all "@#"
+ # hub issue -c ethomas-hrp --include-pulls -s all "@#"
+ hub issue -c ethomas-hrp --include-pulls -f "%U %t %n"
 fi

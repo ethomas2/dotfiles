@@ -11,5 +11,6 @@
 
 head=$1
 default_branch=${GIT_BASE_DEFAULT_BRANCH:-origin/master}
-myoldest=$(git cherry $default_branch $head | grep "^+" | head -1 | awk '{print $2}')
-git log $myoldest -2 --format='%H' | tail -1
+# myoldest=$(git cherry $default_branch $head | grep "^+" | head -1 | awk '{print $2}')
+# git log $myoldest -2 --format='%H' | tail -1
+git merge-base $default_branch HEAD

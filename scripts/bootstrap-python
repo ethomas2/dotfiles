@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euxo pipefail
 
-[ -d venv ] || ~/.pyenv/versions/3.9.1/bin/python -m venv venv
+[ -d venv ] || /Users/evan/.pyenv/versions/3.10.5/bin/python -m venv venv
 
 if [ ! -f .envrc ] || [ -z `grep "source venv/bin/activate" .envrc` ]; then
   echo "source venv/bin/activate" >> .envrc
@@ -14,6 +14,7 @@ pip install mypy
 pip install black
 pip install jedi
 pip install neovim
+pip install pylint
 
 if [ ! -f pyproject.toml ] || [ -z `grep tool.black pyproject.toml` ]; then
   cat <<EOF >> pyproject.toml

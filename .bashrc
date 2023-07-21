@@ -1,9 +1,14 @@
+# PS4='+ $(gdate "+%s.%N")\011 '
+# exec 3>&2 2>/tmp/bashstart.$$.log
+# set -x
+
 #  ================================= SOURCE  =================================
 [ -f ~/.dotfiles/git-completion.bash ] && source ~/.dotfiles/git-completion.bash
 [ -f ~/.marksrc ]                      && source ~/.marksrc
 [ -f ~/.fzf.bash ]                     && source ~/.fzf.bash
 [ -f ~/.dotfiles/secrets ]             && source ~/.dotfiles/secrets
 [ -f ~/.temporc ]                      && source ~/.temporc
+[ -f ~/.hrprc ]                        && source ~/.hrprc
 
 # brew bash completion stuff (bat, ag, pandoc). Idk if this even does anything
 [ -d /usr/local/etc/bash_completion. ] && source /usr/local/etc/bash_completion.d/*
@@ -29,7 +34,7 @@ export EDITOR='nvim'
 #  ============================== PATH CHANGES ==============================
 PATH="${PATH}:~/.config/yarn/global/node_modules/.bin/" # for yarn binaries, ie prettier
 PATH="${PATH}:$HOME/bin" # mostly for ack. Also direnv
-PATH="${PATH}:$HOME/.cargo/bin"
+PATH="${PATH}:$HOME/bin/kafka_2.13-3.4.0/bin"
 PATH="${PATH}:$HOME/go/bin"
 PATH="${PATH}:$HOME/Library/Haskell/bin" # haskell stuff installed by cabal
 PATH="${PATH}:$HOME/Library/Python/2.7/bin" # pip/virtualenv location
@@ -39,10 +44,20 @@ PATH="${PATH}:$HOME/scripts/git-scripts"
 PATH="${PATH}:$PYENV_ROOT/bin"
 PATH="${PATH}:/usr/local/sbin"
 PATH="$PYENV_ROOT/bin:${PATH}"
-PATH="${PATH}:/home/evan/github.com/tempoautomation/talos-tools"
+# PATH="${PATH}:/home/evan/github.com/tempoautomation/talos-tools"
+PATH="${PATH}:/usr/local/bin"  # for npm
+
+
+# TODO: remove the following. There are "proper" brew instructions. This line
+# adds the brew binary and the binaries brew installs to your PATH. You're
+# supposed to do something like /opt/homebrew/bin/brew shellenv > ~/.profile. I
+# couldn't figure out what so i just did this
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
 export PATH
 
 #  ================================= ALIASES =================================
+alias grep='ggrep --color'
 alias lifx='/home/evan/.dotfiles/scripts/lifx-cmd/venv/bin/python /home/evan/.dotfiles/scripts/lifx-cmd/bin/lifx'
 alias lifx-discover='/home/evan/.dotfiles/scripts/lifx-cmd/venv/bin/python /home/evan/.dotfiles/scripts/lifx-cmd/bin/lifx-discover'
 alias nose='nosetests -v -x -s'
@@ -112,8 +127,9 @@ shopt -s histappend
 # After each command, append to the history file and reread it
 export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
 
+
 # My current .bash_history is 508 lines and 15644 bytes for an average of 30
-# bytes per line. Thus 10000 HISTSIZE is 30.7 KB
+# bytes per line. Thus 10000 HISTSIZE is 307 KB
 export HISTSIZE=10000                   # big big history
 export HISTFILESIZE=10000               # big big history
 
@@ -122,6 +138,7 @@ export HISTFILESIZE=10000               # big big history
 if [ -z "$TMUX" ] && [ -t 1 ]; then
   tmux
 fi
+
 
 # I have no idea what is setting PGPASSWORD, but something somewhere is setting
 # it
@@ -143,8 +160,9 @@ white=$(tput setaf 7)
 blue=$(tput setaf 4)
 cyan=$(tput setaf 6)
 user_color=$magenta
-PS1="\[$reset\]\[$cyan\][ \[$bold\]\[$user_color\]\u@\h\
-\[$reset\]\[$blue\]\W\[$cyan\] ] \[$reset\]\[$reset\]\\$\[$reset\] "
+# PS1="\[$reset\]\[$cyan\][ \[$bold\]\[$user_color\]\u@\h\
+# \[$reset\]\[$blue\]\W\[$cyan\]\D{%H:%M:%S}\[$cyan\] ] \[$reset\]\[$reset\]\\$\[$reset\] "
+PS1="\[$reset\]\[$cyan\][ \[$bold\]\[$user_color\]\W\[$reset\]\[$blue\]\D{%H:%M:%S}\[$cyan\] ] \[$reset\]\[$reset\]\\$\[$reset\] "
 
 # eval "$(pipenv --completion)"
 
@@ -153,3 +171,39 @@ PS1="\[$reset\]\[$cyan\][ \[$bold\]\[$user_color\]\u@\h\
 
 # LINES=$(cat /home/evan/file | wc -l)
 # echo $LINES >> /home/evan/file
+
+
+# I commented out because it's slow
+# The following was automatically appended by onboarding.sh:
+# export PATH="$HOME/.jenv/bin:$PATH"
+# eval "$(jenv init -)"
+# export SAM_CLI_TELEMETRY=0
+# export HOMEBREW_NO_ANALYTICS=1
+
+export AWS_MFA_USERNAME=ethomas
+export EMPLOYEE_STATUS=eng
+
+# a little slow
+# export NVM_DIR="$HOME/.nvm"
+# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+
+export HOMEBREW_NO_AUTO_UPDATE=1
+
+
+# export OP_SESSION_hrplp="Onl1xPsClEChwLVPrOC9Q35AHTYH-7a_Q19OMYK5FMM"
+# eval $(op signin hrplp)
+
+
+export AWS_MFA_USERNAME=ethomas
+export EMPLOYEE_STATUS=eng
+export HRP_AWS_USER=ethomas
+export AWS_DEFAULT_REGION=us-east-1
+export AWS_MFA_COMMAND="ykman oath accounts code --single aws:ethomas"
+
+
+# set +x
+# exec 2>&3 3>&-
+eval `ssh-agent`
+ssh-add   ~/.ssh/id_ed25519

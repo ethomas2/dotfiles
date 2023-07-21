@@ -30,9 +30,10 @@ call plug#begin('~/.vim/plugged')
 " " Language/IDE like things
 " Plug 'https://github.com/dense-analysis/ale' " REally slow on mac
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'github/copilot.vim'
 
 
-Plug 'fatih/vim-go'
+" Plug 'fatih/vim-go'
 let g:go_fmt_command = "goimports"
 
 Plug 'bitc/vim-hdevtools'
@@ -40,8 +41,9 @@ Plug 'https://github.com/dan-t/vim-hsimport'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'https://github.com/junegunn/fzf.vim'
 Plug 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
+" Plug 'https://github.com/fisadev/vim-isort'
 " let g:black_linelength = 79
-Plug 'psf/black'
+" Plug 'psf/black'
 Plug 'https://github.com/rust-lang/rust.vim'
 let g:rustfmt_autosave = 1
 Plug 'https://github.com/tell-k/vim-autopep8'
@@ -282,9 +284,15 @@ command! -bang -nargs=* Ag
 "   \ fzf#vim#with_preview('right:35%'),
 "   \ )
 
-command! -nargs=* -complete=dir Rg
+command! -nargs=* -complete=dir RgFixedString
   \ call fzf#vim#grep(
   \   "rg --column --line-number --no-heading --fixed-strings --smart-case --hidden --color=always ".<q-args>, 1,
+  \ fzf#vim#with_preview('right:35%'),
+  \ )
+
+command! -nargs=* -complete=dir Rg
+  \ call fzf#vim#grep(
+  \   "rg --column --line-number --no-heading --smart-case --hidden --color=always ".<q-args>, 1,
   \ fzf#vim#with_preview('right:35%'),
   \ )
 
@@ -292,7 +300,7 @@ command! -bang -nargs=* Lines
   \ call fzf#vim#lines(<q-args>, fzf#vim#with_preview('right:35%'))
 
 " Immediately trigger a search for the current keyword if there is one
-nnoremap <expr> <leader>g (expand("<cword>") ==? "") ? ":Rg " : ":Rg \<C-r>\<C-w><CR>"
+nnoremap <expr> <leader>g (expand("<cword>") ==? "") ? ":Rg " : ":Rg '\\b\<C-r>\<C-w>\\b'<CR>"
 
 " Immediately trigger a search for the current selection if there is one
 xnoremap <leader>g "zy:exe "Rg ".@z.""<CR>
@@ -471,3 +479,54 @@ endfunction
 nnoremap <leader>t :call RunThis()<CR>
 
 nnoremap <leader>d :call system("tmux send-keys -t " . g:tslime['pane'] . " C-d")<CR>
+
+command! -nargs=0 Gblame :Git blame
+
+
+" :QFSave <FILENAME>
+" :QFLoad <FILENAME>  " default is to append to the current quickfix list
+" :QFLoad! <FILENAME> " replace quickfix list with the contents of file
+" :QFAddNote [NOTE]   " add quickfix entry with message NOTE
+" :QFAddNote! [NOTE]  " like :QFAddNote but start a new quickfix list
+" :QFAddNotePattern[!] [NOTE] " add quickfix entry matching the p
+
+
+function! DeleteEmptyBuffers()
+    let [i, n; empty] = [1, bufnr('$')]
+    while i <= n
+        if bufexists(i) && bufname(i) == ''
+            call add(empty, i)
+        endif
+        let i += 1
+    endwhile
+    if len(empty) > 0
+        exe 'bdelete' join(empty)
+    endif
+endfunction
+command! -nargs=0 DeleteEmptyBuffers call DeleteEmptyBuffers()
+
+lua <<EOF
+function GetMostRecentFriday()
+    local currentDate = os.date("*t")
+    local year = currentDate.year
+    local month = currentDate.month
+    local day = currentDate.day
+    local currentDayOfWeek = currentDate.wday
+
+    if currentDayOfWeek == 6 then -- Friday
+        print(os.date("%Y-%m-%d"))
+        return os.date("%Y-%m-%d")
+    elseif currentDayOfWeek > 6 then
+        local diff = currentDayOfWeek - 6
+        local previousFriday = os.time{year = year, month = month, day = day} - (diff * 24 * 60 * 60)
+        print(os.date("%Y-%m-%d", previousFriday))
+        return os.date("%Y-%m-%d", previousFriday)
+    else
+        local diff = 6 - currentDayOfWeek
+        local previousFriday = os.time{year = year, month = month, day = day} - ((7 - diff) * 24 * 60 * 60)
+        print(os.date("%Y-%m-%d", previousFriday))
+        return os.date("%Y-%m-%d", previousFriday)
+    end
+end
+EOF
+command! -nargs=0 GetMostRecentFriday :lua GetMostRecentFriday()

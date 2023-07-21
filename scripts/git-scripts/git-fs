@@ -8,7 +8,7 @@ set -euxo pipefail
 # echo $_tempdir
 
 # clone method
-_tempdir=$(mktemp -d --suffix=-git-fs)
+_tempdir=$(mktemp -d -t 'git-fs')
 branch_prefix="zzz-git-fs"
 default_branch=${DEFAULT_GIT_BRANCH:-git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/@@'}
 (

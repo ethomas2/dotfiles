@@ -2,8 +2,8 @@
 .vim/plugged
 .vim/bundle
 .vim/.netrwhist
-*secret*
 *venv
 *.config
 *.conf
 .mypy_cache
+debug.py

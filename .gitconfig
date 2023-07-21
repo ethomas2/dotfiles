@@ -1,5 +1,5 @@
 [user]
-	email = evan@gmail.com
+	email = ethomas@hiddenroad.com
 	name = Evan Thomas
 
 [diff]
@@ -22,7 +22,7 @@
 
 [core]
     editor = nvim
-	excludesfile = /Users/ethomas/.gitignore
+    excludesfile = ~/.gitignore
 
 [alias]
   ch = checkout
@@ -78,3 +78,7 @@
 
   ; rs = reset
   ; res = reset
+[credential]
+	helper = store
+[blame]
+	ignoreRevsFile = .git-blame-ignore-revs

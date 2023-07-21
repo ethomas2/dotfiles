@@ -1,9 +1,15 @@
 -- https://www.craigkerstiens.com/2020/11/14/exploring-a-new-postgres-database/
 \pset null 'Ø'
-\x auto
+-- \x auto
 
 -- Save history based on database name
 \set HISTFILE ~/.psql_history- :DBNAME
 
 -- Turn on automatic query timing
 \timing
+
+-- Use pspg pager
+-- https://github.com/okbob/pspg
+\setenv PAGER 'pspg -s 17'
+\pset border 2
+\pset linestyle unicode
