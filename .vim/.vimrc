@@ -97,6 +97,7 @@ Plug 'https://github.com/mattboehm/vim-accordion'
 Plug 'https://github.com/tpope/vim-fugitive'
 Plug 'https://github.com/tpope/vim-rhubarb'
 Plug 'https://github.com/kshenoy/vim-signature'
+" Plug 'https://github.com/fisadev/vim-isort'
 let g:SignatureMarkLineHL = 'Search' " Consider other highlight groups. This one is sort of annoying
 let g:SignatureMarkTextHL = 'None'
 let g:SignatureForceRemoveGlobal = 1 " See https://github.com/kshenoy/vim-signature/issues/72
@@ -530,3 +531,43 @@ function GetMostRecentFriday()
 end
 EOF
 command! -nargs=0 GetMostRecentFriday :lua GetMostRecentFriday()
+
+
+function! NERDOpen()
+  " Get the directory of the current buffer
+  let curdir = expand('%:p:h')
+
+  " Open NERDTree and replace the current window
+  silent! NERDTreeFocusHere | NERDTreeFind | wincmd c
+
+  " Set the cursor focus back to the NERDTree window
+  wincmd p
+endfunction
+command! -nargs=* NERDOpen call NERDOpen()
+
+
+luafile ~/.vim/mystuff/luaUtils.lua
+
+
+
+function! OpenThoughts()
+    let last_friday_date = luaeval("get_last_friday()")
+
+    let next_thursday_date = luaeval("get_next_thursday()")
+
+    let filename = '~/notes/Main/Thoughts/2023/' . last_friday_date . ' -- ' . next_thursday_date . '.md'
+    let filename = expand(filename)
+
+    if !filereadable(filename)
+        silent execute '!mkdir -p ' . fnameescape(fnamemodify(filename, ':h'))
+        silent execute 'write ' . fnameescape(filename)
+        echo 'Created file: ' . filename
+    else
+        echo 'File already exists: ' . filename
+    endif
+
+    " Open the newly created notes file in a new Vim tab
+    silent execute 'tabedit ' . fnameescape(filename)
+endfunction
+
+command! -nargs=* OpenThoughts call OpenThoughts()

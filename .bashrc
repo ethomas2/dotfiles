@@ -44,8 +44,9 @@ PATH="${PATH}:$HOME/scripts/git-scripts"
 PATH="${PATH}:$PYENV_ROOT/bin"
 PATH="${PATH}:/usr/local/sbin"
 PATH="$PYENV_ROOT/bin:${PATH}"
-# PATH="${PATH}:/home/evan/github.com/tempoautomation/talos-tools"
 PATH="${PATH}:/usr/local/bin"  # for npm
+PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+
 
 
 # TODO: remove the following. There are "proper" brew instructions. This line
@@ -173,37 +174,16 @@ PS1="\[$reset\]\[$cyan\][ \[$bold\]\[$user_color\]\W\[$reset\]\[$blue\]\D{%H:%M:
 # echo $LINES >> /home/evan/file
 
 
-# I commented out because it's slow
-# The following was automatically appended by onboarding.sh:
-# export PATH="$HOME/.jenv/bin:$PATH"
-# eval "$(jenv init -)"
-# export SAM_CLI_TELEMETRY=0
-# export HOMEBREW_NO_ANALYTICS=1
-
-export AWS_MFA_USERNAME=ethomas
-export EMPLOYEE_STATUS=eng
-
-# a little slow
-# export NVM_DIR="$HOME/.nvm"
-# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-
 export HOMEBREW_NO_AUTO_UPDATE=1
-
-
-# export OP_SESSION_hrplp="Onl1xPsClEChwLVPrOC9Q35AHTYH-7a_Q19OMYK5FMM"
-# eval $(op signin hrplp)
-
-
-export AWS_MFA_USERNAME=ethomas
-export EMPLOYEE_STATUS=eng
-export HRP_AWS_USER=ethomas
-export AWS_DEFAULT_REGION=us-east-1
-export AWS_MFA_COMMAND="ykman oath accounts code --single aws:ethomas"
-
 
 # set +x
 # exec 2>&3 3>&-
 eval `ssh-agent`
 ssh-add   ~/.ssh/id_ed25519
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/ethomas/Downloads/google-cloud-sdk/path.bash.inc' ]; then . '/Users/ethomas/Downloads/google-cloud-sdk/path.bash.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/ethomas/Downloads/google-cloud-sdk/completion.bash.inc' ]; then . '/Users/ethomas/Downloads/google-cloud-sdk/completion.bash.inc'; fi
+. "$HOME/.cargo/env"

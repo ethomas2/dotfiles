@@ -1,2 +1,3 @@
 # mac specific settings
 alias ls='ls -G'
+eval "$(/opt/homebrew/bin/brew shellenv)"
