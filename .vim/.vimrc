@@ -571,3 +571,28 @@ function! OpenThoughts()
 endfunction
 
 command! -nargs=* OpenThoughts call OpenThoughts()
+
+function! OpenTodo()
+    " foo
+    let last_friday_date = luaeval("get_last_friday()")
+
+    let next_thursday_date = luaeval("get_next_thursday()")
+
+    let dirpath = '~/notes/Main/Todo/2023/' . last_friday_date . ' -- ' . next_thursday_date . '/'
+    let dirpath = expand(dirpath)
+    silent execute '!mkdir -p ' . fnameescape(fnamemodify(dirpath, ':h'))
+
+    let planfilepath = dirpath . 'Plan.md'
+    echo planfilepath
+    execute '!touch ' . fnameescape(planfilepath)
+
+    let todofilepath = dirpath . 'Todo.md'
+    execute '!touch ' . fnameescape(todofilepath)
+
+    " silent execute 'tabedit ' . fnameescape(dirpath)
+    " normal! R
+    tabnew
+    execute 'NERDTree ' . dirpath
+endfunction
+
+command! -nargs=* OpenTodo call OpenTodo()
