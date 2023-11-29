@@ -58,7 +58,7 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 export PATH
 
 #  ================================= ALIASES =================================
-alias grep='ggrep --color'
+# alias grep='ggrep --color'
 alias lifx='/home/evan/.dotfiles/scripts/lifx-cmd/venv/bin/python /home/evan/.dotfiles/scripts/lifx-cmd/bin/lifx'
 alias lifx-discover='/home/evan/.dotfiles/scripts/lifx-cmd/venv/bin/python /home/evan/.dotfiles/scripts/lifx-cmd/bin/lifx-discover'
 alias nose='nosetests -v -x -s'

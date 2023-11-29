@@ -88,6 +88,7 @@ Plug 'https://github.com/wellle/targets.vim'
 Plug 'https://github.com/coderifous/textobj-word-column.vim'
 
 " Other
+" Plug 'https://github.com/jackMort/ChatGPT.nvim'
 Plug 'https://github.com/jgdavey/tslime.vim'
 Plug 'https://github.com/tpope/vim-dispatch'
 Plug 'https://github.com/kassio/neoterm'
@@ -492,6 +493,37 @@ command! -nargs=0 Gblame :Git blame
 " :QFAddNotePattern[!] [NOTE] " add quickfix entry matching the p
 
 
+" Unicode	Name	                        Symbol
+" U+2200	FOR ALL	                        ∀
+" U+2203	THERE EXISTS	                ∃
+" U+2204	THERE DOES NOT EXIST	        ∄
+" U+2208	ELEMENT OF	                ∈
+" U+2209	NOT AN ELEMENT OF	        ∉
+" U+220B	CONTAINS AS MEMBER	        ∋
+" U+2282	SUBSET OF	                ⊂
+" U+207B	SUPERSCRIPT MINUS	        ⁻
+" U+2070	SUPERSCRIPT ZERO	        ⁰
+" U+00B9	SUPERSCRIPT ONE	                ¹
+" U+00B2	SUPERSCRIPT TWO	                ²
+" U+00B3	SUPERSCRIPT THREE	        ³
+" U+2074	SUPERSCRIPT FOUR	        ⁴
+" U+2075	SUPERSCRIPT FIVE	        ⁵
+" U+2076	SUPERSCRIPT SIX	                ⁶
+" U+2077	SUPERSCRIPT SEVEN	        ⁷
+" U+2078	SUPERSCRIPT EIGHT	        ⁸
+" U+2079	SUPERSCRIPT NINE	        ⁹
+" U+2080	SUBSCRIPT ZERO	                ₀
+" U+2081	SUBSCRIPT ONE	                ₁
+" U+2082	SUBSCRIPT TWO	                ₂
+" U+2083	SUBSCRIPT THREE	                ₃
+" U+2084	SUBSCRIPT FOUR	                ₄
+" U+2085	SUBSCRIPT FIVE	                ₅
+" U+2086	SUBSCRIPT SIX	                ₆
+" U+2087	SUBSCRIPT SEVEN	                ₇
+" U+2088	SUBSCRIPT EIGHT	                ₈
+" U+2089	SUBSCRIPT NINE	                ₉
+
+
 function! DeleteEmptyBuffers()
     let [i, n; empty] = [1, bufnr('$')]
     while i <= n
@@ -596,3 +628,76 @@ function! OpenTodo()
 endfunction
 
 command! -nargs=* OpenTodo call OpenTodo()
+
+" Digraphs subscripts
+:dig as 8336 " ₐ
+:dig es 8337 " ₑ
+:dig hs 8341 " ₕ
+:dig is 8305 " ᵢ
+:dig js 8333 " ⱼ
+:dig ks 8342 " ₖ
+:dig ls 8343 " ₗ
+:dig ms 8344 " ₘ
+:dig ns 8345 " ₙ
+:dig os 8338 " ₒ
+:dig ps 8339 " ₚ
+:dig rs 8346 " ₚ
+:dig ss 8347 " ₛ
+:dig ts 8348 " ₜ
+:dig us 8349 " ᵤ
+:dig vs 8350 " ₜ
+:dig xs 8332 " ₓ
+:dig 0s 8320 " ₀
+:dig 1s 8321 " ₁
+:dig 2s 8322 " ₂
+:dig 3s 8323 " ₃
+:dig 4s 8324 " ₄
+:dig 5s 8325 " ₅
+:dig 6s 8326 " ₆
+:dig 7s 8327 " ₇
+:dig 8s 8328 " ₈
+:dig 9s 8329 " ₉
+
+" Digraph superscripts
+:dig 0S 8304 " ⁰
+:dig 1S 185  " ¹
+:dig 2S 178  " ²
+:dig 3S 179  " ³
+:dig 4S 8308 " ⁴
+:dig 5S 8309 " ⁵
+:dig 6S 8310 " ⁶
+:dig 7S 8311 " ⁷
+:dig 8S 8312 " ⁸
+:dig 9S 8313 " ⁹
+
+:dig +S 8314 " ⁺
+:dig -S 8315 " ⁻
+:dig =S 8316 " ⁼
+:dig (S 8317 " ⁽
+:dig )S 8318 " ⁾
+
+:dig aS 7491 " ᵃ
+:dig bS 7495 " ᵇ
+:dig cS 7580 " ᶜ
+:dig dS 7496 " ᵈ
+:dig eS 7497 " ᵉ
+:dig fS 7584 " ᶠ
+:dig gS 7501 " ᵍ
+:dig hS 688  " ʰ
+:dig iS 8305 " ⁱ
+:dig jS 690  " ʲ
+:dig kS 7503 " ᵏ
+:dig lS 737  " ˡ
+:dig mS 7504 " ᵐ
+:dig nS 8319 " ⁿ
+:dig oS 7506 " ᵒ
+:dig pS 7510 " ᵖ
+:dig rS 691  " ʳ
+:dig sS 738  " ˢ
+:dig tS 7511 " ᵗ
+:dig uS 7512 " ᵘ
+:dig vS 7515 " ᵛ
+:dig wS 695  " ʷ
+:dig xS 739  " ˣ
+:dig yS 696  " ʸ
+:dig zS 7611 " ᶻ
