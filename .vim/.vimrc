@@ -61,9 +61,11 @@ autocmd BufNewFile,BufRead *.tsx set filetype=typescript.tsx " hack to make coc.
 Plug 'https://github.com/mxw/vim-jsx'
 Plug 'https://github.com/altercation/vim-colors-solarized'
 " Mostly so f strings get syntax highlighted
-Plug 'https://github.com/ethomas2/python-syntax', {
-  \ 'branch': 'normal-f-strings',
-  \ }
+" Plug 'https://github.com/ethomas2/python-syntax', {
+"   \ 'branch': 'normal-f-strings',
+"   \ }
+
+Plug 'https://github.com/vim-python/python-syntax'
 let g:python_highlight_all = 1
 Plug 'https://github.com/lifepillar/pgsql.vim'
 let g:sql_type_default = 'pgsql'
@@ -605,7 +607,6 @@ endfunction
 command! -nargs=* OpenThoughts call OpenThoughts()
 
 function! OpenTodo()
-    " foo
     let last_friday_date = luaeval("get_last_friday()")
 
     let next_thursday_date = luaeval("get_next_thursday()")

@@ -1,8 +1,12 @@
 #!/bin/bash
 
-# Given a relative path output it's absolut path. I.e.
-# echo ./vim/plugin/mystuff/remaps.vim returns /home/evan/.dotfiles/.vim/plugin/mystuff/remaps.vim
-# This will break in mac. For mac consider
-# echo "$(pwd)/$(cat)"
+# Given a relative path output its absolute path. If a command line argument is given,
+# it uses that, otherwise it reads from stdin.
 
-echo "$(readlink -f $(cat))"
+if [ "$#" -eq 1 ]; then
+    # Command line argument is provided
+    echo "$(readlink -f "$1")"
+else
+    # No command line argument, read from stdin
+    echo "$(readlink -f $(cat))"
+fi

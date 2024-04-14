@@ -1,2 +1,8 @@
 #!/bin/bash
-now=$(date +%s)sec; watch -n0.1 -p TZ=UTC date --date now-$now +%H:%M:%S.%N
+
+# now=$(date +%s)sec; watch -n0.1 -p TZ=UTC date --date now-$now +%H:%M:%S.%N
+
+# now=$(date +%s); watch -n0.1 -p TZ=UTC bash -c "while true; do now_diff=\$(( \$(date +%s) - $now )); echo \$(date -u -r \$now_diff +%H:%M:%S); sleep 0.1"
+
+now=$(date +%s)
+watch -n 0.1 "now_diff=\$(( \$(date +%s) - $now )); echo \$(date -u -r \$now_diff +%H:%M:%S)"
