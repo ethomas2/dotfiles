@@ -81,6 +81,7 @@ alias py36='~/.pyenv/versions/3.6.1/bin/python'
 alias svenv='source venv/bin/activate'
 alias tf='tfwrapper'
 alias gs='git s'
+alias cat='bat'
 
 
 #  ================================= FZF =================================

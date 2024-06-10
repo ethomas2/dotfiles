@@ -44,6 +44,8 @@ Plug 'https://github.com/prettier/vim-prettier' " TODO: write your own aucmd
 " Plug 'https://github.com/fisadev/vim-isort'
 " let g:black_linelength = 79
 " Plug 'psf/black'
+Plug 'https://github.com/averms/black-nvim'
+Plug 'https://github.com/stsewd/isort.nvim'
 Plug 'https://github.com/rust-lang/rust.vim'
 let g:rustfmt_autosave = 1
 Plug 'https://github.com/tell-k/vim-autopep8'
@@ -64,6 +66,7 @@ Plug 'https://github.com/altercation/vim-colors-solarized'
 " Plug 'https://github.com/ethomas2/python-syntax', {
 "   \ 'branch': 'normal-f-strings',
 "   \ }
+
 
 Plug 'https://github.com/vim-python/python-syntax'
 let g:python_highlight_all = 1
@@ -105,7 +108,9 @@ let g:SignatureMarkLineHL = 'Search' " Consider other highlight groups. This one
 let g:SignatureMarkTextHL = 'None'
 let g:SignatureForceRemoveGlobal = 1 " See https://github.com/kshenoy/vim-signature/issues/72
 " Plug 'https://github.com/jiangmiao/auto-pairs'
+"
 call plug#end()
+
 
 autocmd BufRead,BufNewFile *go setlocal filetype=go
 
@@ -608,10 +613,13 @@ command! -nargs=* OpenThoughts call OpenThoughts()
 
 function! OpenTodo()
     let last_friday_date = luaeval("get_last_friday()")
-
     let next_thursday_date = luaeval("get_next_thursday()")
 
-    let dirpath = '~/notes/Main/Todo/2023/' . last_friday_date . ' -- ' . next_thursday_date . '/'
+    " Obtain the current year using strftime
+    let current_year = strftime('%Y')
+
+    " Use the current year in your directory path
+    let dirpath = '~/notes/Main/Todo/' . current_year . '/' . last_friday_date . ' -- ' . next_thursday_date . '/'
     let dirpath = expand(dirpath)
     silent execute '!mkdir -p ' . fnameescape(fnamemodify(dirpath, ':h'))
 
@@ -622,6 +630,9 @@ function! OpenTodo()
     let todofilepath = dirpath . 'Todo.md'
     execute '!touch ' . fnameescape(todofilepath)
 
+    let timelinefilepath = dirpath . 'Timeline.md'
+    execute '!touch ' . fnameescape(timelinefilepath)
+
     " silent execute 'tabedit ' . fnameescape(dirpath)
     " normal! R
     tabnew
@@ -630,75 +641,7 @@ endfunction
 
 command! -nargs=* OpenTodo call OpenTodo()
 
-" Digraphs subscripts
-:dig as 8336 " ₐ
-:dig es 8337 " ₑ
-:dig hs 8341 " ₕ
-:dig is 8305 " ᵢ
-:dig js 8333 " ⱼ
-:dig ks 8342 " ₖ
-:dig ls 8343 " ₗ
-:dig ms 8344 " ₘ
-:dig ns 8345 " ₙ
-:dig os 8338 " ₒ
-:dig ps 8339 " ₚ
-:dig rs 8346 " ₚ
-:dig ss 8347 " ₛ
-:dig ts 8348 " ₜ
-:dig us 8349 " ᵤ
-:dig vs 8350 " ₜ
-:dig xs 8332 " ₓ
-:dig 0s 8320 " ₀
-:dig 1s 8321 " ₁
-:dig 2s 8322 " ₂
-:dig 3s 8323 " ₃
-:dig 4s 8324 " ₄
-:dig 5s 8325 " ₅
-:dig 6s 8326 " ₆
-:dig 7s 8327 " ₇
-:dig 8s 8328 " ₈
-:dig 9s 8329 " ₉
-
-" Digraph superscripts
-:dig 0S 8304 " ⁰
-:dig 1S 185  " ¹
-:dig 2S 178  " ²
-:dig 3S 179  " ³
-:dig 4S 8308 " ⁴
-:dig 5S 8309 " ⁵
-:dig 6S 8310 " ⁶
-:dig 7S 8311 " ⁷
-:dig 8S 8312 " ⁸
-:dig 9S 8313 " ⁹
-
-:dig +S 8314 " ⁺
-:dig -S 8315 " ⁻
-:dig =S 8316 " ⁼
-:dig (S 8317 " ⁽
-:dig )S 8318 " ⁾
-
-:dig aS 7491 " ᵃ
-:dig bS 7495 " ᵇ
-:dig cS 7580 " ᶜ
-:dig dS 7496 " ᵈ
-:dig eS 7497 " ᵉ
-:dig fS 7584 " ᶠ
-:dig gS 7501 " ᵍ
-:dig hS 688  " ʰ
-:dig iS 8305 " ⁱ
-:dig jS 690  " ʲ
-:dig kS 7503 " ᵏ
-:dig lS 737  " ˡ
-:dig mS 7504 " ᵐ
-:dig nS 8319 " ⁿ
-:dig oS 7506 " ᵒ
-:dig pS 7510 " ᵖ
-:dig rS 691  " ʳ
-:dig sS 738  " ˢ
-:dig tS 7511 " ᵗ
-:dig uS 7512 " ᵘ
-:dig vS 7515 " ᵛ
-:dig wS 695  " ʷ
-:dig xS 739  " ˣ
-:dig yS 696  " ʸ
-:dig zS 7611 " ᶻ
+" hi LspDiagnosticsVirtualTextError guifg=red gui=bold,italic,underline
+" hi LspDiagnosticsVirtualTextWarning guifg=orange gui=bold,italic,underline
+" hi LspDiagnosticsVirtualTextInformation guifg=yellow gui=bold,italic,underline
+" hi LspDiagnosticsVirtualTextHint guifg=green gui=bold,italic,underline
