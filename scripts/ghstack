@@ -1,0 +1,100 @@
+#!/usr/bin/env python
+
+import curses
+import os
+from getpass import getpass
+from typing import List
+
+import git
+import requests
+
+# Configuration (set these as environment variables or hardcode)
+GITHUB_REPO = "Koanix-dev/catalysts"
+GITHUB_API_URL = "https://api.github.com"
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN") or getpass("GitHub Token: ")
+
+
+def get_commits() -> List[git.Commit]:
+    repo = git.Repo(".")
+    commits = list(repo.iter_commits("origin/main..HEAD"))
+    return commits
+
+
+def push_commits(branch_name: str, commit: str):
+    repo = git.Repo(".")
+    repo.remotes.origin.push(refspec=f"{commit}:refs/heads/{branch_name}")
+
+
+def create_pull_request(branch_name: str, title: str):
+    url = f"{GITHUB_API_URL}/repos/{GITHUB_REPO}/pulls"
+    headers = {
+        "Authorization": f"token {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github.v3+json",
+    }
+    data = {
+        "title": title,
+        "head": branch_name,
+        "base": "main",
+    }
+    response = requests.post(url, headers=headers, json=data, timeout=10)
+    return response.json()
+
+
+# Main ncurses application
+def main(stdscr):
+    curses.curs_set(0)
+    stdscr.clear()
+
+    commits = get_commits()
+    selected = [False] * len(commits)
+    current_row = 0
+
+    def _commit_title(commit: git.Commit) -> str:
+        message = commit.message
+        if isinstance(message, (bytes, bytearray)):
+            message = message.decode("utf-8")
+        return message.split("\n")[0]
+
+    while True:
+        stdscr.clear()
+
+        for idx, commit in enumerate(commits):
+            commit_title = _commit_title(commit)
+            selected_indicator = "X" if selected[idx] else " "
+            if idx == current_row:
+                stdscr.addstr(
+                    idx,
+                    0,
+                    f"> [{selected_indicator}] {commit_title} ({commit.hexsha})",
+                    curses.A_REVERSE,
+                )
+            else:
+                stdscr.addstr(
+                    idx,
+                    0,
+                    f"> [{selected_indicator}] {commit_title} ({commit.hexsha})",
+                )
+
+        stdscr.refresh()
+
+        key = stdscr.getch()
+
+        if key in [curses.KEY_UP, ord("k")] and current_row > 0:
+            current_row -= 1
+        elif key in [curses.KEY_DOWN, ord("j")] and current_row < len(commits) - 1:
+            current_row += 1
+        elif key in [ord(" "), curses.KEY_ENTER]:
+            selected[current_row] = not selected[current_row]
+        elif key == ord("q"):
+            break
+        elif key == ord("p"):
+            for idx, commit in enumerate(commits):
+                if selected[idx]:
+                    branch_name = f"pr-{commit.hexsha[:7]}"
+                    push_commits(branch_name, commit.hexsha)
+                    create_pull_request(branch_name, _commit_title(commit))
+            break
+
+
+if __name__ == "__main__":
+    curses.wrapper(main)
