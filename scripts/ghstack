@@ -3,7 +3,7 @@
 import curses
 import os
 from getpass import getpass
-from typing import List
+from typing import List, Optional
 
 import git
 import requests
@@ -14,18 +14,24 @@ GITHUB_API_URL = "https://api.github.com"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN") or getpass("GitHub Token: ")
 
 
-def get_commits() -> List[git.Commit]:
+def _get_commits() -> List[git.Commit]:
+    """
+    Get all commits from origin/main to HEAD. Commits are turned in the order
+    origin/main first then HEAD last
+    """
     repo = git.Repo(".")
     commits = list(repo.iter_commits("origin/main..HEAD"))
-    return commits
+    return list(reversed(commits))
 
 
-def push_commits(branch_name: str, commit: str):
+def _push_commit_to_remote_branch(commit: str, branch_name: str):
     repo = git.Repo(".")
     repo.remotes.origin.push(refspec=f"{commit}:refs/heads/{branch_name}")
 
 
-def create_pull_request(branch_name: str, title: str):
+def _create_pull_request(
+    branch_name: str, title: str, base: str, body: Optional[str] = None
+):
     url = f"{GITHUB_API_URL}/repos/{GITHUB_REPO}/pulls"
     headers = {
         "Authorization": f"token {GITHUB_TOKEN}",
@@ -34,31 +40,48 @@ def create_pull_request(branch_name: str, title: str):
     data = {
         "title": title,
         "head": branch_name,
-        "base": "main",
+        "base": base,
+        **({"body": body} if body else {}),
     }
     response = requests.post(url, headers=headers, json=data, timeout=10)
     return response.json()
 
 
+def _commit_title(commit: git.Commit) -> str:
+    message = commit.message
+    if isinstance(message, (bytes, bytearray)):
+        message = message.decode("utf-8")
+    assert not isinstance(message, memoryview)
+
+    return message.split("\n")[0].strip()
+
+
+def _commit_body(commit: git.Commit) -> Optional[str]:
+    message = commit.message
+    if isinstance(message, (bytes, bytearray)):
+        message = message.decode("utf-8")
+    assert not isinstance(message, memoryview)
+
+    message_parts = message.split("\n", maxsplit=1)
+    if len(message_parts) > 1:
+        return message_parts[1].strip()
+    return None
+
+
 # Main ncurses application
-def main(stdscr):
+def gui(stdscr) -> Optional[List[git.Commit]]:
+    """Some docstring"""
     curses.curs_set(0)
     stdscr.clear()
 
-    commits = get_commits()
+    commits = _get_commits()
     selected = [False] * len(commits)
     current_row = 0
-
-    def _commit_title(commit: git.Commit) -> str:
-        message = commit.message
-        if isinstance(message, (bytes, bytearray)):
-            message = message.decode("utf-8")
-        return message.split("\n")[0]
 
     while True:
         stdscr.clear()
 
-        for idx, commit in enumerate(commits):
+        for idx, commit in reversed(list(enumerate(commits))):
             commit_title = _commit_title(commit)
             selected_indicator = "X" if selected[idx] else " "
             if idx == current_row:
@@ -83,18 +106,36 @@ def main(stdscr):
             current_row -= 1
         elif key in [curses.KEY_DOWN, ord("j")] and current_row < len(commits) - 1:
             current_row += 1
-        elif key in [ord(" "), curses.KEY_ENTER]:
+        elif key in [ord(" "), ord("x"), ord("X")]:
             selected[current_row] = not selected[current_row]
         elif key == ord("q"):
-            break
+            return None
         elif key == ord("p"):
-            for idx, commit in enumerate(commits):
-                if selected[idx]:
-                    branch_name = f"pr-{commit.hexsha[:7]}"
-                    push_commits(branch_name, commit.hexsha)
-                    create_pull_request(branch_name, _commit_title(commit))
-            break
+            commits_to_push = [commit for commit, s in zip(commits, selected) if s]
+            return commits_to_push
+
+
+def main():
+
+    commits_to_push = curses.wrapper(gui)
+    if commits_to_push is None:
+        return
+
+    branch_names = [f"pr-{commit.hexsha[:7]}" for commit in commits_to_push]
+    base_branches = ["main"] + branch_names[:-1]
+    for commit, branch_name, base in zip(commits_to_push, branch_names, base_branches):
+        print(f"Pushing commit {commit.hexsha[:7]} to remote branch {branch_name}")
+        _push_commit_to_remote_branch(commit.hexsha, branch_name)
+
+    for commit, branch_name, base in zip(commits_to_push, branch_names, base_branches):
+        data = _create_pull_request(
+            branch_name=branch_name,
+            title=_commit_title(commit),
+            base=base,
+            body=_commit_body(commit),
+        )
+        print(data.get("html_url"))
 
 
 if __name__ == "__main__":
-    curses.wrapper(main)
+    main()

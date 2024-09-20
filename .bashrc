@@ -65,7 +65,7 @@ alias nose='nosetests -v -x -s'
 alias godevel='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias godvl='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias gdvl='/Users/ethomas/go/src/github.com/golang/go/bin/go'
-alias dc='docker-compose'
+alias dc='docker compose'
 # alias pbcopy='xclip -selection clipboard'
 # alias pbpaste='xclip -selection clipboard -o'
 alias g='git'
@@ -188,3 +188,7 @@ if [ -f '/Users/ethomas/Downloads/google-cloud-sdk/path.bash.inc' ]; then . '/Us
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/ethomas/Downloads/google-cloud-sdk/completion.bash.inc' ]; then . '/Users/ethomas/Downloads/google-cloud-sdk/completion.bash.inc'; fi
 . "$HOME/.cargo/env"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

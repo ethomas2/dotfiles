@@ -545,31 +545,31 @@ function! DeleteEmptyBuffers()
 endfunction
 command! -nargs=0 DeleteEmptyBuffers call DeleteEmptyBuffers()
 
-lua <<EOF
-function GetMostRecentFriday()
-    local currentDate = os.date("*t")
-    local year = currentDate.year
-    local month = currentDate.month
-    local day = currentDate.day
-    local currentDayOfWeek = currentDate.wday
+" lua <<EOF
+" function GetMostRecentFriday()
+"     local currentDate = os.date("*t")
+"     local year = currentDate.year
+"     local month = currentDate.month
+"     local day = currentDate.day
+"     local currentDayOfWeek = currentDate.wday
 
-    if currentDayOfWeek == 6 then -- Friday
-        print(os.date("%Y-%m-%d"))
-        return os.date("%Y-%m-%d")
-    elseif currentDayOfWeek > 6 then
-        local diff = currentDayOfWeek - 6
-        local previousFriday = os.time{year = year, month = month, day = day} - (diff * 24 * 60 * 60)
-        print(os.date("%Y-%m-%d", previousFriday))
-        return os.date("%Y-%m-%d", previousFriday)
-    else
-        local diff = 6 - currentDayOfWeek
-        local previousFriday = os.time{year = year, month = month, day = day} - ((7 - diff) * 24 * 60 * 60)
-        print(os.date("%Y-%m-%d", previousFriday))
-        return os.date("%Y-%m-%d", previousFriday)
-    end
-end
-EOF
-command! -nargs=0 GetMostRecentFriday :lua GetMostRecentFriday()
+"     if currentDayOfWeek == 6 then -- Friday
+"         print(os.date("%Y-%m-%d"))
+"         return os.date("%Y-%m-%d")
+"     elseif currentDayOfWeek > 6 then
+"         local diff = currentDayOfWeek - 6
+"         local previousFriday = os.time{year = year, month = month, day = day} - (diff * 24 * 60 * 60)
+"         print(os.date("%Y-%m-%d", previousFriday))
+"         return os.date("%Y-%m-%d", previousFriday)
+"     else
+"         local diff = 6 - currentDayOfWeek
+"         local previousFriday = os.time{year = year, month = month, day = day} - ((7 - diff) * 24 * 60 * 60)
+"         print(os.date("%Y-%m-%d", previousFriday))
+"         return os.date("%Y-%m-%d", previousFriday)
+"     end
+" end
+" EOF
+" command! -nargs=0 GetMostRecentFriday :lua GetMostRecentFriday()
 
 
 function! NERDOpen()
@@ -585,7 +585,7 @@ endfunction
 command! -nargs=* NERDOpen call NERDOpen()
 
 
-luafile ~/.vim/mystuff/luaUtils.lua
+" luafile ~/.vim/mystuff/luaUtils.lua
 
 
 
@@ -645,3 +645,6 @@ command! -nargs=* OpenTodo call OpenTodo()
 " hi LspDiagnosticsVirtualTextWarning guifg=orange gui=bold,italic,underline
 " hi LspDiagnosticsVirtualTextInformation guifg=yellow gui=bold,italic,underline
 " hi LspDiagnosticsVirtualTextHint guifg=green gui=bold,italic,underline
+"
+set statusline+=%F
+set laststatus=2

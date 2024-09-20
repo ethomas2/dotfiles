@@ -4,6 +4,7 @@
 .vim/.netrwhist
 *venv
 *.config
-*.conf
 .mypy_cache
 debug.py
+.envrc
+.secrets.envrc
