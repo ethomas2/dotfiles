@@ -29,7 +29,7 @@ call plug#begin('~/.vim/plugged')
 
 " " Language/IDE like things
 " Plug 'https://github.com/dense-analysis/ale' " REally slow on mac
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'github/copilot.vim'
 
 
@@ -309,10 +309,10 @@ command! -bang -nargs=* Lines
   \ call fzf#vim#lines(<q-args>, fzf#vim#with_preview('right:35%'))
 
 " Immediately trigger a search for the current keyword if there is one
-nnoremap <expr> <leader>g (expand("<cword>") ==? "") ? ":Rg " : ":Rg '\\b\<C-r>\<C-w>\\b'<CR>"
+nnoremap <expr> <leader>g (expand("<cword>") ==? "") ? ":Ag " : ":Ag '\\b\<C-r>\<C-w>\\b'<CR>"
 
 " Immediately trigger a search for the current selection if there is one
-xnoremap <leader>g "zy:exe "Rg ".@z.""<CR>
+xnoremap <leader>g "zy:exe "Ag ".@z.""<CR>
 
 let g:prettier#exec_cmd_path = "~/.config/yarn/global/node_modules/.bin/prettier"
 let g:prettier#exec_cmd_async = 1

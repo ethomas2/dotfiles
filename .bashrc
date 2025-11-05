@@ -28,6 +28,7 @@ export PGDATA="/usr/local/var/postgres"
 export GOPATH=$HOME/go
 export MANPAGER="/bin/sh -c \"col -b | nvim -c 'set ft=man ts=8 nomod nolist nonu noma' -\""
 export EDITOR='nvim'
+export PSQL_TZ=$(date +%Z)
 # export AWS_DEFAULT_REGION=us-west-2  # used by aws tools. Specifically sam (maybe others)
 
 
@@ -45,6 +46,7 @@ PATH="${PATH}:$PYENV_ROOT/bin"
 PATH="${PATH}:/usr/local/sbin"
 PATH="$PYENV_ROOT/bin:${PATH}"
 PATH="${PATH}:/usr/local/bin"  # for npm
+PATH="${PATH}:~/.dblab/"
 PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 
 
@@ -180,7 +182,8 @@ export HOMEBREW_NO_AUTO_UPDATE=1
 # set +x
 # exec 2>&3 3>&-
 eval `ssh-agent`
-ssh-add   ~/.ssh/id_ed25519
+# ssh-add   ~/.ssh/id_ed25519
+# ssh-add   ~/.ssh/id_rsa.koanix
 
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f '/Users/ethomas/Downloads/google-cloud-sdk/path.bash.inc' ]; then . '/Users/ethomas/Downloads/google-cloud-sdk/path.bash.inc'; fi
@@ -192,3 +195,13 @@ if [ -f '/Users/ethomas/Downloads/google-cloud-sdk/completion.bash.inc' ]; then 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Shell-GPT integration BASH v0.2
+_sgpt_bash() {
+if [[ -n "$READLINE_LINE" ]]; then
+    READLINE_LINE=$(sgpt --shell <<< "$READLINE_LINE" --no-interaction)
+    READLINE_POINT=${#READLINE_LINE}
+fi
+}
+# bind -x '"\C-i": _sgpt_bash'
+# Shell-GPT integration BASH v0.2

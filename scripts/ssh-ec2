@@ -1,0 +1,1 @@
+/Users/evanthomas/github.com/ethomas2/ssh-ec2/venv/bin/python /Users/evanthomas/github.com/ethomas2/ssh-ec2/main.py "$@"

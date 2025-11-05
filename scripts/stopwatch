@@ -1,4 +1,120 @@
-#!/bin/bash
+#!/Users/evanthomas/.dotfiles/scripts/venv-stopwatch/bin/python
 
-# stolen from https://stackoverflow.com/questions/37986523/how-can-i-create-a-stopwatch-in-bash
-now=$(date +%s)sec; watch -n0.1 -p TZ=UTC date --date now-$now +%H:%M:%S.%N
+from __future__ import annotations
+
+import argparse
+import re
+import time
+
+
+def _no_curses(offset: TimeOffset | None = None):
+    now = time.time()
+
+    while True:
+        elapsed = time.time() - now + (offset.offset_seconds if offset else 0)
+
+        hours, remainder = divmod(int(elapsed), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        elapsed_time = f"{hours:02}:{minutes:02}:{seconds:02}"
+        # https://stackoverflow.com/questions/37774983/clearing-the-screen-by-printing-a-character
+        print("\033c")
+        print(elapsed_time, end="\n\r")
+        time.sleep(1)
+
+
+def _curses(offset: TimeOffset | None = None):
+    import curses
+
+    def _run(stdscr):
+        # Initialize curses
+        curses.curs_set(0)  # Hide the cursor
+        stdscr.clear()  # Clear the screen
+
+        now = time.time()
+        while True:
+            # Calculate elapsed time
+            elapsed = time.time() - now + (offset.offset_seconds if offset else 0)
+            hours, remainder = divmod(int(elapsed), 3600)
+            minutes, seconds = divmod(remainder, 60)
+            elapsed_time = f"{hours:02}:{minutes:02}:{seconds:02}"
+
+            # Display elapsed time in the center of the screen
+            height, width = stdscr.getmaxyx()
+            x = width // 2 - len(elapsed_time) // 2
+            y = height // 2
+            stdscr.addstr(y, x, elapsed_time)
+            stdscr.refresh()
+
+            time.sleep(1)
+
+    curses.wrapper(_run)
+
+
+class TimeOffset:
+    def __init__(self, offset_seconds: int):
+        self.offset_seconds = offset_seconds
+
+    @classmethod
+    def parse(cls, time_str: str) -> TimeOffset | None:
+        """
+        time_str is like 5m, 1h, '5minutes', '5 minutes', '1 hour'
+        """
+        pattern = r"(?P<value>\d+)\s*(?P<unit>\w+)$"
+        m = re.match(pattern, time_str)
+        if m is None:
+            return None
+
+        value = int(m.group("value"))
+        unit = m.group("unit")
+
+        conversion = {
+            "m": 60,
+            "minute": 60,
+            "minutes": 60,
+            "h": 3600,
+            "hour": 3600,
+            "hours": 3600,
+            "s": 1,
+            "second": 1,
+            "seconds": 1,
+        }.get(unit)
+        if conversion is None:
+            raise ValueError(f"Unknown unit {unit}")
+        return TimeOffset(conversion * value)
+
+
+def test_time_offset():
+    good_patterns = [
+        ("5m", 300),
+        ("5 m", 300),
+        ("5minutes", 300),
+        ("5 minutes", 300),
+        ("5s", 5),
+        ("5 second", 5),
+        ("5hour", 18_000),
+        ("5h", 18_000),
+    ]
+    for time_str, expected_offset in good_patterns:
+        o = TimeOffset.parse(time_str)
+        assert o is not None, f"Expected {time_str} to parse, got None"
+        assert (
+            o.offset_seconds == expected_offset
+        ), f"Expected {expected_offset=} for {time_str=} got {o.offset_seconds=}"
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--no-curses", action="store_true", help="Use plain text instead of curses"
+    )
+    parser.add_argument("--offset", type=TimeOffset.parse, required=False)
+
+    args = parser.parse_args()
+    if args.no_curses:
+        _no_curses(offset=args.offset)
+    else:
+        _curses(offset=args.offset)
+
+
+if __name__ == "__main__":
+    main()

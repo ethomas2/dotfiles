@@ -8,3 +8,7 @@
 debug.py
 .envrc
 .secrets.envrc
+.ignore
+.rgignore
+.git-blame-ignore-revs
+.spr.yml

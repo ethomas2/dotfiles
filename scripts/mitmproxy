@@ -9,7 +9,7 @@
 #     export CURL_CA_BUNDLE=~/.mitmproxy/mitmproxy-ca-cert.cer  # For curl
 #     export SSL_CERT_FILE=~/.mitmproxy/mitmproxy-ca-cert.cer   # For go
 #     curl --data '{foo: "bar"}' https://example.com/
-
+#    NOTE: http_proxy is LOWERCASE ONLY!!!
 # The following will make libcurl look for the mitmproxy's cert without the
 # CURL_CA_BUNDLE env variable. It's not very useful, bc even though libcurl
 # will find the cert it still won't trust it bc it's self signed. It's also
@@ -19,5 +19,6 @@
 # is.
 #    $ mkdir -p /usr/share/ca-certificates/extra/
 #    $ openssl x509 -in ~/.mitmproxy/mitmproxy-ca-cert.pem -inform PEM -out /usr/share/ca-certificates/extra/mitmproxy.crt
+#
 
 docker run --rm -it -v ~/.mitmproxy:/home/mitmproxy/.mitmproxy --network=host -p 8080:8080 mitmproxy/mitmproxy mitmproxy "$@"
