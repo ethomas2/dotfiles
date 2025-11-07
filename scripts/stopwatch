@@ -5,6 +5,9 @@ from __future__ import annotations
 import argparse
 import re
 import time
+from datetime import datetime
+
+import dateparser
 
 
 def _no_curses(offset: TimeOffset | None = None):
@@ -82,6 +85,66 @@ class TimeOffset:
             raise ValueError(f"Unknown unit {unit}")
         return TimeOffset(conversion * value)
 
+    @classmethod
+    def parse_since(cls, time_str: str) -> TimeOffset:
+        """
+        Parse a human-readable timestamp like "5:00 AM", "5am", "9:30 PM", etc.
+        Returns a TimeOffset representing the time elapsed since that timestamp.
+        Raises ValueError if parsing fails or is ambiguous.
+        """
+        # Use dateparser with settings to prefer recent dates and handle ambiguity
+        # RELATIVE_BASE set to now helps with ambiguous dates
+        now = datetime.now()
+        settings = {
+            # makes it so that if you pass in a date with an ambiguous date
+            # (e.g. "5:00 AM") at 2 PM with no date, it assumes today
+            'RELATIVE_BASE': now,
+            'PREFER_DATES_FROM': 'past',  # Prefer past dates for times like "5:00 AM"
+        }
+
+        parsed = dateparser.parse(time_str, settings=settings)
+
+        if parsed is None:
+            raise ValueError(
+                f"Could not parse timestamp '{time_str}'. "
+                "Please provide a time like '5:00 AM', '5am', '9:30 PM', etc."
+            )
+
+        # Check for ambiguity
+        time_diff = abs((parsed - now).total_seconds())
+
+        # If the parsed time is 12 hours off, it's likely ambiguous
+        # (e.g., if it's 2 PM and user says "5:00 AM", they probably meant earlier today, not tomorrow)
+        # TODO (evan): I don't like this heuristic
+        if time_diff > 12 * 3600:
+            raise ValueError(
+                f"Ambiguous timestamp '{time_str}'. "
+                f"Parsed as {parsed.strftime('%Y-%m-%d %I:%M %p')}, "
+                f"which is {time_diff/3600:.1f} hours in the future. "
+                "Please be more specific (e.g., 'today 5:00 AM' or 'yesterday 5:00 AM')."
+            )
+
+        # Also check if parsing with "today" prefix gives a different (more reasonable) result
+        # This helps catch cases where dateparser chose the wrong day
+        today_parsed = dateparser.parse(f"today {time_str}", settings=settings)
+        if today_parsed is not None:
+            today_diff = (today_parsed - now).total_seconds()
+            # If "today" version is in the past and much closer to now, the original was ambiguous
+            if today_diff < 0 and abs(today_diff) < abs(time_diff) and abs(time_diff - today_diff) > 6 * 3600:
+                raise ValueError(
+                    f"Ambiguous timestamp '{time_str}'. "
+                    f"Could mean {parsed.strftime('%Y-%m-%d %I:%M %p')} "
+                    f"or {today_parsed.strftime('%Y-%m-%d %I:%M %p')}. "
+                    "Please be more specific (e.g., 'today 5:00 AM' or 'yesterday 5:00 AM')."
+                )
+
+        # Calculate offset: negative because we want to add time that has already elapsed
+        # If parsed time is in the past, offset should be positive (time has elapsed)
+        # If parsed time is in the future, offset should be negative (time hasn't elapsed yet)
+        offset_seconds = int(-time_diff)
+
+        return TimeOffset(offset_seconds)
+
 
 def test_time_offset():
     good_patterns = [
@@ -107,13 +170,30 @@ def main():
     parser.add_argument(
         "--no-curses", action="store_true", help="Use plain text instead of curses"
     )
-    parser.add_argument("--offset", type=TimeOffset.parse, required=False)
+
+    # Create a mutually exclusive group for --offset and --since
+    time_group = parser.add_mutually_exclusive_group()
+    time_group.add_argument(
+        "--offset",
+        type=TimeOffset.parse,
+        required=False,
+        help="Time offset duration (e.g., '5m', '1h', '30 minutes')",
+    )
+    time_group.add_argument(
+        "--since",
+        type=TimeOffset.parse_since,
+        required=False,
+        help="Start time as human-readable timestamp (e.g., '5:00 AM', '9:30 PM', '5am')",
+    )
 
     args = parser.parse_args()
+
+    offset = args.since if args.since is not None else args.offset
+
     if args.no_curses:
-        _no_curses(offset=args.offset)
+        _no_curses(offset=offset)
     else:
-        _curses(offset=args.offset)
+        _curses(offset=offset)
 
 
 if __name__ == "__main__":
