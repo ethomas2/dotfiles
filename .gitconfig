@@ -3,12 +3,12 @@
 	name = Evan Thomas
 
 [diff]
-	; tool = nvimdiff
-	tool = vimdiff
+  ; tool = vimdiff
+	tool = nvimdiff
 
 [merge]
-	; tool = nvimdiff
-	tool = vimdiff
+  ; tool = vimdiff
+	tool = nvimdiff
 
 
 [mergetool "nvimdiff"]
