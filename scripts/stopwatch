@@ -2,15 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
 import argparse
 import re
 import time
-from datetime import datetime
+import datetime
 
 import dateparser
 
 
-def _no_curses(offset: TimeOffset | None = None):
+def _no_curses(offset: TimeOffset | None = None, title: str | None = None):
     now = time.time()
 
     while True:
@@ -21,11 +22,13 @@ def _no_curses(offset: TimeOffset | None = None):
         elapsed_time = f"{hours:02}:{minutes:02}:{seconds:02}"
         # https://stackoverflow.com/questions/37774983/clearing-the-screen-by-printing-a-character
         print("\033c")
+        if title:
+            print(title, end="\n\r")
         print(elapsed_time, end="\n\r")
         time.sleep(1)
 
 
-def _curses(offset: TimeOffset | None = None):
+def _curses(offset: TimeOffset | None = None, title: str | None = None):
     import curses
 
     def _run(stdscr):
@@ -35,6 +38,8 @@ def _curses(offset: TimeOffset | None = None):
 
         now = time.time()
         while True:
+            # Clear the screen on each iteration to prevent artifacts from resizes
+            stdscr.clear()
             # Calculate elapsed time
             elapsed = time.time() - now + (offset.offset_seconds if offset else 0)
             hours, remainder = divmod(int(elapsed), 3600)
@@ -43,6 +48,14 @@ def _curses(offset: TimeOffset | None = None):
 
             # Display elapsed time in the center of the screen
             height, width = stdscr.getmaxyx()
+
+            # Display title if provided
+            if title:
+                title_x = width // 2 - len(title) // 2
+                title_y = min(5, height // 2)
+                stdscr.addstr(title_y, title_x, title, curses.A_BOLD)
+
+            # Display elapsed time
             x = width // 2 - len(elapsed_time) // 2
             y = height // 2
             stdscr.addstr(y, x, elapsed_time)
@@ -94,12 +107,12 @@ class TimeOffset:
         """
         # Use dateparser with settings to prefer recent dates and handle ambiguity
         # RELATIVE_BASE set to now helps with ambiguous dates
-        now = datetime.now()
+        now = datetime.datetime.now()
         settings = {
             # makes it so that if you pass in a date with an ambiguous date
             # (e.g. "5:00 AM") at 2 PM with no date, it assumes today
-            'RELATIVE_BASE': now,
-            'PREFER_DATES_FROM': 'past',  # Prefer past dates for times like "5:00 AM"
+            "RELATIVE_BASE": now,
+            "PREFER_DATES_FROM": "past",  # Prefer past dates for times like "5:00 AM"
         }
 
         parsed = dateparser.parse(time_str, settings=settings)
@@ -111,32 +124,7 @@ class TimeOffset:
             )
 
         # Check for ambiguity
-        time_diff = abs((parsed - now).total_seconds())
-
-        # If the parsed time is 12 hours off, it's likely ambiguous
-        # (e.g., if it's 2 PM and user says "5:00 AM", they probably meant earlier today, not tomorrow)
-        # TODO (evan): I don't like this heuristic
-        if time_diff > 12 * 3600:
-            raise ValueError(
-                f"Ambiguous timestamp '{time_str}'. "
-                f"Parsed as {parsed.strftime('%Y-%m-%d %I:%M %p')}, "
-                f"which is {time_diff/3600:.1f} hours in the future. "
-                "Please be more specific (e.g., 'today 5:00 AM' or 'yesterday 5:00 AM')."
-            )
-
-        # Also check if parsing with "today" prefix gives a different (more reasonable) result
-        # This helps catch cases where dateparser chose the wrong day
-        today_parsed = dateparser.parse(f"today {time_str}", settings=settings)
-        if today_parsed is not None:
-            today_diff = (today_parsed - now).total_seconds()
-            # If "today" version is in the past and much closer to now, the original was ambiguous
-            if today_diff < 0 and abs(today_diff) < abs(time_diff) and abs(time_diff - today_diff) > 6 * 3600:
-                raise ValueError(
-                    f"Ambiguous timestamp '{time_str}'. "
-                    f"Could mean {parsed.strftime('%Y-%m-%d %I:%M %p')} "
-                    f"or {today_parsed.strftime('%Y-%m-%d %I:%M %p')}. "
-                    "Please be more specific (e.g., 'today 5:00 AM' or 'yesterday 5:00 AM')."
-                )
+        time_diff = (parsed - now).total_seconds()
 
         # Calculate offset: negative because we want to add time that has already elapsed
         # If parsed time is in the past, offset should be positive (time has elapsed)
@@ -165,15 +153,30 @@ def test_time_offset():
         ), f"Expected {expected_offset=} for {time_str=} got {o.offset_seconds=}"
 
 
+def test_parse_since():
+
+    o1 = TimeOffset.parse_since("5m")
+    print(o1.offset_seconds)
+
+    o2 = TimeOffset.parse_since("2025-11-8 10:00")
+    print(o2.offset_seconds)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--no-curses", action="store_true", help="Use plain text instead of curses"
     )
+    parser.add_argument(
+        "--title",
+        type=str,
+        required=False,
+        help="Title to display above the stopwatch",
+    )
 
     # Create a mutually exclusive group for --offset and --since
     time_group = parser.add_mutually_exclusive_group()
-    time_group.add_argument(
+    time_group.add_argument(  # TODO: remove this. No need for --offset. --since handles it
         "--offset",
         type=TimeOffset.parse,
         required=False,
@@ -191,9 +194,9 @@ def main():
     offset = args.since if args.since is not None else args.offset
 
     if args.no_curses:
-        _no_curses(offset=offset)
+        _no_curses(offset=offset, title=args.title)
     else:
-        _curses(offset=offset)
+        _curses(offset=offset, title=args.title)
 
 
 if __name__ == "__main__":
