@@ -28,7 +28,7 @@ def _no_curses(offset: TimeOffset | None = None, title: str | None = None):
         time.sleep(1)
 
 
-def _curses(offset: TimeOffset | None = None, title: str | None = None):
+def _curses(start_time: datetime.datetime, title: str | None = None):
     import curses
 
     def _run(stdscr):
@@ -40,20 +40,28 @@ def _curses(offset: TimeOffset | None = None, title: str | None = None):
         while True:
             # Clear the screen on each iteration to prevent artifacts from resizes
             stdscr.clear()
-            # Calculate elapsed time
-            elapsed = time.time() - now + (offset.offset_seconds if offset else 0)
-            hours, remainder = divmod(int(elapsed), 3600)
-            minutes, seconds = divmod(remainder, 60)
-            elapsed_time = f"{hours:02}:{minutes:02}:{seconds:02}"
-
-            # Display elapsed time in the center of the screen
             height, width = stdscr.getmaxyx()
 
-            # Display title if provided
-            if title:
-                title_x = width // 2 - len(title) // 2
-                title_y = min(5, height // 2)
+            # Calculate elapsed time
+            elapsed = datetime.datetime.now() - start_time
+            elapsed_time = (
+                f"{elapsed.hours:02}:{elapsed.minutes:02}:{elapsed.seconds:02}"
+            )
+
+            # Calculate title position
+            title_y = min(5, height // 2)
+            title_pos = (width // 2 - len(title) // 2, title_y) if title else None
+
+            # Calculate start time position
+            start_time_pos = (width // 2 - len(start_time_str) // 2, title_y + 10)
+
+            ################################### Display ###################################
+            # Display title
+            if title_pos is not None:
+                title_x, title_y = title_pos
                 stdscr.addstr(title_y, title_x, title, curses.A_BOLD)
+
+            # Display start time
 
             # Display elapsed time
             x = width // 2 - len(elapsed_time) // 2
@@ -71,35 +79,7 @@ class TimeOffset:
         self.offset_seconds = offset_seconds
 
     @classmethod
-    def parse(cls, time_str: str) -> TimeOffset | None:
-        """
-        time_str is like 5m, 1h, '5minutes', '5 minutes', '1 hour'
-        """
-        pattern = r"(?P<value>\d+)\s*(?P<unit>\w+)$"
-        m = re.match(pattern, time_str)
-        if m is None:
-            return None
-
-        value = int(m.group("value"))
-        unit = m.group("unit")
-
-        conversion = {
-            "m": 60,
-            "minute": 60,
-            "minutes": 60,
-            "h": 3600,
-            "hour": 3600,
-            "hours": 3600,
-            "s": 1,
-            "second": 1,
-            "seconds": 1,
-        }.get(unit)
-        if conversion is None:
-            raise ValueError(f"Unknown unit {unit}")
-        return TimeOffset(conversion * value)
-
-    @classmethod
-    def parse_since(cls, time_str: str) -> TimeOffset:
+    def parse(cls, time_str: str) -> TimeOffset:
         """
         Parse a human-readable timestamp like "5:00 AM", "5am", "9:30 PM", etc.
         Returns a TimeOffset representing the time elapsed since that timestamp.
@@ -108,7 +88,9 @@ class TimeOffset:
         # Use dateparser with settings to prefer recent dates and handle ambiguity
         # RELATIVE_BASE set to now helps with ambiguous dates
         now = datetime.datetime.now()
-        settings = {
+
+        # Settings = TypedDict()
+        settings: dateparser._Settings = {  # TODO (evan): don't access private var
             # makes it so that if you pass in a date with an ambiguous date
             # (e.g. "5:00 AM") at 2 PM with no date, it assumes today
             "RELATIVE_BASE": now,
@@ -134,31 +116,12 @@ class TimeOffset:
         return TimeOffset(offset_seconds)
 
 
-def test_time_offset():
-    good_patterns = [
-        ("5m", 300),
-        ("5 m", 300),
-        ("5minutes", 300),
-        ("5 minutes", 300),
-        ("5s", 5),
-        ("5 second", 5),
-        ("5hour", 18_000),
-        ("5h", 18_000),
-    ]
-    for time_str, expected_offset in good_patterns:
-        o = TimeOffset.parse(time_str)
-        assert o is not None, f"Expected {time_str} to parse, got None"
-        assert (
-            o.offset_seconds == expected_offset
-        ), f"Expected {expected_offset=} for {time_str=} got {o.offset_seconds=}"
-
-
 def test_parse_since():
 
-    o1 = TimeOffset.parse_since("5m")
+    o1 = TimeOffset.parse("5m")
     print(o1.offset_seconds)
 
-    o2 = TimeOffset.parse_since("2025-11-8 10:00")
+    o2 = TimeOffset.parse("2025-11-8 10:00")
     print(o2.offset_seconds)
 
 
@@ -174,17 +137,9 @@ def main():
         help="Title to display above the stopwatch",
     )
 
-    # Create a mutually exclusive group for --offset and --since
-    time_group = parser.add_mutually_exclusive_group()
-    time_group.add_argument(  # TODO: remove this. No need for --offset. --since handles it
-        "--offset",
-        type=TimeOffset.parse,
-        required=False,
-        help="Time offset duration (e.g., '5m', '1h', '30 minutes')",
-    )
-    time_group.add_argument(
+    parser.add_argument(
         "--since",
-        type=TimeOffset.parse_since,
+        type=TimeOffset.parse,
         required=False,
         help="Start time as human-readable timestamp (e.g., '5:00 AM', '9:30 PM', '5am')",
     )
