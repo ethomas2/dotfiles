@@ -48,7 +48,7 @@ PATH="$PYENV_ROOT/bin:${PATH}"
 PATH="${PATH}:/usr/local/bin"  # for npm
 PATH="${PATH}:~/.dblab/"
 PATH="/opt/homebrew/opt/libpq/bin:$PATH"
-
+PATH="$PATH:/Users/evanthomas/github.com/arunsupe/semantic-grep"
 
 
 # TODO: remove the following. There are "proper" brew instructions. This line
@@ -129,7 +129,8 @@ _fzf_all_dirs_and_files() {
 shopt -s histappend
 
 # After each command, append to the history file and reread it
-export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+# export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+export PROMPT_COMMAND="history -a; history -c; history -r"
 
 
 # My current .bash_history is 508 lines and 15644 bytes for an average of 30
