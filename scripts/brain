@@ -1,0 +1,5 @@
+#!/bin/bash
+
+
+cd /Users/evanthomas/notes/Main
+mgrep "$@"

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+REPO_ROOT=/Users/evanthomas/github.com/ethomas2/formatter
+
+export PYTHONPATH=$REPO_ROOT
+$REPO_ROOT/venv/bin/python $REPO_ROOT/pfmt/cli.py "$@"

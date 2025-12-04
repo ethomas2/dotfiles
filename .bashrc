@@ -1,6 +1,5 @@
 # PS4='+ $(gdate "+%s.%N")\011 '
 # exec 3>&2 2>/tmp/bashstart.$$.log
-# set -x
 
 #  ================================= SOURCE  =================================
 [ -f ~/.dotfiles/git-completion.bash ] && source ~/.dotfiles/git-completion.bash
@@ -196,7 +195,8 @@ if [ -f '/Users/ethomas/Downloads/google-cloud-sdk/completion.bash.inc' ]; then 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-[ -s "$NVM_DIR/nvm.sh" ] && nvm use default > /dev/null 2>&1  # Use default Node.js version
+# setting use default takes forever
+# [ -s "$NVM_DIR/nvm.sh" ] && nvm use default > /dev/null 2>&1  # Use default Node.js version
 
 # Shell-GPT integration BASH v0.2
 _sgpt_bash() {
