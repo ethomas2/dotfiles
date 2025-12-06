@@ -3,13 +3,15 @@ from __future__ import annotations
 
 import argparse
 import csv
-import pathlib
 import json
 import sys
+import pathlib
 from typing import Iterable, TextIO
 
+import matplotlib.pyplot as plt
 from mitmproxy.http import HTTPFlow
 from mitmproxy.io import FlowReader
+
 
 FIELDS = [
     "index",
@@ -66,40 +68,109 @@ def write_json(flows: Iterable[dict], out: TextIO) -> int:
     return len(items)
 
 
-def main():
+def visualize(flows: list[dict], image_file: str | None) -> None:
+    if not flows:
+        print("No HTTP flows to visualize", file=sys.stderr)
+        return
+
+    # DevTools-like: time relative to first request
+    base = flows[0]["start_ts"]
+    starts = [f["start_ts"] - base for f in flows]
+    durations = [f["duration_s"] for f in flows]
+    labels = [f'{f["method"]} {f["path"]}' for f in flows]
+
+    n = len(flows)
+    ys = list(range(n))
+
+    # Scale height a bit with number of flows
+    fig_height = max(4.0, min(0.25 * n, 20.0))
+    fig, ax = plt.subplots(figsize=(12, fig_height))
+
+    ax.barh(ys, durations, left=starts)
+    ax.set_xlabel("Time since first request (s)")
+    ax.set_ylabel("Request index")
+    ax.set_title("HTTP Request Timeline (mitmproxy dump)")
+    ax.invert_yaxis()
+
+    # Y labels: truncate to avoid insane width
+    max_label_len = 80
+    ytick_labels = [
+        (label if len(label) <= max_label_len else label[: max_label_len - 1] + "…")
+        for label in labels
+    ]
+    ax.set_yticks(ys)
+    ax.set_yticklabels(ytick_labels, fontsize=6)
+
+    plt.tight_layout()
+
+    if image_file:
+        fig.savefig(image_file, dpi=150)
+        print(f"Wrote visualization → {image_file}", file=sys.stderr)
+    else:
+        # Fall back to interactive window if no file
+        plt.show()
+
+    plt.close(fig)
+
+
+def _parse_cli():
     parser = argparse.ArgumentParser(
-        description="Extract timing info from a mitmproxy dump."
+        description="Extract and visualize HTTP flow timeline from mitmproxy dump."
     )
-    parser.add_argument("dump_file", help="path to the mitmproxy dump file")
+    parser.add_argument("dump_file", help="Path to the mitmproxy dump file")
     parser.add_argument(
         "--out-file",
-        help="Output file. If omitted, write to stdout.",
+        help="Output file. If omitted, write CSV/JSON to stdout.",
     )
     parser.add_argument(
         "--format",
         choices=["csv", "json"],
-        default="json",
-        help="Output format (default: json)",
+        default="csv",
+        help="Output format (default: csv)",
     )
+    parser.add_argument(
+        "--visualize",
+        action="store_true",
+        help="Generate a waterfall-style PNG timeline.",
+    )
+    parser.add_argument(
+        "--image-file",
+        help="Output image file for visualization (default: timeline.png when --visualize is set).",
+    )
+
     args = parser.parse_args()
+    return args
 
+
+def main(args: argparse.ArgumentParser) -> None:
     dump_path = pathlib.Path(args.dump_file)
-    flows = iter_flows(dump_path)
+    flows_list = list(iter_flows(dump_path))
 
-    out: TextIO = open(args.out_file, "w", newline="") if args.out_file else sys.stdout
-
-    try:
-        if args.format == "csv":
-            count = write_csv(flows, out)
-        else:
-            count = write_json(flows, out)
-    finally:
-        if args.out_file:
-            out.close()
-
+    # textual output (csv/json)
+    out_stream: TextIO
     if args.out_file:
-        print(f"Extracted {count} HTTP flows → {args.out_file}", file=sys.stderr)
+        # newline="" to keep csv happy on Windows
+        out_stream = open(args.out_file, "w", newline="")
+    else:
+        out_stream = sys.stdout
+
+    if not args.visualize:
+        try:
+            if args.format == "csv":
+                count = write_csv(flows_list, out_stream)
+            else:
+                count = write_json(flows_list, out_stream)
+        finally:
+            if args.out_file:
+                out_stream.close()
+
+        if args.out_file:
+            print(f"Extracted {count} HTTP flows → {args.out_file}", file=sys.stderr)
+    else args.visualize:
+        image_file = args.image_file or "timeline.png"
+        visualize(flows_list, image_file=image_file)
 
 
 if __name__ == "__main__":
-    main()
+    args = _parse_cli()
+    main(args)
