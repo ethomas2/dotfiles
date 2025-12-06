@@ -1,0 +1,105 @@
+#!/Users/evanthomas/.dotfiles/scripts/venv-mitm-view/bin/python
+from __future__ import annotations
+
+import argparse
+import csv
+import pathlib
+import json
+import sys
+from typing import Iterable, TextIO
+
+from mitmproxy.http import HTTPFlow
+from mitmproxy.io import FlowReader
+
+FIELDS = [
+    "index",
+    "start_ts",
+    "end_ts",
+    "duration_s",
+    "method",
+    "host",
+    "path",
+    "status_code",
+]
+
+
+def iter_flows(dump_path: pathlib.Path) -> Iterable[dict]:
+    with dump_path.open("rb") as f:
+        reader = FlowReader(f)
+        i = 0
+        for flow in reader.stream():
+            if not isinstance(flow, HTTPFlow) or flow.response is None:
+                continue
+
+            start = flow.request.timestamp_start
+            end = flow.response.timestamp_end
+            duration = end - start
+            req = flow.request
+            res = flow.response
+
+            yield {
+                "index": i,
+                "start_ts": round(start, 6),
+                "end_ts": round(end, 6),
+                "duration_s": round(duration, 6),
+                "method": req.method,
+                "host": req.host or "",
+                "path": req.path or "",
+                "status_code": res.status_code,
+            }
+            i += 1
+
+
+def write_csv(flows: Iterable[dict], out: TextIO) -> int:
+    writer = csv.writer(out)
+    writer.writerow(FIELDS)
+    count = 0
+    for flow in flows:
+        writer.writerow([flow[f] for f in FIELDS])
+        count += 1
+    return count
+
+
+def write_json(flows: Iterable[dict], out: TextIO) -> int:
+    items = list(flows)
+    json.dump(items, out, indent=2)
+    return len(items)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Extract timing info from a mitmproxy dump."
+    )
+    parser.add_argument("dump_file", help="path to the mitmproxy dump file")
+    parser.add_argument(
+        "--out-file",
+        help="Output file. If omitted, write to stdout.",
+    )
+    parser.add_argument(
+        "--format",
+        choices=["csv", "json"],
+        default="json",
+        help="Output format (default: json)",
+    )
+    args = parser.parse_args()
+
+    dump_path = pathlib.Path(args.dump_file)
+    flows = iter_flows(dump_path)
+
+    out: TextIO = open(args.out_file, "w", newline="") if args.out_file else sys.stdout
+
+    try:
+        if args.format == "csv":
+            count = write_csv(flows, out)
+        else:
+            count = write_json(flows, out)
+    finally:
+        if args.out_file:
+            out.close()
+
+    if args.out_file:
+        print(f"Extracted {count} HTTP flows → {args.out_file}", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()
