@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+set -exuo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage:
+  rtmux <host> <tmux-command> [args...]
+
+Examples:
+  rtmux whatbox list-sessions
+  rtmux whatbox attach-session -t main
+EOF
+}
+
+red() { printf '\033[31m%s\033[0m\n' "$*" >&2; }
+
+if [[ $# -lt 2 ]]; then
+  usage >&2
+  exit 2
+fi
+
+host="$1"
+shift
+tmux_args=("$@")
+
+# Local socket path for the forwarded remote tmux socket
+sock_local="/$(mktemp -d)/rtmux-${USER}-${host}.sock"
+
+cleanup() {
+  # best-effort cleanup: kill ssh forwarder, remove local socket
+  [[ -n "${ssh_pid:-}" ]] && kill "${ssh_pid}" 2>/dev/null || true
+  rm -f "${sock_local}" 2>/dev/null || true
+}
+trap cleanup EXIT INT TERM
+
+# Ask remote tmux (via its default socket) what socket path the server is using.
+# If there's no server, this will fail.
+remote_sock="$(
+  ssh -o BatchMode=yes -o ConnectTimeout=5 "${host}" \
+    'tmux display-message -p -F "#{socket_path}"' 2>/dev/null
+)" || {
+  red "rtmux: no tmux server reachable on ${host} (or tmux not installed)."
+  red "      Start one (e.g. ssh ${host} 'tmux new -s main') then retry."
+  exit 1
+}
+
+if [[ -z "${remote_sock}" ]]; then
+  red "rtmux: failed to determine remote tmux socket path on ${host}."
+  exit 1
+fi
+
+# Start SSH StreamLocal (unix socket) forwarding in the background.
+rm -f "${sock_local}"
+ssh \
+  -o ExitOnForwardFailure=yes \
+  -o StreamLocalBindUnlink=yes \
+  -o BatchMode=yes \
+  -N \
+  -L "${sock_local}:${remote_sock}" \
+  "${host}" &
+ssh_pid=$!
+
+# Wait until the local socket appears (or ssh dies).
+for _ in {1..100}; do
+  [[ -S "${sock_local}" ]] && break
+  if ! kill -0 "${ssh_pid}" 2>/dev/null; then
+    red "rtmux: ssh port-forward process exited unexpectedly."
+    exit 1
+  fi
+  sleep 0.05
+done
+
+if [[ ! -S "${sock_local}" ]]; then
+  red "rtmux: timed out waiting for local forwarded socket: ${sock_local}"
+  exit 1
+fi
+
+# Run tmux command locally against forwarded socket.
+exec tmux -S "${sock_local}" "${tmux_args[@]}"
