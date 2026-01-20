@@ -1,13 +1,57 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-docker network create mitmweb
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") [OPTIONS]
 
+Run mitmweb in Docker.
+
+Options:
+  --no-block-global  Disable mitmproxy global connection blocking
+  -h, --help        Show this help message and exit
+EOF
+}
+
+# Default: block_global = true (mitmproxy default)
+NO_BLOCK_GLOBAL=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --no-block-global)
+      NO_BLOCK_GLOBAL=true
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+docker network create mitmweb || true
+
+MITM_ARGS=(
+  mitmweb
+  --web-host 0.0.0.0
+)
+
+if [[ "$NO_BLOCK_GLOBAL" == "true" ]]; then
+  MITM_ARGS+=(--set block_global=false)
+fi
+
+set -x
 docker run --rm -it \
   --name mitmproxy \
-  -v ~/.mitmproxy:/home/mitmproxy/.mitmproxy   \
-  -p 8080:8080   \
-  -p 8081:8081   \
+  -v "$HOME/.mitmproxy:/home/mitmproxy/.mitmproxy" \
+  -p 8080:8080 \
+  -p 8081:8081 \
   --network=mitmweb \
-  mitmproxy/mitmproxy   \
-  mitmweb  \
-  --web-host 0.0.0.0
+  mitmproxy/mitmproxy \
+  "${MITM_ARGS[@]}"
+set +x

@@ -70,10 +70,9 @@ def write_json(flows: Iterable[dict], out: TextIO) -> int:
 
 def visualize(flows: list[dict], image_file: str | None) -> None:
     if not flows:
-        print("No HTTP flows to visualize", file=sys.stderr)
+        print("No HTTP flows to visualize (PNG)", file=sys.stderr)
         return
 
-    # DevTools-like: time relative to first request
     base = flows[0]["start_ts"]
     starts = [f["start_ts"] - base for f in flows]
     durations = [f["duration_s"] for f in flows]
@@ -82,7 +81,6 @@ def visualize(flows: list[dict], image_file: str | None) -> None:
     n = len(flows)
     ys = list(range(n))
 
-    # Scale height a bit with number of flows
     fig_height = max(4.0, min(0.25 * n, 20.0))
     fig, ax = plt.subplots(figsize=(12, fig_height))
 
@@ -92,7 +90,6 @@ def visualize(flows: list[dict], image_file: str | None) -> None:
     ax.set_title("HTTP Request Timeline (mitmproxy dump)")
     ax.invert_yaxis()
 
-    # Y labels: truncate to avoid insane width
     max_label_len = 80
     ytick_labels = [
         (label if len(label) <= max_label_len else label[: max_label_len - 1] + "…")
@@ -105,15 +102,133 @@ def visualize(flows: list[dict], image_file: str | None) -> None:
 
     if image_file:
         fig.savefig(image_file, dpi=150)
-        print(f"Wrote visualization → {image_file}", file=sys.stderr)
+        print(f"Wrote visualization PNG → {image_file}", file=sys.stderr)
     else:
-        # Fall back to interactive window if no file
         plt.show()
 
     plt.close(fig)
 
 
-def _parse_cli():
+def write_html(flows: list[dict], html_file: str) -> None:
+    if not flows:
+        html = """<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>mitm-timeline</title>
+  </head>
+  <body>
+    <p>No HTTP flows to display.</p>
+  </body>
+</html>
+"""
+        pathlib.Path(html_file).write_text(html, encoding="utf-8")
+        print(f"No flows; wrote trivial HTML → {html_file}", file=sys.stderr)
+        return
+
+    flows_json = json.dumps(flows)
+
+    html = f"""<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>mitm-timeline</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      html, body {{
+        height: 100%;
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }}
+      #chart {{
+        width: 100%;
+        height: 100vh;
+      }}
+    </style>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  </head>
+  <body>
+    <div id="chart"></div>
+    <script>
+      const FLOWS = {flows_json};
+
+      if (FLOWS.length === 0) {{
+        document.getElementById("chart").innerText = "No flows to display.";
+      }} else {{
+        const base = FLOWS[0].start_ts;
+
+        const y = FLOWS.map(f => f.index);
+        const durations = FLOWS.map(f => f.duration_s);
+        const xStart = FLOWS.map(f => f.start_ts - base);
+
+        const hoverText = FLOWS.map(f => {{
+          const relStart = (f.start_ts - base).toFixed(6);
+          const relEnd = (f.end_ts - base).toFixed(6);
+          return [
+            `${{f.method}} ${{f.path}}`,
+            `Host: ${{f.host}}`,
+            `Status: ${{f.status_code}}`,
+            `Start: ${{relStart}} s`,
+            `End: ${{relEnd}} s`,
+            `Duration: ${{f.duration_s.toFixed(6)}} s`
+          ].join("<br>");
+        }});
+
+        const trace = {{
+          type: "bar",
+          orientation: "h",
+          x: durations,
+          base: xStart,
+          y: y,
+          text: hoverText,
+          hoverinfo: "text"
+        }};
+
+        const maxLabelLen = 80;
+        const yTickText = FLOWS.map(f => {{
+          const label = `${{f.method}} ${{f.path}}`;
+          return label.length <= maxLabelLen ? label : label.slice(0, maxLabelLen - 1) + "…";
+        }});
+
+        const layout = {{
+          title: "HTTP Request Timeline (mitmproxy dump)",
+          xaxis: {{
+            title: "Time since first request (s)",
+            zeroline: false
+          }},
+          yaxis: {{
+            title: "Request index",
+            autorange: "reversed",
+            tickmode: "array",
+            tickvals: y,
+            ticktext: yTickText
+          }},
+          margin: {{
+            l: 250,
+            r: 20,
+            t: 50,
+            b: 50
+          }},
+          hovermode: "closest"
+        }};
+
+        const config = {{
+          responsive: true,
+          displayModeBar: true,
+          scrollZoom: true
+        }};
+
+        Plotly.newPlot("chart", [trace], layout, config);
+      }}
+    </script>
+  </body>
+</html>
+"""
+    pathlib.Path(html_file).write_text(html, encoding="utf-8")
+    print(f"Wrote interactive HTML → {html_file}", file=sys.stderr)
+
+
+def _parse_cli() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Extract and visualize HTTP flow timeline from mitmproxy dump."
     )
@@ -137,40 +252,50 @@ def _parse_cli():
         "--image-file",
         help="Output image file for visualization (default: timeline.png when --visualize is set).",
     )
+    parser.add_argument(
+        "--html",
+        action="store_true",
+        help="Generate an interactive HTML waterfall timeline.",
+    )
+    parser.add_argument(
+        "--html-file",
+        help="Output HTML file (default: timeline.html when --html is set).",
+    )
 
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
-def main(args: argparse.ArgumentParser) -> None:
+def main(args: argparse.Namespace) -> None:
     dump_path = pathlib.Path(args.dump_file)
-    flows_list = list(iter_flows(dump_path))
+    flows_list = sorted(iter_flows(dump_path), key=lambda f: f["start_ts"])
 
-    # textual output (csv/json)
     out_stream: TextIO
     if args.out_file:
-        # newline="" to keep csv happy on Windows
         out_stream = open(args.out_file, "w", newline="")
     else:
         out_stream = sys.stdout
 
-    if not args.visualize:
-        try:
-            if args.format == "csv":
-                count = write_csv(flows_list, out_stream)
-            else:
-                count = write_json(flows_list, out_stream)
-        finally:
-            if args.out_file:
-                out_stream.close()
-
+    try:
+        if args.format == "csv":
+            count = write_csv(flows_list, out_stream)
+        else:
+            count = write_json(flows_list, out_stream)
+    finally:
         if args.out_file:
-            print(f"Extracted {count} HTTP flows → {args.out_file}", file=sys.stderr)
-    else args.visualize:
+            out_stream.close()
+
+    if args.out_file:
+        print(f"Extracted {count} HTTP flows → {args.out_file}", file=sys.stderr)
+
+    if args.visualize:
         image_file = args.image_file or "timeline.png"
         visualize(flows_list, image_file=image_file)
 
+    if args.html:
+        html_file = args.html_file or "timeline.html"
+        write_html(flows_list, html_file=html_file)
+
 
 if __name__ == "__main__":
-    args = _parse_cli()
-    main(args)
+    cli_args = _parse_cli()
+    main(cli_args)

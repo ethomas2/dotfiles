@@ -100,27 +100,12 @@ export FZF_DEFAULT_OPTS='
                   head -500 {}) 2> /dev/null"
 '
 
-_important_dirs() {
-  [ -d ~/github.com ] && find ~/github.com -maxdepth 2 -mindepth 2 -type d
-  [ -d ~/.marks ] && find ~/.marks -type l -ls | awk '{print $NF}'
+jj() {
+  local dir
+  dir="$(jumpdir)" || return
+  [[ -n "$dir" ]] || return
+  cd -- "$dir"
 }
-_fzf_important_dirs() {
-  _important_dirs | fzf
-}
-# deep black magic adopted from fzf's C-t
-# see https://github.com/junegunn/fzf/blob/315e568de006e80138f79c77d5508c7e4853e6b2/shell/key-bindings.bash#L77
-# bind '"\C-j": " \C-u \C-a\C-k`_fzf_important_dirs`\e\C-e\C-y\C-a\C-y\ey\C-h\C-e\er \C-h"'
-
-_all_dirs_and_files() {
-  echo /etc/hosts &&
-  find $HOME/.ssh &&
-  find $HOME/github.com -type d -maxdepth 2
-}
-_fzf_all_dirs_and_files() {
-  _all_dirs | fzf
-}
-# bind '"\C-j": " \C-u \C-a\C-k`_fzf_important_dirs`\e\C-e\C-y\C-a\C-y\ey\C-h\C-e\er \C-h"'
-# bind '"\C-j": " \C-u \C-a\C-k`_fzf_important_dirs`\e\C-e\C-y\C-a\C-y\ey\C-h\C-e\er \C-h"'
 
 #  ========================== HISTORY CONTROL  ==========================
 # See https://unix.stackexchange.com/questions/1288/preserve-bash-history-in-multiple-terminal-windows
@@ -205,5 +190,33 @@ if [[ -n "$READLINE_LINE" ]]; then
     READLINE_POINT=${#READLINE_LINE}
 fi
 }
+
+
 # bind -x '"\C-i": _sgpt_bash'
 # Shell-GPT integration BASH v0.2
+bind -x '"\C-g": __llm_cmdcomp'
+__llm_cmdcomp() {
+    # Store the current command line
+    local old_cmd="${READLINE_LINE}"
+    local cursor_pos="${READLINE_POINT}"
+    local result
+
+    # Move to a new line
+    echo
+
+    # Get the LLM completion
+    if result="$(llm cmdcomp "${old_cmd}")"; then
+        # Replace the command line with the result
+        READLINE_LINE="${result}"
+        READLINE_POINT="${#result}"
+        # Move down a line to prevent bash from overwriting output
+        echo
+    else
+        # Restore original command on error
+        READLINE_LINE="${old_cmd}"
+        READLINE_POINT="${cursor_pos}"
+        echo "Command completion failed" >&2
+    fi
+}
+
+

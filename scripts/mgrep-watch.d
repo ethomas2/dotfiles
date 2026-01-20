@@ -1,4 +1,5 @@
 #!/bin/bash
+# vim: set filetype=sh :
 
 
 
