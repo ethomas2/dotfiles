@@ -1,0 +1,461 @@
+#!/usr/bin/env -S uv run --script
+# vim: set filetype=python :
+"""
+tm: tmux helper
+
+Implements "insert current window at index N" semantics:
+- Current window ends up at N
+- If N already has a window, windows rotate to preserve indices (no new gaps)
+- If N is a new index, current moves there and its old index disappears
+- Keeps contiguous windows contiguous (compression-preserving)
+
+The pure planning function:
+
+    insert(target, state) -> list[Command]
+
+returns a sequence of tmux commands (move-window only) that should work in tmux,
+using a temporary slot and rotation to avoid conflicts.
+
+Run tests:
+    pytest -q tm.py
+
+Run:
+    tm insert 2      # insert current window at index 2
+    tm ins 2
+    tm i 2
+
+    tm compress      # compress windows to [0, 1, ..., n-1]
+    tm comp
+    tm c
+"""
+
+from __future__ import annotations
+
+import subprocess
+from dataclasses import dataclass
+from typing import Iterable, Literal, Sequence
+import argparse
+import subprocess
+import itertools
+
+
+@dataclass(frozen=True)
+class State:
+    windows: list[int]  # existing tmux window indices
+    current_window: int
+
+
+@dataclass(frozen=True)
+class Command:
+    kind: Literal["move", "swap"]
+    src: int
+    dst: int
+
+
+def normalize_state(state: State) -> State:
+    """
+    Validates and normalizes state:
+    - Asserts windows are unique (duplicates are a bug, not valid tmux state)
+    - Sorts windows for canonical ordering
+    - Validates current_window is in windows
+    """
+    if len(state.windows) != len(set(state.windows)):
+        raise ValueError(f"windows must be unique, got duplicates: {state.windows}")
+
+    ws = sorted(state.windows)
+    if state.current_window not in ws:
+        raise ValueError(f"current_window={state.current_window} not in windows={ws}")
+    return State(windows=ws, current_window=state.current_window)
+
+
+def move(state: State, src: int, dst: int) -> State:
+    """
+    Pure state transition for "tmux move-window -s src -t dst"
+    (tmux defaults -s to current window if omitted; we always include it here).
+    """
+    state = normalize_state(state)
+    if src not in state.windows:
+        raise ValueError(f"move: src {src} not in windows {state.windows}")
+    if dst in state.windows:
+        raise ValueError(f"move: dst {dst} already occupied in windows {state.windows}")
+
+    ws = [dst if w == src else w for w in state.windows]
+    cur = dst if state.current_window == src else state.current_window
+    return normalize_state(State(windows=ws, current_window=cur))
+
+
+def swap(state: State, a: int, b: int) -> State:
+    """
+    Pure state transition for "tmux swap-window -s a -t b"
+    Swaps the contents of windows at indices a and b.
+    The set of indices remains the same, only contents are exchanged and  current_window updated
+    """
+    state = normalize_state(state)
+    if a not in state.windows:
+        raise ValueError(f"swap: a={a} not in windows {state.windows}")
+    if b not in state.windows:
+        raise ValueError(f"swap: b={b} not in windows {state.windows}")
+
+    # Indices stay the same, but we track current_window which follows its content
+    if state.current_window == a:
+        cur = b
+    elif state.current_window == b:
+        cur = a
+    else:
+        cur = state.current_window
+    return State(windows=state.windows, current_window=cur)
+
+
+def apply_commands(state: State, cmds: Sequence[Command]) -> State:
+    s = normalize_state(state)
+    for c in cmds:
+        if c.kind == "move":
+            s = move(s, c.src, c.dst)
+        elif c.kind == "swap":
+            s = swap(s, c.src, c.dst)
+        else:
+            raise ValueError(f"unknown command kind: {c.kind}")
+    return s
+
+
+def insert(target: int, state: State) -> list[Command]:
+    """
+    Insert current window "right before" the target window index, then compress.
+
+    Goal:
+        Given a current winnum, target winnum and list of windows, generate
+        commands to "move" the current winnum "right before" the target in the
+        list, then "compress" the list
+
+        E.g. given  the state
+            target: 7
+            current: 3
+            windows: 2,3,6,7,11
+
+        First we move <current> (3) so it's "right before" <target> (7) in the
+        list
+            target: 7
+            current: 3
+            windows: 2,6,3,7,11
+
+        Then we map each window to its index in the list
+            2 -> 0
+            6 -> 1
+            3 -> 2
+            7 -> 3
+            11 -> 4
+
+        Final state is
+            current: 2
+            windows: 0,1,2,3,4
+
+    Algo:
+        1. Generate the map from winnum -> new index
+        2. Then perform a sequence of moves/swaps to move each wn -> wn' according to the map
+    """
+    s0 = normalize_state(state)
+
+    if target < 0:
+        raise ValueError("target must be >= 0")
+
+    # Step 1: Generate map
+    arr = sorted(s0.windows)
+    arr.remove(s0.current_window)
+    idx = next((idx for (idx, val) in enumerate(arr) if val >= target), len(arr))
+    arr.insert(idx, s0.current_window)
+    map = {val: idx for idx, val in enumerate(arr)}
+
+    # Step 2: Execute moves/swaps
+    reverse = {dst: src for src, dst in map.items()}
+    cmds: list[Command] = []
+
+    # Process in order of destination to ensure we don't overwrite needed sources
+    for dst in sorted(reverse.keys()):
+        src = reverse[dst]
+        if src == dst:
+            continue
+
+        is_dst_occupied = dst in map
+        if is_dst_occupied:
+            # Destination is free, just move
+            map[src], map[dst] = map[dst], map[src]
+            cmds.append(Command("swap", src, dst))
+        else:
+            del map[src]
+            map[dst] = dst
+            cmds.append(Command("move", src, dst))
+        reverse = {dst: src for src, dst in map.items()}
+
+    assert all(src == dst for src, dst in map.items()), "Logic error"
+    return cmds
+
+
+def compress(state: State) -> list[Command]:
+    """
+    Compress windows to [0, 1, ..., n-1] while keeping current window
+    at its relative position in the sorted order.
+    """
+
+    def _compress(state: State):
+        state = normalize_state(state)
+        for src, dst in zip(state.windows, itertools.count()):
+            if src == dst:
+                continue
+            assert dst not in state.windows, "Logic error"
+            if src != dst:
+                cmd = Command(kind="move", src=src, dst=dst)
+                yield cmd
+                state = apply_commands(state, [cmd])
+
+    return list(_compress(state))
+
+
+# -------------------- tmux execution --------------------
+
+
+def execute(cmds: Sequence[Command]) -> None:
+
+    def _exec(cmd: list[str]):
+        print("\033[32m" + " ".join(cmd) + "\033[m")
+        subprocess.check_call(cmd)
+
+    for c in cmds:
+        if c.kind == "move":
+            _exec(["tmux", "move-window", "-s", str(c.src), "-t", str(c.dst), "-d"])
+        elif c.kind == "swap":
+            _exec(["tmux", "swap-window", "-s", str(c.src), "-t", str(c.dst), "-d"])
+        else:
+            raise ValueError(f"unknown command kind: {c.kind}")
+
+
+# -------------------- CLI parsing --------------------
+
+
+@dataclass(frozen=True)
+class InsertArgs:
+    command: Literal["insert"]
+    target: int
+
+
+@dataclass(frozen=True)
+class CompressArgs:
+    command: Literal["compress"]
+
+
+CliArgs = InsertArgs | CompressArgs
+
+
+def _parse_cli(argv: Sequence[str] | None = None) -> CliArgs:
+    """Parse CLI arguments and return a CliArgs model."""
+    p = argparse.ArgumentParser(
+        prog="tm",
+        description="tmux helper",
+    )
+    subparsers = p.add_subparsers(dest="command", required=True)
+
+    # insert command with aliases: insert, ins, i
+    insert_parser = subparsers.add_parser(
+        "insert",
+        aliases=["ins", "i"],
+        help="insert current window at index N",
+    )
+    insert_parser.add_argument(
+        "target",
+        type=int,
+        metavar="N",
+        help="target index for current window",
+    )
+
+    # compress command with aliases: compress, comp, c
+    subparsers.add_parser(
+        "compress",
+        aliases=["comp", "c"],
+        help="compress windows to contiguous indices [0, 1, ..., n-1]",
+    )
+
+    args = p.parse_args(list(argv) if argv is not None else None)
+
+    match args.command:
+        case "insert" | "ins" | "i":
+            return InsertArgs(command="insert", target=args.target)
+        case "compress" | "comp" | "c":
+            return CompressArgs(command="compress")
+        case _:
+            raise ValueError(f"unknown command: {args.command}")
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = _parse_cli(argv)
+
+    # Read current state from tmux.
+    cur = int(
+        subprocess.check_output(["tmux", "display-message", "-p", "#I"])
+        .decode()
+        .strip()
+    )
+    ws = sorted(
+        int(x)
+        for x in subprocess.check_output(["tmux", "list-windows", "-F", "#I"])
+        .decode()
+        .splitlines()
+        if x.strip() != ""
+    )
+    state = State(windows=ws, current_window=cur)
+    n = len(ws)
+
+    if args.command == "insert":
+        # Compute effective target (clamped to valid range)
+        effective_target = min(args.target, n - 1) if args.target >= 0 else 0
+        cmds = insert(args.target, state)
+    elif args.command == "compress":
+        # Current window stays at its relative position
+        effective_target = ws.index(cur)
+        cmds = compress(state)
+    else:
+        raise ValueError(f"unknown command: {args.command}")
+
+    execute(cmds)
+
+    # Explicitly select the target window to ensure focus is correct.
+    # During the sequence of moves, tmux's focus tracking may not always
+    # follow the window to its final position, so we ensure it explicitly.
+    subprocess.check_call(["tmux", "select-window", "-t", str(effective_target)])
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+
+###############################################################################
+################################ insert Tests ################################
+###############################################################################
+
+
+def test_insert_docstring_example():
+    """Test the example from insert's docstring."""
+    # target: 7, current: 3, windows: 2,3,6,7,11
+    # After insert before 7: logical order [2, 6, 3, 7, 11]
+    # After compress: [0, 1, 2, 3, 4] with current at 2
+    s0 = State(windows=[2, 3, 6, 7, 11], current_window=3)
+    cmds = insert(7, s0)
+    s1 = apply_commands(s0, cmds)
+    assert s1.windows == [0, 1, 2, 3, 4], f"Expected [0,1,2,3,4] but got {s1.windows}"
+    assert (
+        s1.current_window == 2
+    ), f"Expected current_window=2 but got {s1.current_window}"
+
+
+def test_insert_insert_at_beginning():
+    """Insert current window at the beginning."""
+    # windows: [0, 5, 10], current: 10, target: 0
+    # Insert 10 before 0: logical order [10, 0, 5]
+    # After compress: [0, 1, 2] with current at 0
+    s0 = State(windows=[0, 5, 10], current_window=10)
+    cmds = insert(0, s0)
+    s1 = apply_commands(s0, cmds)
+    assert s1.windows == [0, 1, 2]
+    assert s1.current_window == 0
+
+
+def test_insert_insert_at_end():
+    """Insert current window at the end (after last window)."""
+    # windows: [0, 5, 10], current: 0, target: 11 (after 10)
+    # Insert 0 at position 11: logical order [5, 10, 0]
+    # After compress: [0, 1, 2] with current at 2
+    s0 = State(windows=[0, 5, 10], current_window=0)
+    cmds = insert(11, s0)
+    s1 = apply_commands(s0, cmds)
+    assert s1.windows == [0, 1, 2]
+    assert s1.current_window == 2
+
+
+def test_insert_already_compressed_no_change():
+    """When already compressed and current stays in place, no commands needed."""
+    s0 = State(windows=[0, 1, 2], current_window=1)
+    # Insert 1 before position 1 (itself) - should be no-op
+    cmds = insert(1, s0)
+    s1 = apply_commands(s0, cmds)
+    assert s1.windows == [0, 1, 2]
+    assert s1.current_window == 1
+
+
+###############################################################################
+############################### Hypothesis Tests ##############################
+###############################################################################
+
+from hypothesis import given, strategies as st
+
+
+@st.composite
+def state_strategy(draw):
+    """Generate a valid State with unique window indices and a current_window from that set."""
+    # Generate 1-10 unique window indices in range [0, 100]
+    windows = draw(
+        st.lists(
+            st.integers(min_value=0, max_value=100),
+            min_size=1,
+            max_size=10,
+            unique=True,
+        )
+    )
+    current_window = draw(st.sampled_from(windows))
+    return State(windows=sorted(windows), current_window=current_window)
+
+
+@given(state=state_strategy(), target=st.integers(min_value=0, max_value=1000))
+def test_hypothesis_always_compressed(state, target):
+    """
+    Property: After insert, windows are always compressed to [0, 1, ..., n-1].
+    """
+    n = len(state.windows)
+
+    cmds = insert(target, state)
+    result = apply_commands(state, cmds)
+
+    expected = list(range(n))
+    assert result.windows == expected, (
+        f"windows should be {expected}, got {result.windows}. "
+        f"State: {state}, target: {target}"
+    )
+
+
+@given(state=state_strategy(), target=st.integers(min_value=0, max_value=1000))
+def test_hypothesis_any_nonnegative_target_valid(state, target):
+    """
+    Property: Any non-negative target value should succeed without exception.
+    """
+    # This should not raise any exception
+    cmds = insert(target, state)
+    result = apply_commands(state, cmds)
+
+    # Basic sanity: result should have same number of windows
+    assert len(result.windows) == len(state.windows)
+
+
+@given(state=state_strategy())
+def test_hypothesis_compress(state: State):
+    cmds = compress(state)
+    result = apply_commands(state, cmds)
+    assert result.windows == list(range(len(result.windows)))
+
+
+@given(state=state_strategy(), target=st.integers(min_value=0, max_value=200))
+def test_hypothesis_insert_always_compresses(state, target):
+    """Property: insert always produces compressed [0, 1, ..., n-1] indices."""
+    n = len(state.windows)
+    cmds = insert(target, state)
+    result = apply_commands(state, cmds)
+
+    assert result.windows == list(
+        range(n)
+    ), f"Expected {list(range(n))}, got {result.windows}. State: {state}, target: {target}"
+
+
+@given(state=state_strategy(), target=st.integers(min_value=0, max_value=200))
+def test_hypothesis_insert_preserves_window_count(state, target):
+    """Property: insert preserves the number of windows."""
+    cmds = insert(target, state)
+    result = apply_commands(state, cmds)
+    assert len(result.windows) == len(state.windows)
