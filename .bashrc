@@ -166,7 +166,17 @@ export HOMEBREW_NO_AUTO_UPDATE=1
 
 # set +x
 # exec 2>&3 3>&-
-eval `ssh-agent`
+#
+# eval `ssh-agent`
+
+SSH_AGENT_SOCK="$HOME/.ssh/agent.sock"
+export SSH_AUTH_SOCK="$SSH_AGENT_SOCK"
+
+if [ ! -S "$SSH_AGENT_SOCK" ]; then
+    rm -f "$SSH_AGENT_SOCK"
+    ssh-agent -a "$SSH_AGENT_SOCK" >/dev/null
+fi
+
 # ssh-add   ~/.ssh/id_ed25519
 # ssh-add   ~/.ssh/id_rsa.koanix
 
