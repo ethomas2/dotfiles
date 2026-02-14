@@ -1,0 +1,21 @@
+#!/bin/bash
+
+SESSION="Background"
+
+# Create the session with the appropriate layout
+if ! tmux has-session -t "$SESSION" 2>/dev/null; then
+    tmux new-session -d -s "$SESSION"
+    tmux split-window -h -t "$SESSION:0"
+    tmux split-window -v -t "$SESSION:0.1"
+    tmux split-window -v -t "$SESSION:0.2"
+    tmux select-layout -t "$SESSION:0" main-vertical
+fi
+
+# Start or respawn scripts (only if not already running)
+if [[ -z $(ps aux | grep mgrep-watch | grep -v 'grep mgrep-watch') ]]; then
+    tmux respawn-pane -k -t "$SESSION:0.2" "cd ~/scripts/background && ./mgrep-watch.d"
+fi
+
+if [[ -z $(ps aux | grep obsidian-watch | grep -v 'grep obsidian-watch') ]]; then
+    tmux respawn-pane -k -t "$SESSION:0.3" "cd ~/scripts/background && ./obsidian-watch.d"
+fi
