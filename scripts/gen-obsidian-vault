@@ -1,0 +1,7 @@
+#!/bin/bash
+set -euxo pipefail
+
+(
+  cd ~/notes/Main
+  gfind . -type f -iname '*md' -printf '########################### %p ###########################\n\n'  -exec cat {} \; -printf '\n' -printf '\n'
+)
