@@ -7,6 +7,7 @@
 import sys
 import re
 import pathlib
+import argparse
 
 
 def find_git_root(start_path: pathlib.Path) -> pathlib.Path:
@@ -24,7 +25,7 @@ def find_git_root(start_path: pathlib.Path) -> pathlib.Path:
 def update_or_create_envrc(envrc_path: pathlib.Path, var_name: str, var_value: str):
     """Append new export value right after the latest occurrence of the variable"""
     export_line = f"export {var_name}={var_value}"
-    pattern = re.compile(f"^export {re.escape(var_name)}\s*=.*$", re.MULTILINE)
+    pattern = re.compile(rf"^export {re.escape(var_name)}\s*=.*$", re.MULTILINE)
 
     if not envrc_path.exists():
         envrc_path.write_text("")
@@ -44,22 +45,17 @@ def update_or_create_envrc(envrc_path: pathlib.Path, var_name: str, var_value: s
     print(f"Added {var_name} to {envrc_path} (after existing occurrences)")
 
 
+def _parse_cli_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("key", type=str)
+    parser.add_argument("value", type=str)
+    args = parser.parse_args()
+    return args
+
+
 def main():
-    if len(sys.argv) != 2:
-        print("Error: No arguments provided", file=sys.stderr)
-        print("Usage: envrc-export FOO=bar", file=sys.stderr)
-        sys.exit(1)
 
-    export_arg = sys.argv[1]
-
-    # Validate format: VARIABLE=value
-    if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*=.*$", export_arg):
-        print("Error: Invalid format. Expected: VARIABLE=value", file=sys.stderr)
-        sys.exit(1)
-
-    # Extract variable name and value
-    var_name, var_value = export_arg.split("=", 1)
-
+    args = _parse_cli_args()
     # Find git root
     try:
         git_root = find_git_root(pathlib.Path.cwd())
@@ -70,7 +66,7 @@ def main():
     envrc_path = git_root / ".envrc"
 
     # Update or create .envrc
-    update_or_create_envrc(envrc_path, var_name, var_value)
+    update_or_create_envrc(envrc_path, args.key, args.value)
 
 
 if __name__ == "__main__":

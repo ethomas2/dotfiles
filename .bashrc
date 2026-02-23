@@ -231,3 +231,29 @@ __llm_cmdcomp() {
 }
 
 
+cdr() {
+  if [ -n "$REPO_ROOT" ]; then
+    cd "$REPO_ROOT"
+  else
+    echo -e "\033[31mNo REPO_ROOT found in env variables\033[0m" >&2
+  fi
+}
+
+# _edit_noexec() {
+#     local tmp
+#     tmp=$(mktemp)
+
+#     # Write current Readline buffer to file
+#     printf "%s" "$READLINE_LINE" > "$tmp"
+
+#     # Open editor
+#     "${VISUAL:-${EDITOR:-vi}}" "$tmp"
+
+#     # Replace current buffer with edited content
+#     READLINE_LINE=$(<"$tmp")
+#     READLINE_POINT=${#READLINE_LINE}
+
+#     rm -f "$tmp"
+# }
+
+# bind -x '"\C-x\C-e": _edit_noexec'

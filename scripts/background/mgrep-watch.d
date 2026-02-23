@@ -6,7 +6,9 @@
 trap 'exit' INT # necessary bc otherwise just kills the running mgrep watch. Not the whole bash
 cd /Users/evanthomas/notes/Main
 while true; do
-  timeout --foreground 3600 mgrep watch
+  # Restart every 5m because otheriwse JWT expires
+  echo "Restarting $(date '+%Y-%m-%d %H:%M:%S')"
+  timeout --foreground 300 mgrep watch
 done
 
 

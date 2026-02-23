@@ -1,0 +1,14 @@
+#!/bin/bash
+set -eo pipefail
+
+if [ -z "$1" ]; then
+  echo "Usage: git wta <name>"
+  exit 1
+fi
+
+COMMIT=${2:-HEAD}
+
+mkdir -p worktrees/
+NAME="wt-$(date +%Y.%m.%d-%H.%M.%S)-$1"
+# TODO: consider putting this in the parent directory
+git worktree add -b $NAME "worktrees/$NAME" $COMMIT
