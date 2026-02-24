@@ -185,8 +185,8 @@ fi
 if [ -f '/Users/ethomas/Downloads/google-cloud-sdk/path.bash.inc' ]; then . '/Users/ethomas/Downloads/google-cloud-sdk/path.bash.inc'; fi
 
 # The next line enables shell command completion for gcloud.
-if [ -f '/Users/ethomas/Downloads/google-cloud-sdk/completion.bash.inc' ]; then . '/Users/ethomas/Downloads/google-cloud-sdk/completion.bash.inc'; fi
-. "$HOME/.cargo/env"
+# if [ -f '/Users/ethomas/Downloads/google-cloud-sdk/completion.bash.inc' ]; then . '/Users/ethomas/Downloads/google-cloud-sdk/completion.bash.inc'; fi
+# . "$HOME/.cargo/env"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -257,3 +257,23 @@ cdr() {
 # }
 
 # bind -x '"\C-x\C-e": _edit_noexec'
+
+export UV_PYTHON=3.13
+
+
+
+
+###############################################################################
+#################################### Simple ###################################
+###############################################################################
+export PATH="/Applications/Postgres.app/Contents/Versions/latest/bin:$PATH"
+eval "$(rbenv init -)"
+eval "$(fnm env --use-on-cd --shell bash)"
+#
+# Rails shortcuts
+alias rc="bundle exec rails console"  # Quick access to Rails console
+
+# Development workflow
+alias cg="pnpm run compile"  # Run pnpm compile
+alias rb="rubocop -A"       # Auto-fix Ruby code style issues
+alias cop="bundle exec rubocop -A"  # Run Rubocop with bundled version
