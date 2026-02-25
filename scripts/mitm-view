@@ -1,4 +1,13 @@
-#!/Users/evanthomas/.dotfiles/scripts/venv-mitm-view/bin/python
+#!/usr/bin/env -S uv run --script
+# vim: set filetype=python :
+# /// script
+# requires-python = ">=3.8"
+# dependencies = [
+#   "matplotlib",
+#   "mitmproxy",
+# ]
+# ///
+
 from __future__ import annotations
 
 import argparse
