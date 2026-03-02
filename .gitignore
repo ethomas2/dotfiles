@@ -16,3 +16,5 @@ debug.py
 .git-blame-ignore-revs
 .spr.yml
 *.secrets
+
+experiments/

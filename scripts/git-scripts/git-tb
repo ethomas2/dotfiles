@@ -1,2 +1,15 @@
 #!/bin/bash
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git tb
+
+Print the current branch name (this branch).
+
+Options:
+  -h, --help   Show this help message
+EOF
+  exit 0
+fi
+
 git rev-parse --abbrev-ref HEAD

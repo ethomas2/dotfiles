@@ -1,4 +1,17 @@
 #!/bin/bash
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git s [<git-status-args>...]
+
+Show current branch, last commit, and short status. All arguments are passed to git status.
+
+Options:
+  -h, --help   Show this help message
+EOF
+  exit 0
+fi
+
 bold=""
 normal=""
 if [ -t 1 ]; then

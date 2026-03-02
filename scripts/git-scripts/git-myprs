@@ -1,5 +1,18 @@
 #!/bin/bash
 
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git myprs [-b]
+
+List my open pull requests. Uses hub CLI.
+
+Options:
+  -b           Open PRs in the browser instead of listing them
+  -h, --help   Show this help message
+EOF
+  exit 0
+fi
+
 browse=false
 while getopts ":b" opt; do
   case ${opt} in

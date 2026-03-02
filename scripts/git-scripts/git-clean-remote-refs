@@ -1,5 +1,17 @@
 #!/bin/bash
 
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git clean-remote-refs
+
+Delete local remote-tracking refs that no longer have a corresponding push target.
+
+Options:
+  -h, --help   Show this help message
+EOF
+  exit 0
+fi
+
 set -exo pipefail
 remote_refs=$(git branch --all | sed 's/^\s\+//g' | grep "^remotes/origin" | grep -v HEAD)
 tracked_refs=$(git remote show origin | grep -Po "pushes to \K\b.*\b" | awk '{print $1}')

@@ -1,5 +1,20 @@
 #!/bin/bash
 
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git create-repo
+
+Create a GitHub repo from the current directory and push to it.
+
+Uses the current directory name as the repo name. Requires \$GHTOKEN to be set.
+The directory must be an initialized git repo with at least one commit.
+
+Options:
+  -h, --help   Show this help message
+EOF
+  exit 0
+fi
+
 set -euxo pipefail
 
 function errAndQuit() {

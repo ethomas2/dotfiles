@@ -1,2 +1,15 @@
 #!/bin/bash
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git clean-fs
+
+Remove temporary directories in /tmp created by 'git fs'.
+
+Options:
+  -h, --help   Show this help message
+EOF
+  exit 0
+fi
+
 find /tmp/ -maxdepth 1 -iname '*git-fs' | grep "git-fs" | xargs rm -r

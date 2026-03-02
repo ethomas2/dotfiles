@@ -1,6 +1,20 @@
 #!/bin/bash
 set -eo pipefail
 
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git get <repo-url>
+
+Clone a GitHub repo into ~/github.com/<org>/<repo>.
+
+Accepts SSH (git@github.com:org/repo.git) or HTTPS URLs.
+
+Options:
+  -h, --help   Show this help message
+EOF
+  exit 0
+fi
+
 repo_url="$1"
 
 valid_chars="[a-zA-Z_0-9-]"

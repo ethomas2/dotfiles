@@ -1,5 +1,18 @@
 #!/bin/bash
 
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git myreviews [--not-ready]
+
+Open my review-requested PRs in the browser. Uses hub CLI.
+
+Options:
+  --not-ready   Exclude PRs labeled "Ready to Deploy"
+  -h, --help    Show this help message
+EOF
+  exit 0
+fi
+
 if [ "$1" == "--not-ready" ]; then
   hub browse -- "pulls?utf8=%E2%9C%93&q=is%3Aopen+is%3Apr+review-requested%3Aethomas2+-label%3A%22Ready+to+Deploy%22+"
 else

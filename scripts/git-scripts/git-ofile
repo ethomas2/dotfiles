@@ -1,6 +1,18 @@
 #!/bin/bash
 set -euo pipefail
 
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git ofile <file-path>
+
+Open a file on GitHub in the browser (on the default branch).
+
+Options:
+  -h, --help   Show this help message
+EOF
+  exit 0
+fi
+
 file_path="$1"
 org_and_repo=$(git remote -v | head -1 | awk '{print $2}' | cut -d: -f2 | sed 's/.git$//g')
 # See https://stackoverflow.com/a/44750379/4993041

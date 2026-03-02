@@ -1,5 +1,19 @@
 #!/bin/bash
 
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git dpr <pr-number> [-- <path>...]
+
+Diff all commits in a pull request by PR number.
+Uses difftool when stdout is a terminal, plain diff otherwise.
+Requires \$GHTOKEN to be set.
+
+Options:
+  -h, --help   Show this help message
+EOF
+  exit 0
+fi
+
 set -euo pipefail
 
 repo_full_name=$(git remote get-url origin | awk -F: '{print $2}' | sed "s/.git//")

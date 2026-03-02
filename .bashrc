@@ -108,14 +108,28 @@ jj() {
   cd -- "$dir"
 }
 
+jwt() {
+  local dir
+  dir="$(jump-worktree)" || return
+  [[ -n "$dir" ]] || return
+  cd -- "$dir"
+}
+
 #  ========================== HISTORY CONTROL  ==========================
 # See https://unix.stackexchange.com/questions/1288/preserve-bash-history-in-multiple-terminal-windows
 # When the shell exits, append to the history file instead of overwriting it
 shopt -s histappend
 
-# After each command, append to the history file and reread it
-# export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
-export PROMPT_COMMAND="history -a; history -c; history -r"
+# Explicitly set HISTFILE (don't rely on bash's internal default, which can
+# fail to initialize in some tmux/bash-3.2 environments)
+export HISTFILE="$HOME/.bash_history"
+
+# After each command, append to the history file and read in new entries from
+# other sessions. Use "history -n" (read only new lines) instead of
+# "history -c; history -r" (clear+reread all) — the latter resets bash 3.2's
+# internal "new lines this session" counter, causing "history -a" to write
+# nothing on subsequent commands.
+export PROMPT_COMMAND="history -a; history -n"
 
 
 # My current .bash_history is 508 lines and 15644 bytes for an average of 30

@@ -1,4 +1,18 @@
 #!/bin/bash
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git fs [<branch-or-commit>]
+
+Clone the repo into a temp directory at the given branch or commit (default: default branch).
+Prints the path to the temp directory. Clean up with 'git clean-fs'.
+
+Options:
+  -h, --help   Show this help message
+EOF
+  exit 0
+fi
+
 set -euxo pipefail
 
 # archive method

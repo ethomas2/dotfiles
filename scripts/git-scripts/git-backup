@@ -1,6 +1,20 @@
 #!/bin/bash
 set -eo pipefail
 
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git ba <--create | --latest>
+
+Create or find backup branches for the current branch.
+
+Options:
+  -c, --create   Create a timestamped backup branch from HEAD
+  -l, --latest   Print the most recent backup branch name
+  -h, --help     Show this help message
+EOF
+  exit 0
+fi
+
 CUR_BRANCH=`git rev-parse --abbrev-ref HEAD`
 NEW_BRANCH="${CUR_BRANCH}_backup-$(date +%Y.%m.%d-%H.%M.%S)"
 

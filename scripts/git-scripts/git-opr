@@ -1,5 +1,19 @@
 #!/bin/bash
 set -euo pipefail
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git opr [<branch>]
+
+Open the pull request for a branch in the browser (default: current branch).
+Uses hub CLI.
+
+Options:
+  -h, --help   Show this help message
+EOF
+  exit 0
+fi
+
 branch=${1:-$(git tb)}
 prnum=$(hub pr list -h $branch | cm 1 | sed 's/#//g')
 if [ -z "$prnum" ]; then

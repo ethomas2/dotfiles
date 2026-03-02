@@ -1,4 +1,17 @@
 #!/bin/bash
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git files-by-commit [<commit>]
+
+List changed files grouped by commit since the given commit (default: merge-base).
+
+Options:
+  -h, --help   Show this help message
+EOF
+  exit 0
+fi
+
 SINCE_COMMIT=${1:-$(git base)}
 git log $SINCE_COMMIT..HEAD --reverse --format=%h | while read -r line; do
   git log -1 $line --oneline

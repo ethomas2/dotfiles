@@ -1,2 +1,15 @@
 #!/bin/bash
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git l [<git-log-args>...]
+
+Shorthand for git log --oneline --graph. All arguments are passed through.
+
+Options:
+  -h, --help   Show this help message
+EOF
+  exit 0
+fi
+
 git log --pretty=oneline --abbrev-commit --graph $@

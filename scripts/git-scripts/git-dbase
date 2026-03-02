@@ -1,5 +1,20 @@
 #!/bin/bash
 
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git dbase [-- <path>...]
+
+Diff the current branch against its merge-base with the default branch.
+Uses difftool when stdout is a terminal, plain diff otherwise.
+
+Additional arguments are passed through to git diff/difftool.
+
+Options:
+  -h, --help   Show this help message
+EOF
+  exit 0
+fi
+
 if [ -t 1 ]; then
   git difftool $(git base) "$@"
 else

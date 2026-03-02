@@ -1,6 +1,22 @@
 #!/bin/bash
 set -eo pipefail
 
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git wta <name> [<commit>]
+
+Create a named worktree in worktrees/ with a timestamped branch.
+
+Arguments:
+  name     Name suffix for the worktree branch
+  commit   Starting point (default: HEAD)
+
+Options:
+  -h, --help   Show this help message
+EOF
+  exit 0
+fi
+
 if [ -z "$1" ]; then
   echo "Usage: git wta <name>"
   exit 1

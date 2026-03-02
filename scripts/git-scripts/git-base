@@ -1,5 +1,19 @@
 #!/bin/bash
 
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git base
+
+Print the merge-base commit between HEAD and the default branch.
+
+The default branch is controlled by \$GIT_BASE_DEFAULT_BRANCH (default: origin/master).
+
+Options:
+  -h, --help   Show this help message
+EOF
+  exit 0
+fi
+
 # Grep for ^+ because sometimes git cherry has a bunch of minuses and plusses
 # git cherry origin/develop
 # - d6058eae3859e0917a8722a4aad859c56ecbe718
