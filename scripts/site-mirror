@@ -1,0 +1,251 @@
+#!/usr/bin/env -S uv run --script
+# vim: set filetype=python :
+# /// script
+# requires-python = ">=3.8"
+# dependencies = [
+#   "html2text",
+#   "pydantic",
+# ]
+# ///
+
+from __future__ import annotations
+
+import argparse
+import pathlib
+import re
+import shutil
+import subprocess
+import sys
+from urllib.parse import urlparse
+
+import html2text
+from pydantic import BaseModel, field_validator, model_validator
+
+
+class Args(BaseModel):
+    url: str | None = None
+    depth: int = 3
+    output: str | None = None
+    mirror_only: bool = False
+    markdown_only: bool = False
+    mirror_dir: str | None = None
+    robots: str = "off"
+    user_agent: str | None = None
+    verbose: bool = False
+
+    @field_validator("depth")
+    @classmethod
+    def _depth_positive(cls, value: int) -> int:
+        if value < 0:
+            raise ValueError("depth must be >= 0")
+        return value
+
+    @field_validator("robots")
+    @classmethod
+    def _robots_allowed(cls, value: str) -> str:
+        if value not in {"on", "off"}:
+            raise ValueError("robots must be 'on' or 'off'")
+        return value
+
+    @model_validator(mode="after")
+    def _validate_flags(self) -> "Args":
+        if self.mirror_only and self.markdown_only:
+            raise ValueError("Cannot use --mirror-only and --markdown-only together.")
+        if self.markdown_only and not self.mirror_dir:
+            raise ValueError("--markdown-only requires --mirror-dir.")
+        if not self.markdown_only and not self.url:
+            raise ValueError("--url is required unless --markdown-only is set.")
+        return self
+
+
+def _ensure_url_scheme(url: str) -> str:
+    parsed = urlparse(url)
+    if parsed.scheme:
+        return url
+    return f"https://{url}"
+
+
+def _sanitize_component(value: str) -> str:
+    value = value.lower()
+    value = re.sub(r"[^a-z0-9]+", "-", value)
+    value = re.sub(r"-{2,}", "-", value).strip("-")
+    return value or "site"
+
+
+def _derive_base_name(url: str) -> str:
+    parsed = urlparse(url)
+    host = parsed.netloc or parsed.path
+    host = host.strip("/")
+    path = parsed.path.strip("/")
+    parts = [host] if host else []
+    if path:
+        parts.append(path.split("/")[-1])
+    return _sanitize_component("-".join(parts)) if parts else "site"
+
+
+def _unique_dir(base_dir: pathlib.Path) -> pathlib.Path:
+    if not base_dir.exists():
+        return base_dir
+    idx = 1
+    while True:
+        candidate = base_dir.with_name(f"{base_dir.name}-{idx}")
+        if not candidate.exists():
+            return candidate
+        idx += 1
+
+
+def _resolve_output_root(url: str, output: str | None) -> pathlib.Path:
+    if output:
+        return pathlib.Path(output).expanduser().resolve()
+    base = _derive_base_name(url)
+    return _unique_dir(pathlib.Path.cwd() / base)
+
+
+def _resolve_markdown_root(
+    output: str | None, mirror_dir: pathlib.Path
+) -> pathlib.Path:
+    if output:
+        return pathlib.Path(output).expanduser().resolve()
+    if mirror_dir.name == "site" and mirror_dir.parent.exists():
+        return mirror_dir.parent
+    base = _unique_dir(pathlib.Path.cwd() / f"{mirror_dir.name}-md")
+    return base
+
+
+def _mirror_site(
+    url: str,
+    site_dir: pathlib.Path,
+    depth: int,
+    robots: str,
+    user_agent: str | None,
+    verbose: bool,
+) -> None:
+    if shutil.which("wget") is None:
+        raise RuntimeError("Missing dependency: wget. Please install wget first.")
+
+    cmd = [
+        "wget",
+        f"-e",
+        f"robots={robots}",
+        "--recursive",
+        f"--level={depth}",
+        "--page-requisites",
+        "--convert-links",
+        "--no-parent",
+        "--adjust-extension",
+        f"--directory-prefix={str(site_dir)}",
+    ]
+    if user_agent:
+        cmd.append(f"--user-agent={user_agent}")
+    cmd.append(url)
+
+    if verbose:
+        subprocess.run(cmd, check=True)
+        return
+
+    result = subprocess.run(cmd, text=True, capture_output=True)
+    if result.returncode != 0:
+        stderr = result.stderr.strip()
+        if stderr:
+            print(stderr, file=sys.stderr)
+        raise RuntimeError(f"wget failed with exit code {result.returncode}")
+
+
+def _convert_to_markdown(site_dir: pathlib.Path, markdown_dir: pathlib.Path) -> int:
+    converter = html2text.HTML2Text()
+    converter.ignore_links = False
+    converter.body_width = 0
+
+    html_files = list(site_dir.rglob("*.html"))
+    for html_path in html_files:
+        rel_path = html_path.relative_to(site_dir)
+        md_path = markdown_dir / rel_path
+        md_path = md_path.with_suffix(".md")
+        md_path.parent.mkdir(parents=True, exist_ok=True)
+        html = html_path.read_text(errors="ignore")
+        md_text = converter.handle(html)
+        md_path.write_text(md_text)
+
+    return len(html_files)
+
+
+def _parse_args() -> Args:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--url", type=str, required=False, help="Root URL to mirror")
+    parser.add_argument(
+        "--depth", type=int, default=3, help="Max crawl depth (default: 3)"
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=str,
+        required=False,
+        help="Output directory root",
+    )
+    parser.add_argument("--mirror-only", action="store_true")
+    parser.add_argument("--markdown-only", action="store_true")
+    parser.add_argument(
+        "--mirror-dir",
+        type=str,
+        required=False,
+        help="Existing mirror directory (for --markdown-only)",
+    )
+    parser.add_argument(
+        "--robots",
+        choices=["on", "off"],
+        default="off",
+        help="Robots setting passed to wget (default: off)",
+    )
+    parser.add_argument("--user-agent", type=str, required=False)
+    parser.add_argument("--verbose", action="store_true")
+
+    ns = parser.parse_args()
+    try:
+        return Args(**vars(ns))
+    except ValueError as exc:
+        parser.error(str(exc))
+
+
+def main() -> None:
+    args = _parse_args()
+
+    if args.markdown_only:
+        mirror_dir = pathlib.Path(args.mirror_dir).expanduser().resolve()
+        if not mirror_dir.exists():
+            print(f"Mirror dir does not exist: {mirror_dir}", file=sys.stderr)
+            sys.exit(1)
+        output_root = _resolve_markdown_root(args.output, mirror_dir)
+        markdown_dir = output_root / "markdown"
+        markdown_dir.mkdir(parents=True, exist_ok=True)
+        count = _convert_to_markdown(mirror_dir, markdown_dir)
+        print(f"Markdown written to: {markdown_dir}")
+        print(f"Converted {count} HTML files.")
+        return
+
+    url = _ensure_url_scheme(args.url)
+    output_root = _resolve_output_root(url, args.output)
+    site_dir = output_root / "site"
+    site_dir.mkdir(parents=True, exist_ok=True)
+
+    _mirror_site(
+        url=url,
+        site_dir=site_dir,
+        depth=args.depth,
+        robots=args.robots,
+        user_agent=args.user_agent,
+        verbose=args.verbose,
+    )
+    print(f"Mirror written to: {site_dir}")
+
+    if args.mirror_only:
+        return
+
+    markdown_dir = output_root / "markdown"
+    markdown_dir.mkdir(parents=True, exist_ok=True)
+    count = _convert_to_markdown(site_dir, markdown_dir)
+    print(f"Markdown written to: {markdown_dir}")
+    print(f"Converted {count} HTML files.")
+
+
+if __name__ == "__main__":
+    main()

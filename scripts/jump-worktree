@@ -1,0 +1,53 @@
+#!/bin/bash
+
+set -euo pipefail
+
+find_repo_root() {
+  if [[ -n "${REPO_ROOT:-}" ]]; then
+    printf '%s\n' "$REPO_ROOT"
+    return 0
+  fi
+
+  local dir
+  dir="$PWD"
+
+  while [[ "$dir" != "/" ]]; do
+    if [[ -e "$dir/.git" || -e "$dir/.envrc" ]]; then
+      printf '%s\n' "$dir"
+      return 0
+    fi
+    dir="$(dirname "$dir")"
+  done
+
+  return 1
+}
+
+main() {
+  if ! command -v fzf >/dev/null 2>&1; then
+    echo "fzf is required but not installed" >&2
+    exit 1
+  fi
+
+  local repo_root
+  if ! repo_root="$(find_repo_root)"; then
+    echo "Could not determine repository root (no REPO_ROOT, .git, or .envrc found)" >&2
+    exit 1
+  fi
+
+  local worktrees_dir
+  worktrees_dir="$(cd "$repo_root" && pwd)/worktrees"
+
+  if [[ ! -d "$worktrees_dir" ]]; then
+    echo "Expected worktrees directory at: $worktrees_dir" >&2
+    exit 1
+  fi
+
+  local selected
+  selected="$(find "$worktrees_dir" -mindepth 1 -maxdepth 1 -type d | sort | fzf)" || exit $?
+
+  [[ -n "$selected" ]] || exit 1
+
+  (cd "$selected" && pwd)
+}
+
+main "$@"
