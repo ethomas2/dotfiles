@@ -1,0 +1,80 @@
+#!/bin/bash
+
+set -euo pipefail
+
+PROJECTS_DIR='/Users/evanthomas/github.com/ethomas2'
+
+list_repositories() {
+  ## List repo directories sorted by modification time.
+  gfind "$PROJECTS_DIR" -maxdepth 1 -type d -printf '%T+ %p\n' | sort -k1 | cm 2
+}
+
+find_repo_root() {
+  ## Walk up from $PWD (or $REPO_ROOT) to find .git or .envrc.
+  if [[ -n "${REPO_ROOT:-}" ]]; then
+    printf '%s\n' "$REPO_ROOT"
+    return 0
+  fi
+
+  local dir="$PWD"
+  while [[ "$dir" != "/" ]]; do
+    if [[ -e "$dir/.git" || -e "$dir/.envrc" ]]; then
+      printf '%s\n' "$dir"
+      return 0
+    fi
+    dir="$(dirname "$dir")"
+  done
+
+  return 1
+}
+
+list_worktrees() {
+  ## List worktree directories under <repo_root>/worktrees.
+  local repo_root
+  if ! repo_root="$(find_repo_root)"; then
+    return 1
+  fi
+
+  local worktrees_dir
+  worktrees_dir="$(cd "$repo_root" && pwd)/worktrees"
+
+  if [[ ! -d "$worktrees_dir" ]]; then
+    return 1
+  fi
+
+  find "$worktrees_dir" -mindepth 1 -maxdepth 1 -type d | sort
+}
+
+main() {
+  if ! command -v fzf >/dev/null 2>&1; then
+    echo "fzf is required but not installed" >&2
+    exit 1
+  fi
+
+  local context="${1:-}"
+
+  case "$context" in
+    repositories)
+      list_repositories | fzf
+      ;;
+    worktree)
+      local wt
+      wt="$(list_worktrees)" || { echo "No worktrees found" >&2; exit 1; }
+      printf '%s\n' "$wt" | fzf
+      ;;
+    "")
+      # Combine all contexts; silently skip any that fail
+      {
+        list_repositories 2>/dev/null || true
+        list_worktrees 2>/dev/null || true
+      } | fzf
+      ;;
+    *)
+      echo "Unknown context: $context" >&2
+      echo "Usage: jump [repositories|worktree]" >&2
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

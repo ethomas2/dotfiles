@@ -28,3 +28,4 @@ mkdir -p worktrees/
 NAME="wt-$(date +%Y.%m.%d-%H.%M.%S)-$1"
 # TODO: consider putting this in the parent directory
 git worktree add -b $NAME "worktrees/$NAME" $COMMIT
+realpath "worktrees/$NAME"

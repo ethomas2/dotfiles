@@ -68,6 +68,7 @@ alias godvl='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias gdvl='/Users/ethomas/go/src/github.com/golang/go/bin/go'
 alias dc='docker compose'
 alias yoco='claude --dangerously-skip-permissions'
+alias yodex='codex --yolo'
 # alias pbcopy='xclip -selection clipboard'
 # alias pbpaste='xclip -selection clipboard -o'
 alias g='git'
@@ -103,14 +104,7 @@ export FZF_DEFAULT_OPTS='
 
 jj() {
   local dir
-  dir="$(jumpdir)" || return
-  [[ -n "$dir" ]] || return
-  cd -- "$dir"
-}
-
-jwt() {
-  local dir
-  dir="$(jump-worktree)" || return
+  dir="$(jump "$@")" || return
   [[ -n "$dir" ]] || return
   cd -- "$dir"
 }
