@@ -1,0 +1,79 @@
+#!/usr/bin/env -S uv run --script
+# vim: set filetype=python :
+# /// script
+# requires-python = ">=3.8"
+# ///
+
+from __future__ import annotations
+
+import argparse
+import re
+import subprocess
+import sys
+import time
+
+
+def parse_duration(s: str) -> float:
+    """Parse a duration string like '5s', '5m', '5h' into seconds."""
+    m = re.fullmatch(r"(\d+(?:\.\d+)?)\s*([smh])", s.strip())
+    if not m:
+        raise argparse.ArgumentTypeError(
+            f"Invalid duration '{s}'. Use e.g. 5s, 5m, 5h"
+        )
+    value = float(m.group(1))
+    unit = m.group(2)
+    multipliers = {"s": 1, "m": 60, "h": 3600}
+    return value * multipliers[unit]
+
+
+def send_alert(message: str, sound: str = "Basso"):
+    """Send a macOS notification via terminal-notifier."""
+    subprocess.run(
+        [
+            "terminal-notifier",
+            "-title", message,
+            "-message", message,
+            "-sound", sound,
+        ],
+        check=True,
+    )
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Send a macOS notification via terminal-notifier."
+    )
+    parser.add_argument("message", help="Notification title and message text")
+    parser.add_argument(
+        "--delay",
+        type=parse_duration,
+        metavar="DURATION",
+        help="Delay before sending (e.g. 5s, 5m, 5h)",
+    )
+    parser.add_argument(
+        "--loop",
+        type=parse_duration,
+        metavar="INTERVAL",
+        help="Repeat every interval (e.g. 5s, 5m, 5h)",
+    )
+    parser.add_argument(
+        "--sound",
+        default="Basso",
+        help="Notification sound (default: Basso)",
+    )
+
+    args = parser.parse_args()
+
+    if args.delay:
+        time.sleep(args.delay)
+
+    if args.loop:
+        while True:
+            send_alert(args.message, sound=args.sound)
+            time.sleep(args.loop)
+    else:
+        send_alert(args.message, sound=args.sound)
+
+
+if __name__ == "__main__":
+    main()
