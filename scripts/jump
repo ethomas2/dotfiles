@@ -2,11 +2,22 @@
 
 set -euo pipefail
 
-PROJECTS_DIR='/Users/evanthomas/github.com/ethomas2'
+PROJECTS_DIRS=(
+  '/Users/evanthomas/github.com/ethomas2'
+  '/Users/evanthomas/github.com/simple-ai-lab'
+)
+EXTRA_DIRS=(
+  "$HOME/scripts"
+)
 
 list_repositories() {
-  ## List repo directories sorted by modification time.
-  gfind "$PROJECTS_DIR" -maxdepth 1 -type d -printf '%T+ %p\n' | sort -k1 | cm 2
+  ## List repo directories sorted by modification time across all project dirs + extras.
+  for dir in "${PROJECTS_DIRS[@]}"; do
+    [[ -d "$dir" ]] && gfind "$dir" -maxdepth 1 -type d -printf '%T+ %p\n'
+  done | sort -k1 | cm 2
+  for dir in "${EXTRA_DIRS[@]}"; do
+    [[ -d "$dir" ]] && printf '%s\n' "$dir"
+  done
 }
 
 find_repo_root() {

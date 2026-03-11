@@ -5,7 +5,10 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
   cat <<EOF
 Usage: git wta <name> [<commit>]
 
-Create a named worktree in worktrees/ with a timestamped branch.
+Given the argument <name>, create a worktree at
+  worktrees/wt-<date>-<name>
+
+and a branch of the same format to track that worktree
 
 Arguments:
   name     Name suffix for the worktree branch

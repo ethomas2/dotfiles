@@ -473,7 +473,7 @@ function! RunThis()
     let l:cmd = "go run"
   elseif &filetype == "haskell"
     let l:cmd = "runhaskell"
-  elseif &filetype == "javascript.jsx"
+  elseif &filetype == "typescript"
     let l:cmd = "node"
   elseif &filetype == "rust"
     let l:cmd = "rustrun"

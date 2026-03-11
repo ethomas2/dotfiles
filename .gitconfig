@@ -85,3 +85,6 @@
 	helper = store
 [blame]
 	ignoreRevsFile = .git-blame-ignore-revs
+[rerere]
+	enabled = true
+	autoupdate = true
