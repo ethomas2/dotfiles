@@ -3,7 +3,7 @@ set -eo pipefail
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
   cat <<EOF
-Usage: git wta <name> [<commit>]
+Usage: git wta [--no-ts] <name> [<commit>]
 
 Given the argument <name>, create a worktree at
   worktrees/wt-<date>-<name>
@@ -15,6 +15,7 @@ Arguments:
   commit   Starting point (default: HEAD)
 
 Options:
+  --no-ts      Omit the timestamp (worktree named wt-<name>)
   -h, --help   Show this help message
 EOF
   exit 0
@@ -25,11 +26,22 @@ if [ -z "$REPO_ROOT" ]; then
   exit 1
 fi
 
+NO_TS=false
+POSITIONAL=()
+for arg in "$@"; do
+  case $arg in
+    --no-ts) NO_TS=true ;;
+    *) POSITIONAL+=("$arg") ;;
+  esac
+done
+set -- "${POSITIONAL[@]}"
+
 if [ -z "$1" ]; then
   echo "Usage: git wta <name>"
   exit 1
 fi
 
+INPUT="${1#wt-}"
 
 (
   cd $REPO_ROOT
@@ -37,8 +49,13 @@ fi
 
 
   mkdir -p worktrees/
-  NAME="wt-$(date +%Y.%m.%d-%H.%M.%S)-$1"
-  # TODO: consider putting this in the parent directory
+  if [ "$NO_TS" = true ]; then
+    NAME="wt-$INPUT"
+  else
+    NAME="wt-$(date +%Y.%m.%d-%H.%M.%S)-$INPUT"
+  fi
+
+
   git worktree add -b $NAME "worktrees/$NAME" $COMMIT
   (
     cd "worktrees/$NAME"
