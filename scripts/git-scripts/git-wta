@@ -20,15 +20,31 @@ EOF
   exit 0
 fi
 
+if [ -z "$REPO_ROOT" ]; then
+  echo -e "\033[31mNo REPO_ROOT defined\033[m"
+  exit 1
+fi
+
 if [ -z "$1" ]; then
   echo "Usage: git wta <name>"
   exit 1
 fi
 
-COMMIT=${2:-HEAD}
 
-mkdir -p worktrees/
-NAME="wt-$(date +%Y.%m.%d-%H.%M.%S)-$1"
-# TODO: consider putting this in the parent directory
-git worktree add -b $NAME "worktrees/$NAME" $COMMIT
-realpath "worktrees/$NAME"
+(
+  cd $REPO_ROOT
+  COMMIT=${2:-HEAD}
+
+
+  mkdir -p worktrees/
+  NAME="wt-$(date +%Y.%m.%d-%H.%M.%S)-$1"
+  # TODO: consider putting this in the parent directory
+  git worktree add -b $NAME "worktrees/$NAME" $COMMIT
+  (
+    cd "worktrees/$NAME"
+    [ -d $REPO_ROOT/experiments/ ] && ln -s $REPO_ROOT/experiments/
+    [ -d $REPO_ROOT/writeups/ ] && ln -s $REPO_ROOT/writeups/
+    [ -d $REPO_ROOT/scrap/ ] && ln -s $REPO_ROOT/scrap/
+  )
+  realpath "worktrees/$NAME"
+)

@@ -2,15 +2,18 @@
 # vim: set filetype=python :
 # /// script
 # requires-python = ">=3.8"
+#
 # ///
 
 from __future__ import annotations
 
 import argparse
+import curses
 import re
 import subprocess
 import sys
 import time
+from datetime import datetime, timedelta
 
 
 def parse_duration(s: str) -> float:
@@ -24,6 +27,68 @@ def parse_duration(s: str) -> float:
     unit = m.group(2)
     multipliers = {"s": 1, "m": 60, "h": 3600}
     return value * multipliers[unit]
+
+
+def parse_time(s: str) -> datetime:
+    """Parse a time string like '14:30', '2:30pm', '5p', '5:00 pm' into a datetime today."""
+    normalized = s.strip()
+    # Strip spaces before am/pm suffix
+    normalized = re.sub(r"\s+(am|pm|a|p)\b", r"\1", normalized, flags=re.IGNORECASE)
+    # Expand shorthand: 5p -> 5pm, 5a -> 5am
+    normalized = re.sub(r"([ap])$", r"\1m", normalized, flags=re.IGNORECASE)
+    for fmt in ("%H:%M", "%I:%M%p", "%I%p"):
+        try:
+            t = datetime.strptime(normalized, fmt).time()
+            target = datetime.now().replace(hour=t.hour, minute=t.minute, second=0, microsecond=0)
+            if target <= datetime.now():
+                raise argparse.ArgumentTypeError(
+                    f"Time '{s}' has already passed today."
+                )
+            return target
+        except ValueError:
+            continue
+    raise argparse.ArgumentTypeError(
+        f"Invalid time '{s}'. Use e.g. 14:30, 2:30pm, 2pm, 5p"
+    )
+
+
+def countdown_sleep(target: datetime, message: str):
+    """Show a full-screen ncurses countdown until target time."""
+    def _run(stdscr: curses.window):
+        curses.curs_set(0)
+        curses.use_default_colors()
+        stdscr.timeout(200)
+
+        while True:
+            remaining = (target - datetime.now()).total_seconds()
+            if remaining <= 0:
+                break
+
+            h = int(remaining // 3600)
+            m = int((remaining % 3600) // 60)
+            s = int(remaining % 60)
+            countdown_str = f"{h:02d}:{m:02d}:{s:02d}"
+            target_str = target.strftime("%-I:%M %p")
+
+            stdscr.erase()
+            rows, cols = stdscr.getmaxyx()
+            mid_y = rows // 2
+
+            # Draw countdown big and centered
+            stdscr.addstr(mid_y - 1, max(0, (cols - len(countdown_str)) // 2), countdown_str, curses.A_BOLD)
+            # Draw message and target time below
+            info = f"{message}  ·  {target_str}"
+            stdscr.addstr(mid_y + 1, max(0, (cols - len(info)) // 2), info, curses.A_DIM)
+            # Quit hint
+            hint = "ctrl-c to cancel"
+            stdscr.addstr(rows - 1, max(0, (cols - len(hint)) // 2), hint, curses.A_DIM)
+
+            stdscr.refresh()
+            key = stdscr.getch()
+            if key == 3:  # ctrl-c
+                raise KeyboardInterrupt
+
+    curses.wrapper(_run)
 
 
 def send_alert(message: str, sound: str = "Basso"):
@@ -57,6 +122,12 @@ def main():
         help="Repeat every interval (e.g. 5s, 5m, 5h)",
     )
     parser.add_argument(
+        "--at",
+        type=parse_time,
+        metavar="TIME",
+        help="Fire at a specific time today (e.g. 14:30, 2:30pm, 2pm)",
+    )
+    parser.add_argument(
         "--sound",
         default="Basso",
         help="Notification sound (default: Basso)",
@@ -64,8 +135,14 @@ def main():
 
     args = parser.parse_args()
 
-    if args.delay:
-        time.sleep(args.delay)
+    if args.at and args.delay:
+        parser.error("--at and --delay are mutually exclusive")
+
+    if args.at:
+        countdown_sleep(args.at, args.message)
+    elif args.delay:
+        target = datetime.now().replace(microsecond=0) + timedelta(seconds=args.delay)
+        countdown_sleep(target, args.message)
 
     if args.loop:
         while True:
