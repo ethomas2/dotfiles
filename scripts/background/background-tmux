@@ -9,13 +9,13 @@ if ! tmux has-session -t "$SESSION" 2>/dev/null; then
     tmux split-window -v -t "$SESSION:0.1"
     tmux split-window -v -t "$SESSION:0.2"
     tmux select-layout -t "$SESSION:0" main-vertical
-fi
 
-# Start or respawn scripts (only if not already running)
-if [[ -z $(ps aux | grep mgrep-watch | grep -v 'grep mgrep-watch') ]]; then
+    # Fresh session — start scripts in their panes (kill the default shells)
     tmux respawn-pane -k -t "$SESSION:0.2" "cd ~/scripts/background && ./mgrep-watch.d"
-fi
-
-if [[ -z $(ps aux | grep obsidian-watch | grep -v 'grep obsidian-watch') ]]; then
     tmux respawn-pane -k -t "$SESSION:0.3" "cd ~/scripts/background && ./obsidian-watch.d"
+else
+    # Session exists — respawn-pane without -k only works on dead panes,
+    # so this is a no-op if the script is still running.
+    tmux respawn-pane -t "$SESSION:0.2" "cd ~/scripts/background && ./mgrep-watch.d" 2>/dev/null || true
+    tmux respawn-pane -t "$SESSION:0.3" "cd ~/scripts/background && ./obsidian-watch.d" 2>/dev/null || true
 fi

@@ -1,7 +1,9 @@
 #!/bin/bash
 # vim: set filetype=sh :
 
-
+# fnm sets up the PATH to include node/mgrep — needed because launchctl
+# starts tmux panes as non-login shells that don't source .bashrc.
+eval "$(fnm env --use-on-cd --shell bash)"
 
 trap 'exit' INT # necessary bc otherwise just kills the running mgrep watch. Not the whole bash
 cd /Users/evanthomas/notes/Main

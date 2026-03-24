@@ -102,7 +102,7 @@ export FZF_DEFAULT_OPTS='
                   head -500 {}) 2> /dev/null"
 '
 
-jj() {
+cdj() {
   local dir
   dir="$(jump "$@")" || return
   [[ -n "$dir" ]] || return

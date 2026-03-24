@@ -59,9 +59,15 @@ INPUT="${1#wt-}"
   git worktree add -b $NAME "worktrees/$NAME" $COMMIT
   (
     cd "worktrees/$NAME"
+    [ -d $REPO_ROOT/tasks.md ] && ln -s $REPO_ROOT/tasks.md
+    [ -d $REPO_ROOT/.claude/ ] && ln -s $REPO_ROOT/.claude/
     [ -d $REPO_ROOT/experiments/ ] && ln -s $REPO_ROOT/experiments/
     [ -d $REPO_ROOT/writeups/ ] && ln -s $REPO_ROOT/writeups/
     [ -d $REPO_ROOT/scrap/ ] && ln -s $REPO_ROOT/scrap/
+
+    [ -f $REPO_ROOT/projects/agent/.env ] && ln -s $REPO_ROOT/projects/agent/.env
+    [ -f $REPO_ROOT/projects/server-v2/.env ] && ln -s $REPO_ROOT/projects/server-v2/.env
+    [ -f $REPO_ROOT/server/.env ] && ln -s $REPO_ROOT/server/.env
   )
   realpath "worktrees/$NAME"
 )
