@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  cat <<EOF
+Usage: git plog [<ref>]
+
+Pretty oneline log of commits on <ref> since it diverged from the default branch.
+With no argument, <ref> defaults to HEAD.
+
+The default branch is controlled by \$GIT_BASE_DEFAULT_BRANCH (default: origin/master).
+
+Options:
+  -h, --help   Show this help message
+EOF
+  exit 0
+fi
+
+ref=${1:-HEAD}
+default_branch=${GIT_BASE_DEFAULT_BRANCH:-origin/master}
+
+base=$(git merge-base "$default_branch" "$ref") || exit $?
+git log --oneline "$base".."$ref"
