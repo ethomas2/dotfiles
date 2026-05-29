@@ -56,6 +56,22 @@ list_worktrees() {
   find "$worktrees_dir" -mindepth 1 -maxdepth 1 -type d | sort
 }
 
+
+list_marks() {
+  ## List directories referenced by marks in $MARKS_DIR.
+  MARKS_DIR="${MARKPATH:-$HOME/.marks}"
+  [[ -d "$MARKS_DIR" ]] || return 1
+
+  local mark
+  while IFS= read -r mark; do
+    [[ -d "$mark" ]] || continue
+    (
+      cd "$mark"
+      pwd -P
+    )
+  done < <(find "$MARKS_DIR" -mindepth 1 -maxdepth 1 | sort) | sort -u
+}
+
 main() {
   if ! command -v fzf >/dev/null 2>&1; then
     echo "fzf is required but not installed" >&2
@@ -68,6 +84,11 @@ main() {
     repositories)
       list_repositories | fzf
       ;;
+    marks)
+      local marks
+      marks="$(list_marks)" || { echo "No marks found" >&2; exit 1; }
+      printf '%s\n' "$marks" | fzf
+      ;;
     worktree)
       local wt
       wt="$(list_worktrees)" || { echo "No worktrees found" >&2; exit 1; }
@@ -78,11 +99,12 @@ main() {
       {
         list_repositories 2>/dev/null || true
         list_worktrees 2>/dev/null || true
+        list_marks 2>/dev/null || true
       } | fzf
       ;;
     *)
       echo "Unknown context: $context" >&2
-      echo "Usage: jump [repositories|worktree]" >&2
+      echo "Usage: jump [repositories|marks|worktree]" >&2
       exit 1
       ;;
   esac

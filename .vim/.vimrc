@@ -283,8 +283,8 @@ let g:fzf_action = {
   \ 'ctrl-v': 'vsplit' }
 let g:fzf_layout = {'down': '45%'}
 
-command! -bang -nargs=* Ag
-  \ call fzf#vim#ag(<q-args>, fzf#vim#with_preview('right:35%'))
+" command! -bang -nargs=* Ag
+"   \ call fzf#vim#ag(<q-args>, fzf#vim#with_preview('right:35%'))
 
 
 " command! -nargs=* -complete=dir Rg

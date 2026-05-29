@@ -2,12 +2,18 @@
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
   cat <<EOF
-Usage: git plog [<ref>]
+Usage: git plog [<ref>] [<git-log-options>...]
 
 Pretty oneline log of commits on <ref> since it diverged from the default branch.
-With no argument, <ref> defaults to HEAD.
+With no <ref>, defaults to HEAD. Any flags (args starting with -) are passed
+through to git log, overriding the default --oneline.
 
 The default branch is controlled by \$GIT_BASE_DEFAULT_BRANCH (default: origin/master).
+
+Examples:
+  git plog
+  git plog HEAD --format=%h
+  git plog --reverse --stat
 
 Options:
   -h, --help   Show this help message
@@ -15,8 +21,23 @@ EOF
   exit 0
 fi
 
-ref=${1:-HEAD}
+ref=""
+passthrough=()
+for arg in "$@"; do
+  if [[ "$arg" == -* ]]; then
+    passthrough+=("$arg")
+  elif [ -z "$ref" ]; then
+    ref="$arg"
+  else
+    passthrough+=("$arg")
+  fi
+done
+ref=${ref:-HEAD}
 default_branch=${GIT_BASE_DEFAULT_BRANCH:-origin/master}
 
 base=$(git merge-base "$default_branch" "$ref") || exit $?
-git log --oneline "$base".."$ref"
+if [ ${#passthrough[@]} -eq 0 ]; then
+  git log --oneline "$base".."$ref"
+else
+  git log "${passthrough[@]}" "$base".."$ref"
+fi

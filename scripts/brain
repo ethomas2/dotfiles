@@ -1,5 +1,50 @@
 #!/bin/bash
 
-
 cd /Users/evanthomas/notes/Main
+
+if [ "$1" = "fzf" ] || [ "$1" = "f" ]; then
+  shift
+  filename_only=0
+  if [ "$1" = "--filename-only" ]; then
+    filename_only=1
+    shift
+  fi
+  query="$1"
+  if [ -z "$query" ]; then
+    echo "usage: brain fzf [--filename-only] <query>" >&2
+    exit 1
+  fi
+
+  results=$(mgrep -m 50 "$query")
+  [ -z "$results" ] && exit 0
+
+  selected=$(printf '%s\n' "$results" | fzf \
+    --ansi \
+    --preview 'f=$(echo {} | sed "s/:.*//"); \
+               range=$(echo {} | sed -nE "s|^[^:]+:([0-9]+)-([0-9]+).*|\1:\2|p"); \
+               start=${range%:*}; end=${range#*:}; \
+               if [ -n "$start" ]; then \
+                 bat --style=numbers --color=always --highlight-line "$start:$end" "$f"; \
+               else \
+                 bat --style=numbers --color=always "$f"; \
+               fi' \
+    --preview-window=right:60%)
+
+  [ -z "$selected" ] && exit 0
+
+  file=$(printf '%s' "$selected" | sed 's/:.*//')
+  line=$(printf '%s' "$selected" | sed -nE 's|^[^:]+:([0-9]+).*|\1|p')
+
+  if [ "$filename_only" = "1" ]; then
+    echo "$file"
+  else
+    if [ -n "$line" ]; then
+      nvim "+$line" "$file"
+    else
+      nvim "$file"
+    fi
+  fi
+  exit 0
+fi
+
 mgrep "$@"

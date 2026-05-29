@@ -1,8 +1,8 @@
 #!/usr/bin/env -S uv run --script
 # vim: set filetype=python :
 # /// script
-# requires-python = ">=3.8"
-#
+# requires-python = ">=3.11"
+# dependencies = ["requests"]
 # ///
 
 from __future__ import annotations
@@ -13,19 +13,37 @@ import re
 import subprocess
 import time
 from datetime import datetime, timedelta
+from typing import Literal, assert_never
+
+import requests
+
+
+NTFY_URL = "https://ntfy.sh/evanthomas-2992-alerts"
+
+AlertMode = Literal["macos", "ntfy.sh"]
+ALL_MODES: list[AlertMode] = ["macos", "ntfy.sh"]
+
+
+_DURATION_RE = re.compile(r"(\d+(?:\.\d+)?)\s*([smh])")
+_DURATION_MULTIPLIERS = {"s": 1, "m": 60, "h": 3600}
+
+
+def _duration_seconds(s: str) -> float | None:
+    """Return seconds for a '5s'/'5m'/'5h' string, or None if not a duration."""
+    m = _DURATION_RE.fullmatch(s.strip())
+    if not m:
+        return None
+    return float(m.group(1)) * _DURATION_MULTIPLIERS[m.group(2)]
 
 
 def parse_loop_duration(s: str) -> float:
     """Parse a duration string like '5s', '5m', '5h' into seconds."""
-    m = re.fullmatch(r"(\d+(?:\.\d+)?)\s*([smh])", s.strip())
-    if not m:
+    seconds = _duration_seconds(s)
+    if seconds is None:
         raise argparse.ArgumentTypeError(
             f"Invalid duration '{s}'. Use e.g. 5s, 5m, 5h"
         )
-    value = float(m.group(1))
-    unit = m.group(2)
-    multipliers = {"s": 1, "m": 60, "h": 3600}
-    return value * multipliers[unit]
+    return seconds
 
 
 def parse_when(s: str) -> datetime:
@@ -33,13 +51,9 @@ def parse_when(s: str) -> datetime:
     Parse either a duration ('5s', '10m', '2h') or a clock time ('14:30', '2:30pm', '5p').
     Returns a target datetime either way.
     """
-    # Try duration first
-    m = re.fullmatch(r"(\d+(?:\.\d+)?)\s*([smh])", s.strip())
-    if m:
-        value = float(m.group(1))
-        unit = m.group(2)
-        multipliers = {"s": 1, "m": 60, "h": 3600}
-        return datetime.now().replace(microsecond=0) + timedelta(seconds=value * multipliers[unit])
+    seconds = _duration_seconds(s)
+    if seconds is not None:
+        return datetime.now().replace(microsecond=0) + timedelta(seconds=seconds)
 
     # Try clock time
     normalized = s.strip()
@@ -101,17 +115,32 @@ def countdown_sleep(target: datetime, message: str):
     curses.wrapper(_run)
 
 
-def send_alert(message: str, sound: str = "Basso"):
-    """Send a macOS notification via terminal-notifier."""
-    subprocess.run(
-        [
-            "terminal-notifier",
-            "-title", message,
-            "-message", message,
-            "-sound", sound,
-        ],
-        check=True,
-    )
+def send_alert(
+    message: str,
+    sound: str = "Basso",
+    modes: list[AlertMode] | None = None,
+):
+    """Send the alert across the requested channels (default: all)."""
+    modes = modes if modes is not None else ALL_MODES
+    for mode in modes:
+        match mode:
+            case "macos":
+                subprocess.run(
+                    [
+                        "terminal-notifier",
+                        "-title", message,
+                        "-message", message,
+                        "-sound", sound,
+                    ],
+                    check=True,
+                )
+            case "ntfy.sh":
+                try:
+                    requests.post(NTFY_URL, data=message.encode("utf-8"), timeout=5)
+                except Exception as e:
+                    print(f"warning: ntfy.sh post failed: {e}")
+            case _:
+                assert_never(mode)
 
 
 def main():
@@ -137,18 +166,24 @@ def main():
         default="Basso",
         help="Notification sound (default: Basso)",
     )
+    parser.add_argument(
+        "--no-ntfy",
+        action="store_true",
+        help="Skip POST to ntfy.sh (sends by default)",
+    )
 
     args = parser.parse_args()
+    modes: list[AlertMode] = [m for m in ALL_MODES if not (m == "ntfy.sh" and args.no_ntfy)]
 
     if args.when:
         countdown_sleep(args.when, args.message)
 
     if args.loop:
         while True:
-            send_alert(args.message, sound=args.sound)
+            send_alert(args.message, sound=args.sound, modes=modes)
             time.sleep(args.loop)
     else:
-        send_alert(args.message, sound=args.sound)
+        send_alert(args.message, sound=args.sound, modes=modes)
 
 
 if __name__ == "__main__":

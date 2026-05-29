@@ -76,6 +76,9 @@ __git_complete g _git # https://stackoverflow.com/questions/9869227/git-autocomp
 alias gi='git'
 __git_complete g _git # https://stackoverflow.com/questions/9869227/git-autocomplete-in-bash-aliases
 
+# Make custom git subcommands complete like their underlying git command.
+_git_plog() { _git_log; }
+
 alias kb='kubectl'
 alias svenv='source venv/bin/activate'
 alias v='nvim'
@@ -87,6 +90,12 @@ alias gs='git s'
 alias cat='bat'
 
 
+alias npm="sfw npm"
+alias yarn="sfw yarn"
+alias pnpm="sfw pnpm"
+alias pip="sfw pip"
+alias uv="sfw uv"
+alias cargo="sfw cargo"
 #  ================================= FZF =================================
 export FZF_DEFAULT_COMMAND="fd"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
@@ -285,3 +294,7 @@ alias rc="bundle exec rails console"  # Quick access to Rails console
 alias cg="pnpm run compile"  # Run pnpm compile
 alias rb="rubocop -A"       # Auto-fix Ruby code style issues
 alias cop="bundle exec rubocop -A"  # Run Rubocop with bundled version
+
+
+################################### Secrets ###################################
+export SG_OPENAI_API_KEY="$EVAN_PERSONAL_OPENAI_API_KEY"
