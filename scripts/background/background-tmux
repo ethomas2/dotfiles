@@ -11,11 +11,15 @@ if ! tmux has-session -t "$SESSION" 2>/dev/null; then
     tmux select-layout -t "$SESSION:0" main-vertical
 
     # Fresh session — start scripts in their panes (kill the default shells)
+    tmux respawn-pane -k -t "$SESSION:0.0" "cd ~/github.com/ethomas2/claude-tutorial && doppler run --project ts-api --config dev --only-secrets ANTHROPIC_API_KEY -- npm run dev"
+    tmux respawn-pane -k -t "$SESSION:0.1" "cd ~/scripts/background && ./brew-upgrade-daily.d"
     tmux respawn-pane -k -t "$SESSION:0.2" "cd ~/scripts/background && ./mgrep-watch.d"
     tmux respawn-pane -k -t "$SESSION:0.3" "cd ~/scripts/background && ./obsidian-watch.d"
 else
     # Session exists — respawn-pane without -k only works on dead panes,
     # so this is a no-op if the script is still running.
+    tmux respawn-pane -t "$SESSION:0.0" "cd ~/github.com/ethomas2/claude-tutorial && doppler run --project ts-api --config dev --only-secrets ANTHROPIC_API_KEY -- npm run dev" 2>/dev/null || true
+    tmux respawn-pane -t "$SESSION:0.1" "cd ~/scripts/background && ./brew-upgrade-daily.d" 2>/dev/null || true
     tmux respawn-pane -t "$SESSION:0.2" "cd ~/scripts/background && ./mgrep-watch.d" 2>/dev/null || true
     tmux respawn-pane -t "$SESSION:0.3" "cd ~/scripts/background && ./obsidian-watch.d" 2>/dev/null || true
 fi
