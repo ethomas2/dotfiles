@@ -2,19 +2,38 @@
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
   cat <<EOF
-Usage: git files-by-commit [<commit>]
+Usage: git files-by-commit [--stat] [<commit>]
 
 List changed files grouped by commit since the given commit (default: merge-base).
 
 Options:
+  --stat       Show git diff --stat output per commit
   -h, --help   Show this help message
 EOF
   exit 0
 fi
 
-SINCE_COMMIT=${1:-$(git base)}
-git log $SINCE_COMMIT..HEAD --reverse --format=%h | while read -r line; do
-  git log -1 $line --oneline
-  git diff $line^..$line --name-only | prepend "  "
+show_stat=false
+since_commit=""
+
+for argument in "$@"; do
+  case "$argument" in
+    --stat)
+      show_stat=true
+      ;;
+    *)
+      since_commit="$argument"
+      ;;
+  esac
+done
+
+SINCE_COMMIT=${since_commit:-$(git base)}
+git log $SINCE_COMMIT..HEAD --reverse --format=%h | while read -r commit_sha; do
+  git log -1 $commit_sha --oneline
+  if [ "$show_stat" = true ]; then
+    git diff $commit_sha^! --stat | prepend "  "
+  else
+    git diff $commit_sha^..$commit_sha --name-only | prepend "  "
+  fi
   echo
 done

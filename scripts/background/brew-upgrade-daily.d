@@ -4,26 +4,28 @@
 set -uo pipefail
 
 # launchctl-spawned tmux panes are non-login shells with a bare PATH,
-# so brew (and tools it shells out to) need to be made discoverable.
-export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+# so brew, claude, and tools they shell out to need to be made discoverable.
+# ~/.local/bin holds the native claude install (~/.local/bin/claude → versions/X.Y.Z).
+export PATH="$HOME/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
 
-MARKER="$HOME/.cache/brew-upgrade-daily.next"
-INTERVAL=$((24 * 60 * 60))
-POLL=$((30 * 60))
-
-mkdir -p "$(dirname "$MARKER")"
+POLL=$((5 * 60))  # wake every 5 minutes
+INTERVAL=$((60 * 60)) # When you wake, if it's been 1h since the last update, update
 
 trap 'exit' INT
+next=0
 while true; do
-  next=$(cat "$MARKER" 2>/dev/null || echo 0)
   now=$(date +%s)
+  echo "Waking $now ..."
   if (( now >= next )); then
     echo "Running brew update + upgrades $(date '+%Y-%m-%d %H:%M:%S')"
     (
-      set -e
+      set -ex
       brew update
-      brew upgrade claude-code
       brew upgrade codex
+      # claude is NOT brew-managed — the Homebrew cask lags real releases by
+      # days/weeks. Use the native self-updater instead. `claude update` is
+      # a no-op when already on latest.
+      claude update
     )
     status=$?
     if [[ "$status" -eq 0 ]]; then
@@ -31,7 +33,7 @@ while true; do
     else
       echo "FAILED $(date '+%Y-%m-%d %H:%M:%S')"
     fi
-    echo $(($(date +%s) + INTERVAL)) > "$MARKER"
+    next=$(($(date +%s) + INTERVAL))
   fi
   sleep "$POLL"
 done

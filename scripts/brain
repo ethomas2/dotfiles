@@ -2,6 +2,10 @@
 
 cd /Users/evanthomas/notes/Main
 
+run_search() {
+  sg search --vault main "$@"
+}
+
 if [ "$1" = "fzf" ] || [ "$1" = "f" ]; then
   shift
   filename_only=0
@@ -15,7 +19,7 @@ if [ "$1" = "fzf" ] || [ "$1" = "f" ]; then
     exit 1
   fi
 
-  results=$(mgrep -m 50 "$query")
+  results=$(run_search -m 50 "$query")
   [ -z "$results" ] && exit 0
 
   selected=$(printf '%s\n' "$results" | fzf \
@@ -47,4 +51,4 @@ if [ "$1" = "fzf" ] || [ "$1" = "f" ]; then
   exit 0
 fi
 
-mgrep "$@"
+run_search "$@"

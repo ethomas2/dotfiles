@@ -15,7 +15,7 @@
         cmd = nvim -d $REMOTE $BASE $LOCAL $MERGED -c '$wincmd w' -c 'wincmd J'
 
 [difftool "nvimdiff"]
-        cmd = "nvim -d \"$LOCAL\" \"$REMOTE\""
+        cmd = "GIT_DIFFTOOL_LOCAL=\"$LOCAL\" GIT_DIFFTOOL_REMOTE=\"$REMOTE\" GIT_DIFFTOOL_MERGED=\"$MERGED\" GIT_DIFFTOOL_BASE=\"$BASE\" GIT_DIFFTOOL_REPO_ROOT=\"$(git rev-parse --show-toplevel)\" nvim -d \"$LOCAL\" \"$REMOTE\""
 
 
 [diff "ansible-vault"]

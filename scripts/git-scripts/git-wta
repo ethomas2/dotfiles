@@ -1,74 +1,296 @@
-#!/bin/bash
-set -eo pipefail
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["pyyaml"]
+# ///
+"""git wta — create a worktree at worktrees/wt-<name> with a tracking branch.
 
-if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-  cat <<EOF
+After the worktree is created, symlinks shared dotfiles/dirs from $REPO_ROOT
+into the worktree, then runs optional per-repo hooks declared in
+$REPO_ROOT/git-wta.yaml.
+
+Hook schema:
+  hooks:
+    - name: pnpm install (agent)
+      cwd: projects/agent       # optional, relative to worktree root
+      shell: pnpm install
+
+Hooks run sequentially under `bash -c 'set -eo pipefail; <shell>'`.
+Env exposed: WT_PATH, WT_NAME, REPO_ROOT, WT_COMMIT.
+A hook failure aborts and leaves the worktree on disk for inspection.
+"""
+from __future__ import annotations
+
+import argparse
+import os
+import subprocess
+import sys
+from datetime import datetime
+from pathlib import Path
+from typing import NoReturn
+
+import yaml
+
+USAGE = """\
 Usage: git wta [--ts] <name> [<commit>]
+       git wta rename <old> <new>
 
-Given the argument <name>, create a worktree at
-  worktrees/wt-<name>
-
-and a branch of the same format to track that worktree
+Create a worktree at worktrees/wt-<name> on a new branch of the same name.
 
 Arguments:
-  name     Name suffix for the worktree branch
+  name     Name suffix for the worktree branch (a leading 'wt-' is stripped)
   commit   Starting point (default: HEAD)
 
 Options:
-  --ts         Add a timestamp (worktree named wt-<date>-<name>)
+  --ts         Add a timestamp (worktree named wt-<YYYY.MM.DD-HH.MM.SS>-<name>)
+  --hooks      Run the post-create hooks (overrides GIT_WTA_HOOKS_DEFAULT)
+  --no-hooks   Skip the post-create hooks (overrides GIT_WTA_HOOKS_DEFAULT)
   -h, --help   Show this help message
-EOF
-  exit 0
-fi
 
-if [ -z "$REPO_ROOT" ]; then
-  echo -e "\033[31mNo REPO_ROOT defined\033[m"
-  exit 1
-fi
+Hook default:
+  Hooks run by default. Set GIT_WTA_HOOKS_DEFAULT=0 (or false/no/off) to flip
+  the default to off for a given repo (typically via .envrc). --hooks and
+  --no-hooks always override the env var.
 
-USE_TS=false
-POSITIONAL=()
-for arg in "$@"; do
-  case $arg in
-    --ts) USE_TS=true ;;
-    *) POSITIONAL+=("$arg") ;;
-  esac
-done
-set -- "${POSITIONAL[@]}"
+Optional per-repo hooks: $REPO_ROOT/git-wta.yaml
+  hooks:
+    - name: pnpm install
+      cwd: projects/agent       # optional
+      shell: pnpm install
+"""
 
-if [ -z "$1" ]; then
-  echo "Usage: git wta <name>"
-  exit 1
-fi
+RENAME_USAGE = """\
+Usage: git wta rename <old> <new>
 
-INPUT="${1#wt-}"
+Rename a worktree: moves worktrees/wt-<old> -> worktrees/wt-<new> and
+renames the worktree's branch to match.
 
-(
-  cd $REPO_ROOT
-  COMMIT=${2:-HEAD}
+Arguments:
+  old     Current worktree name (a leading 'wt-' is stripped)
+  new     New worktree name (a leading 'wt-' is stripped)
+"""
 
-
-  mkdir -p worktrees/
-  if [ "$USE_TS" = true ]; then
-    NAME="wt-$(date +%Y.%m.%d-%H.%M.%S)-$INPUT"
-  else
-    NAME="wt-$INPUT"
-  fi
-
-
-  git worktree add -b $NAME "worktrees/$NAME" $COMMIT
-  (
-    cd "worktrees/$NAME"
-    [ -d $REPO_ROOT/tasks.md ] && ln -s $REPO_ROOT/tasks.md  || true
-    [ -d $REPO_ROOT/.claude/ ] && ln -s $REPO_ROOT/.claude/ || true
-    [ -d $REPO_ROOT/experiments/ ] && ln -s $REPO_ROOT/experiments/ || true
-    [ -d $REPO_ROOT/writeups/ ] && ln -s $REPO_ROOT/writeups/ || true
-    [ -d $REPO_ROOT/scrap/ ] && ln -s $REPO_ROOT/scrap/ || true
-    [ -d $REPO_ROOT/utility/ ] && ln -s $REPO_ROOT/utility/ || true
-
-    [ -f $REPO_ROOT/projects/agent/.env ] && ln -s $REPO_ROOT/projects/agent/.env || true
-    [ -f $REPO_ROOT/projects/server-v2/.env ] && ln -s $REPO_ROOT/projects/server-v2/.env || true
-    [ -f $REPO_ROOT/server/.env ] && ln -s $REPO_ROOT/server/.env || true
-  )
-  realpath "worktrees/$NAME"
+SYMLINK_TARGETS = (
+    "tasks.md",
+    ".claude",
+    "experiments",
+    "writeups",
+    "scrap",
+    "utility",
+    "projects/agent/.env",
+    "projects/server-v2/.env",
+    "server/.env",
 )
+
+RED = "\033[31m"
+YELLOW = "\033[33m"
+GREEN = "\033[32m"
+RESET = "\033[m"
+
+
+def die(msg: str, code: int = 1) -> NoReturn:
+    """Print msg in red to stderr and exit with code."""
+    print(f"{RED}{msg}{RESET}", file=sys.stderr)
+    sys.exit(code)
+
+
+def main() -> int:
+    """Parse args, create the worktree + symlinks, run hooks, print the path."""
+    if len(sys.argv) >= 2 and sys.argv[1] == "rename":
+        return rename_main(sys.argv[2:])
+
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--ts", action="store_true")
+    hooks_group = parser.add_mutually_exclusive_group()
+    hooks_group.add_argument("--hooks", dest="hooks_flag", action="store_const", const=True, default=None)
+    hooks_group.add_argument("--no-hooks", dest="hooks_flag", action="store_const", const=False)
+    parser.add_argument("-h", "--help", dest="help", action="store_true")
+    parser.add_argument("name", nargs="?")
+    parser.add_argument("commit", nargs="?", default="HEAD")
+    args = parser.parse_args()
+
+    if args.help:
+        print(USAGE)
+        return 0
+    if not args.name:
+        print(USAGE, file=sys.stderr)
+        return 1
+
+    repo_root_env = os.environ.get("REPO_ROOT")
+    if not repo_root_env:
+        die("No REPO_ROOT defined")
+    repo_root = Path(repo_root_env).resolve()
+    if not repo_root.is_dir():
+        die(f"REPO_ROOT is not a directory: {repo_root}")
+
+    raw_name = args.name.removeprefix("wt-")
+    if args.ts:
+        stamp = datetime.now().strftime("%Y.%m.%d-%H.%M.%S")
+        wt_name = f"wt-{stamp}-{raw_name}"
+    else:
+        wt_name = f"wt-{raw_name}"
+
+    wt_dir = repo_root / "worktrees" / wt_name
+    (repo_root / "worktrees").mkdir(parents=True, exist_ok=True)
+
+    subprocess.run(
+        ["git", "worktree", "add", "-b", wt_name, str(wt_dir), args.commit],
+        cwd=repo_root,
+        check=True,
+    )
+
+    create_symlinks(repo_root=repo_root, wt_dir=wt_dir)
+    if hooks_enabled(args.hooks_flag):
+        run_hooks(repo_root=repo_root, wt_dir=wt_dir, wt_name=wt_name, commit=args.commit)
+    else:
+        print(f"{YELLOW}[git-wta] skipping hooks{RESET}", file=sys.stderr)
+
+    print(wt_dir)
+    return 0
+
+
+def hooks_enabled(flag: bool | None) -> bool:
+    """Resolve whether hooks should run: explicit flag wins; else GIT_WTA_HOOKS_DEFAULT; else True."""
+    if flag is not None:
+        return flag
+    raw = os.environ.get("GIT_WTA_HOOKS_DEFAULT", "").strip().lower()
+    if not raw:
+        return True
+    return raw not in {"0", "false", "no", "off"}
+
+
+def create_symlinks(*, repo_root: Path, wt_dir: Path) -> None:
+    """Symlink shared files/dirs from repo_root into wt_dir (skip missing sources)."""
+    for rel in SYMLINK_TARGETS:
+        src = repo_root / rel
+        if not src.exists():
+            continue
+        dst = wt_dir / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        if dst.exists() or dst.is_symlink():
+            continue
+        os.symlink(src, dst)
+
+
+def run_hooks(*, repo_root: Path, wt_dir: Path, wt_name: str, commit: str) -> None:
+    """Run hooks declared in $REPO_ROOT/git-wta.yaml sequentially under bash."""
+    config_path = repo_root / "git-wta.yaml"
+    if not config_path.exists():
+        return
+
+    try:
+        config = yaml.safe_load(config_path.read_text()) or {}
+    except yaml.YAMLError as exc:
+        die(f"Failed to parse {config_path}: {exc}")
+
+    hooks = config.get("hooks") or []
+    if not isinstance(hooks, list):
+        die(f"{config_path}: 'hooks' must be a list")
+
+    env = {
+        **os.environ,
+        "WT_PATH": str(wt_dir),
+        "WT_NAME": wt_name,
+        "REPO_ROOT": str(repo_root),
+        "WT_COMMIT": commit,
+    }
+
+    for idx, hook in enumerate(hooks):
+        if not isinstance(hook, dict):
+            die(f"{config_path}: hooks[{idx}] must be a mapping")
+        name = hook.get("name") or f"hook[{idx}]"
+        shell = hook.get("shell")
+        if not shell or not isinstance(shell, str):
+            die(f"{config_path}: hooks[{idx}] ({name}) missing string 'shell'")
+        cwd_rel = hook.get("cwd", ".")
+        cwd = (wt_dir / cwd_rel).resolve()
+        if not cwd.is_dir():
+            die(f"{config_path}: hooks[{idx}] ({name}) cwd is not a directory: {cwd}")
+
+        print(f"{YELLOW}[git-wta] running hook: {name}{RESET}", file=sys.stderr)
+        result = subprocess.run(
+            ["bash", "-c", f"set -eo pipefail\n{shell}"],
+            cwd=cwd,
+            env=env,
+        )
+        if result.returncode != 0:
+            die(
+                f"hook '{name}' failed (exit {result.returncode}). "
+                f"Worktree left at {wt_dir} for inspection.",
+                code=result.returncode,
+            )
+        print(f"{GREEN}[git-wta] hook ok: {name}{RESET}", file=sys.stderr)
+
+
+def rename_main(argv: list[str]) -> int:
+    """Rename a worktree's directory and its branch (wt-<old> -> wt-<new>)."""
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("-h", "--help", dest="help", action="store_true")
+    parser.add_argument("old", nargs="?")
+    parser.add_argument("new", nargs="?")
+    args = parser.parse_args(argv)
+
+    if args.help:
+        print(RENAME_USAGE)
+        return 0
+    if not args.old or not args.new:
+        print(RENAME_USAGE, file=sys.stderr)
+        return 1
+
+    repo_root_env = os.environ.get("REPO_ROOT")
+    if not repo_root_env:
+        die("No REPO_ROOT defined")
+    repo_root = Path(repo_root_env).resolve()
+    if not repo_root.is_dir():
+        die(f"REPO_ROOT is not a directory: {repo_root}")
+
+    old_name = f"wt-{args.old.removeprefix('wt-')}"
+    new_name = f"wt-{args.new.removeprefix('wt-')}"
+    if old_name == new_name:
+        die(f"old and new names are identical: {old_name}")
+
+    old_dir = repo_root / "worktrees" / old_name
+    new_dir = repo_root / "worktrees" / new_name
+    if not old_dir.is_dir():
+        die(f"worktree not found: {old_dir}")
+    if new_dir.exists():
+        die(f"destination already exists: {new_dir}")
+
+    branch_result = subprocess.run(
+        ["git", "-C", str(old_dir), "branch", "--show-current"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    current_branch = branch_result.stdout.strip()
+    if not current_branch:
+        die(f"worktree at {old_dir} has no current branch (detached HEAD)")
+
+    subprocess.run(
+        ["git", "worktree", "move", str(old_dir), str(new_dir)],
+        cwd=repo_root,
+        check=True,
+    )
+
+    if current_branch != new_name:
+        subprocess.run(
+            ["git", "-C", str(new_dir), "branch", "-m", current_branch, new_name],
+            check=True,
+        )
+
+    cwd = Path.cwd()
+    try:
+        cwd.relative_to(old_dir)
+        print(
+            f"{YELLOW}note: your shell's CWD is stale; run: cd {new_dir}{RESET}",
+            file=sys.stderr,
+        )
+    except ValueError:
+        pass
+
+    print(new_dir)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

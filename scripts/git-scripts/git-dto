@@ -1,0 +1,200 @@
+#!/usr/bin/env -S uv run --script
+# vim: set filetype=python :
+# /// script
+# requires-python = ">=3.12"
+# ///
+"""git dto: diff one commit, optionally against the current worktree."""
+
+from __future__ import annotations
+
+import fnmatch
+import subprocess
+import sys
+from dataclasses import dataclass, field
+from typing import NoReturn
+
+
+USAGE = """\
+Usage: git dto [<commit>] [--head] [<args>...]
+
+Difftool for a single commit.
+Uses difftool when stdout is a terminal, plain diff otherwise.
+
+By default, git dto diffs <commit>^..<commit>. In nvim difftool this opens both
+sides from git objects/tempfiles, so edits made inside difftool do not modify
+the repo files. Use --head when you want the right side to be the current
+worktree, equivalent to git difftool <commit>^ (or git diff <commit>^ when
+stdout is not a terminal).
+
+  git dto                         -> diff HEAD^..HEAD
+  git dto HEAD                    -> diff HEAD^..HEAD
+  git dto --head                  -> diff HEAD^ against the current worktree
+  git dto <commit>                -> diff <commit>^..<commit>
+  git dto <commit> --head         -> diff <commit>^ against the current worktree
+  git dto <commit> --name-only    -> diff <commit>^..<commit> --name-only
+  git dto <commit> --no-tests     -> diff <commit>^..<commit>, excluding tests
+  git dto <commit> -g '*.ts'      -> diff changed files matching the glob
+
+Options:
+  --head            Diff from <commit>^ to the current worktree/HEAD state
+  -g, --glob <glob> Only include changed files matching <glob>
+                    Prefix with ! to exclude instead. Repeatable.
+  --no-tests        Exclude common test/spec files and directories
+  -h, --help        Show this help message
+"""
+
+TEST_PATH_GLOBS = (
+    "*.test.*",
+    "*.spec.*",
+    "*_test.*",
+    "*_spec.*",
+    "test_*.*",
+    "spec_*.*",
+    "test/*",
+    "tests/*",
+    "spec/*",
+    "specs/*",
+    "__tests__/*",
+    "*/test/*",
+    "*/tests/*",
+    "*/spec/*",
+    "*/specs/*",
+    "*/__tests__/*",
+)
+
+
+@dataclass
+class ParsedArgs:
+    commit: str | None = None
+    head: bool = False
+    no_tests: bool = False
+    glob_filters: list[str] = field(default_factory=list)
+    pass_through: list[str] = field(default_factory=list)
+    pathspec: list[str] = field(default_factory=list)
+    saw_pathspec_separator: bool = False
+
+
+def die(message: str, code: int = 1) -> NoReturn:
+    print(f"git dto: {message}", file=sys.stderr)
+    raise SystemExit(code)
+
+
+def parse_args(argv: list[str]) -> ParsedArgs:
+    parsed = ParsedArgs()
+    idx = 0
+
+    while idx < len(argv):
+        arg = argv[idx]
+
+        if arg == "--":
+            parsed.saw_pathspec_separator = True
+            parsed.pathspec.extend(argv[idx + 1 :])
+            break
+
+        if arg in {"-h", "--help"}:
+            print(USAGE)
+            raise SystemExit(0)
+
+        if arg == "--head":
+            parsed.head = True
+        elif arg == "--no-tests":
+            parsed.no_tests = True
+        elif arg in {"-g", "--glob"}:
+            idx += 1
+            if idx >= len(argv):
+                die(f"{arg} requires a glob pattern", code=2)
+            parsed.glob_filters.append(argv[idx])
+        elif arg.startswith("--glob="):
+            parsed.glob_filters.append(arg.removeprefix("--glob="))
+        elif parsed.commit is None and not arg.startswith("-"):
+            parsed.commit = arg
+        else:
+            parsed.pass_through.append(arg)
+
+        idx += 1
+
+    return parsed
+
+
+def diff_base(parsed: ParsedArgs) -> str:
+    commit = parsed.commit or "HEAD"
+    if parsed.head:
+        return f"{commit}^"
+    return f"{commit}^..{commit}"
+
+
+def is_test_path(path: str) -> bool:
+    return any(fnmatch.fnmatchcase(path, pattern) for pattern in TEST_PATH_GLOBS)
+
+
+def matches_glob_filters(path: str, filters: list[str]) -> bool:
+    has_include = False
+    include_match = False
+
+    for raw_pattern in filters:
+        if raw_pattern.startswith("!"):
+            pattern = raw_pattern[1:]
+            if fnmatch.fnmatchcase(path, pattern):
+                return False
+        else:
+            has_include = True
+            if fnmatch.fnmatchcase(path, raw_pattern):
+                include_match = True
+
+    return include_match if has_include else True
+
+
+def changed_paths(diff_ref: str, parsed: ParsedArgs) -> list[str]:
+    args = ["git", "diff", "--name-only", "-z", diff_ref]
+    if parsed.saw_pathspec_separator:
+        args.append("--")
+        args.extend(parsed.pathspec)
+
+    result = subprocess.run(args, stdout=subprocess.PIPE)
+    if result.returncode != 0:
+        raise SystemExit(result.returncode)
+
+    return [
+        path_bytes.decode()
+        for path_bytes in result.stdout.split(b"\0")
+        if path_bytes
+    ]
+
+
+def filtered_path_args(diff_ref: str, parsed: ParsedArgs) -> list[str]:
+    paths = []
+    for path in changed_paths(diff_ref, parsed):
+        if parsed.no_tests and is_test_path(path):
+            continue
+        if not matches_glob_filters(path, parsed.glob_filters):
+            continue
+        paths.append(path)
+
+    if not paths:
+        raise SystemExit(0)
+
+    return ["--", *(f":(top,literal){path}" for path in paths)]
+
+
+def git_args(diff_ref: str, parsed: ParsedArgs) -> list[str]:
+    args = list(parsed.pass_through)
+
+    if parsed.no_tests or parsed.glob_filters:
+        args.extend(filtered_path_args(diff_ref, parsed))
+    elif parsed.saw_pathspec_separator:
+        args.append("--")
+        args.extend(parsed.pathspec)
+
+    return args
+
+
+def main(argv: list[str]) -> int:
+    parsed = parse_args(argv)
+    diff_ref = diff_base(parsed)
+    command = "difftool" if sys.stdout.isatty() else "diff"
+    result = subprocess.run(["git", command, diff_ref, *git_args(diff_ref, parsed)])
+    return result.returncode
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

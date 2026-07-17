@@ -1,6 +1,6 @@
 # Background Tmux Session
 
-Auto-starts `mgrep-watch.d` and `obsidian-watch.d` in a tmux session called "Background" at login and monitors them every 5 minutes.
+Auto-starts background jobs in a tmux session called "Background" at login and monitors them every 5 minutes.
 
 ## Installation
 
@@ -15,7 +15,7 @@ launchctl load ~/Library/LaunchAgents/com.user.background-tmux-monitor.plist
 ## What It Does
 
 The `background-tmux` script:
-- Creates a tmux session at login with 4-pane layout
+- Creates a tmux session at login with panes for each `*.d` job
 - Runs every 5 minutes to check and restart dead scripts
 
 ## Verify

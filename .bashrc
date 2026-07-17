@@ -92,7 +92,7 @@ alias cat='bat'
 
 alias npm="sfw npm"
 alias yarn="sfw yarn"
-alias pnpm="sfw pnpm"
+# alias pnpm="sfw pnpm"
 alias pip="sfw pip"
 alias uv="sfw uv"
 alias cargo="sfw cargo"
@@ -298,3 +298,9 @@ alias cop="bundle exec rubocop -A"  # Run Rubocop with bundled version
 
 ################################### Secrets ###################################
 export SG_OPENAI_API_KEY="$EVAN_PERSONAL_OPENAI_API_KEY"
+
+# ntn (Notion CLI) reliability: the CLI fetches the Notion OpenAPI spec on every
+# call from developers.notion.com (flaky Readme.io CDN), which can silently hang
+# ntn for minutes. Point it at a LOCAL spec server (~/scripts/background/ntn-spec-server.d
+# serves ~/.ntn-spec on port 8799) so spec resolution never hits the network.
+export NOTION_API_DOCS_BASE_URL="http://localhost:8799"

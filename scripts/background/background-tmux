@@ -2,24 +2,92 @@
 
 SESSION="Background"
 
+# Pane index → (command, label) — keep these in sync.
+CMD_0="cd ~/scripts/background && ./claude-tutorial.d"
+CMD_1="cd ~/scripts/background && ./brew-upgrade-daily.d"
+CMD_2="cd ~/scripts/background && ./mgrep-watch.d"
+CMD_3="cd ~/scripts/background && ./obsidian-watch.d"
+CMD_4="cd ~/scripts/background && ./sync-skills-daily.d"
+CMD_5="cd ~/scripts/background && ./giants-game-runner.d"
+CMD_6="cd ~/scripts/background && ./diffview.d"
+CMD_7="cd ~/scripts/background && ./sg-reindex-hourly.d"
+CMD_8="cd ~/scripts/background && ./ntn-spec-server.d"
+CMD_9="cd ~/scripts/background && ./scholarly.d"
+LABEL_0="claude-tutorial dev"
+LABEL_1="brew-upgrade-daily"
+LABEL_2="mgrep-watch"
+LABEL_3="obsidian-watch"
+LABEL_4="sync-skills-daily"
+LABEL_5="giants-game-runner"
+LABEL_6="diffview"
+LABEL_7="sg-reindex-hourly"
+LABEL_8="ntn-spec-server"
+LABEL_9="scholarly"
+
+# ───────────────────────────── simple-ai jobs ─────────────────────────────
+# Jobs specific to simple-ai (github.com/simple-ai-lab/simple) live in this
+# section — keep work jobs here, personal jobs above.
+CMD_10="cd ~/scripts/background && ./vuln-dashboard.d"
+LABEL_10="vuln-dashboard"
+# ──────────────────────────────────────────────────────────────────────────
+
 # Create the session with the appropriate layout
 if ! tmux has-session -t "$SESSION" 2>/dev/null; then
-    tmux new-session -d -s "$SESSION"
+    tmux new-session -d -s "$SESSION" -x 240 -y 80
     tmux split-window -h -t "$SESSION:0"
     tmux split-window -v -t "$SESSION:0.1"
     tmux split-window -v -t "$SESSION:0.2"
-    tmux select-layout -t "$SESSION:0" main-vertical
+    tmux split-window -v -t "$SESSION:0.3"
+    tmux split-window -v -t "$SESSION:0.4"
+    tmux split-window -v -t "$SESSION:0.5"
+    tmux split-window -v -t "$SESSION:0.6"
+    tmux split-window -v -t "$SESSION:0.7"
+    tmux split-window -v -t "$SESSION:0.8"
+    tmux split-window -v -t "$SESSION:0.9"
+    tmux select-layout -t "$SESSION:0" tiled
 
     # Fresh session — start scripts in their panes (kill the default shells)
-    tmux respawn-pane -k -t "$SESSION:0.0" "cd ~/github.com/ethomas2/claude-tutorial && doppler run --project ts-api --config dev --only-secrets ANTHROPIC_API_KEY -- npm run dev"
-    tmux respawn-pane -k -t "$SESSION:0.1" "cd ~/scripts/background && ./brew-upgrade-daily.d"
-    tmux respawn-pane -k -t "$SESSION:0.2" "cd ~/scripts/background && ./mgrep-watch.d"
-    tmux respawn-pane -k -t "$SESSION:0.3" "cd ~/scripts/background && ./obsidian-watch.d"
+    tmux respawn-pane -k -t "$SESSION:0.0" "$CMD_0"
+    tmux respawn-pane -k -t "$SESSION:0.1" "$CMD_1"
+    tmux respawn-pane -k -t "$SESSION:0.2" "$CMD_2"
+    tmux respawn-pane -k -t "$SESSION:0.3" "$CMD_3"
+    tmux respawn-pane -k -t "$SESSION:0.4" "$CMD_4"
+    tmux respawn-pane -k -t "$SESSION:0.5" "$CMD_5"
+    tmux respawn-pane -k -t "$SESSION:0.6" "$CMD_6"
+    tmux respawn-pane -k -t "$SESSION:0.7" "$CMD_7"
+    tmux respawn-pane -k -t "$SESSION:0.8" "$CMD_8"
+    tmux respawn-pane -k -t "$SESSION:0.9" "$CMD_9"
+    # simple-ai jobs
+    tmux respawn-pane -k -t "$SESSION:0.10" "$CMD_10"
 else
     # Session exists — respawn-pane without -k only works on dead panes,
     # so this is a no-op if the script is still running.
-    tmux respawn-pane -t "$SESSION:0.0" "cd ~/github.com/ethomas2/claude-tutorial && doppler run --project ts-api --config dev --only-secrets ANTHROPIC_API_KEY -- npm run dev" 2>/dev/null || true
-    tmux respawn-pane -t "$SESSION:0.1" "cd ~/scripts/background && ./brew-upgrade-daily.d" 2>/dev/null || true
-    tmux respawn-pane -t "$SESSION:0.2" "cd ~/scripts/background && ./mgrep-watch.d" 2>/dev/null || true
-    tmux respawn-pane -t "$SESSION:0.3" "cd ~/scripts/background && ./obsidian-watch.d" 2>/dev/null || true
+    tmux respawn-pane -t "$SESSION:0.0" "$CMD_0" 2>/dev/null || true
+    tmux respawn-pane -t "$SESSION:0.1" "$CMD_1" 2>/dev/null || true
+    tmux respawn-pane -t "$SESSION:0.2" "$CMD_2" 2>/dev/null || true
+    tmux respawn-pane -t "$SESSION:0.3" "$CMD_3" 2>/dev/null || true
+    tmux respawn-pane -t "$SESSION:0.4" "$CMD_4" 2>/dev/null || true
+    tmux respawn-pane -t "$SESSION:0.5" "$CMD_5" 2>/dev/null || true
+    tmux respawn-pane -t "$SESSION:0.6" "$CMD_6" 2>/dev/null || true
+    tmux respawn-pane -t "$SESSION:0.7" "$CMD_7" 2>/dev/null || true
+    tmux respawn-pane -t "$SESSION:0.8" "$CMD_8" 2>/dev/null || true
+    tmux respawn-pane -t "$SESSION:0.9" "$CMD_9" 2>/dev/null || true
+    # simple-ai jobs
+    tmux respawn-pane -t "$SESSION:0.10" "$CMD_10" 2>/dev/null || true
 fi
+
+# Show per-pane labels in the border so each pane is identified by what's running.
+tmux set-window-option -t "$SESSION:0" pane-border-status top
+tmux set-window-option -t "$SESSION:0" pane-border-format '#{?pane_active,#[reverse],} #{pane_index}: #{pane_title} #{?pane_dead,#[fg=red](dead),#[fg=green](running)} #[default]'
+tmux select-pane -t "$SESSION:0.0" -T "$LABEL_0"
+tmux select-pane -t "$SESSION:0.1" -T "$LABEL_1"
+tmux select-pane -t "$SESSION:0.2" -T "$LABEL_2"
+tmux select-pane -t "$SESSION:0.3" -T "$LABEL_3"
+tmux select-pane -t "$SESSION:0.4" -T "$LABEL_4"
+tmux select-pane -t "$SESSION:0.5" -T "$LABEL_5"
+tmux select-pane -t "$SESSION:0.6" -T "$LABEL_6"
+tmux select-pane -t "$SESSION:0.7" -T "$LABEL_7"
+tmux select-pane -t "$SESSION:0.8" -T "$LABEL_8"
+tmux select-pane -t "$SESSION:0.9" -T "$LABEL_9"
+# simple-ai jobs
+tmux select-pane -t "$SESSION:0.10" -T "$LABEL_10" 2>/dev/null || true
