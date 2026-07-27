@@ -34,6 +34,7 @@ import yaml
 USAGE = """\
 Usage: git wta [--ts] <name> [<commit>]
        git wta rename <old> <new>
+       git wta --run-hooks [<path>]
 
 Create a worktree at worktrees/wt-<name> on a new branch of the same name.
 
@@ -52,6 +53,12 @@ Hook default:
   the default to off for a given repo (typically via .envrc). --hooks and
   --no-hooks always override the env var.
 
+Run hooks on demand:
+  git wta --run-hooks [<path>]
+    Run the per-repo hooks for an existing worktree (default: the worktree
+    containing the current directory), regardless of GIT_WTA_HOOKS_DEFAULT.
+    Exits non-zero if no hooks are configured.
+
 Optional per-repo hooks: $REPO_ROOT/git-wta.yaml
   hooks:
     - name: pnpm install
@@ -68,6 +75,20 @@ renames the worktree's branch to match.
 Arguments:
   old     Current worktree name (a leading 'wt-' is stripped)
   new     New worktree name (a leading 'wt-' is stripped)
+"""
+
+RUN_HOOKS_USAGE = """\
+Usage: git wta --run-hooks [<path>]
+
+Run the per-repo hooks ($REPO_ROOT/git-wta.yaml) for an existing worktree,
+exactly as `git wta <name>` would have at creation time, regardless of
+GIT_WTA_HOOKS_DEFAULT.
+
+Arguments:
+  path    Worktree (or any directory inside one) to run hooks for
+          (default: current directory)
+
+Exits non-zero if no hooks are configured for the repo.
 """
 
 SYMLINK_TARGETS = (
@@ -98,6 +119,8 @@ def main() -> int:
     """Parse args, create the worktree + symlinks, run hooks, print the path."""
     if len(sys.argv) >= 2 and sys.argv[1] == "rename":
         return rename_main(sys.argv[2:])
+    if len(sys.argv) >= 2 and sys.argv[1] == "--run-hooks":
+        return run_hooks_main(sys.argv[2:])
 
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("--ts", action="store_true")
@@ -172,11 +195,11 @@ def create_symlinks(*, repo_root: Path, wt_dir: Path) -> None:
         os.symlink(src, dst)
 
 
-def run_hooks(*, repo_root: Path, wt_dir: Path, wt_name: str, commit: str) -> None:
-    """Run hooks declared in $REPO_ROOT/git-wta.yaml sequentially under bash."""
+def run_hooks(*, repo_root: Path, wt_dir: Path, wt_name: str, commit: str) -> int:
+    """Run hooks declared in $REPO_ROOT/git-wta.yaml sequentially under bash; return the hook count."""
     config_path = repo_root / "git-wta.yaml"
     if not config_path.exists():
-        return
+        return 0
 
     try:
         config = yaml.safe_load(config_path.read_text()) or {}
@@ -220,6 +243,47 @@ def run_hooks(*, repo_root: Path, wt_dir: Path, wt_name: str, commit: str) -> No
                 code=result.returncode,
             )
         print(f"{GREEN}[git-wta] hook ok: {name}{RESET}", file=sys.stderr)
+
+    return len(hooks)
+
+
+def run_hooks_main(argv: list[str]) -> int:
+    """Run the per-repo hooks for an existing worktree, ignoring GIT_WTA_HOOKS_DEFAULT."""
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("-h", "--help", dest="help", action="store_true")
+    parser.add_argument("path", nargs="?", default=".")
+    args = parser.parse_args(argv)
+
+    if args.help:
+        print(RUN_HOOKS_USAGE)
+        return 0
+
+    repo_root_env = os.environ.get("REPO_ROOT")
+    if not repo_root_env:
+        die("No REPO_ROOT defined")
+    repo_root = Path(repo_root_env).resolve()
+    if not repo_root.is_dir():
+        die(f"REPO_ROOT is not a directory: {repo_root}")
+
+    start = Path(args.path).resolve()
+    if not start.is_dir():
+        die(f"not a directory: {start}")
+
+    toplevel_result = subprocess.run(
+        ["git", "-C", str(start), "rev-parse", "--show-toplevel"],
+        capture_output=True,
+        text=True,
+    )
+    if toplevel_result.returncode != 0:
+        die(f"not inside a git worktree: {start}")
+    wt_dir = Path(toplevel_result.stdout.strip())
+    if wt_dir == repo_root:
+        die(f"not a worktree (this is the main repo checkout): {wt_dir}")
+
+    ran = run_hooks(repo_root=repo_root, wt_dir=wt_dir, wt_name=wt_dir.name, commit="HEAD")
+    if ran == 0:
+        die(f"no hooks configured for this repo ({repo_root / 'git-wta.yaml'})")
+    return 0
 
 
 def rename_main(argv: list[str]) -> int:
