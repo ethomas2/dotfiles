@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import curses
+import os
 import re
 import subprocess
 import time
@@ -34,6 +35,21 @@ def _duration_seconds(s: str) -> float | None:
     if not m:
         return None
     return float(m.group(1)) * _DURATION_MULTIPLIERS[m.group(2)]
+
+
+def current_session_url() -> str | None:
+    """
+    Deep link back to the agent session running this script, from the env the
+    agent harness exports: Codex thread, Claude desktop session, or Claude CLI
+    session (in that order). None when run outside an agent.
+    """
+    if thread_id := os.environ.get("CODEX_THREAD_ID"):
+        return f"codex://threads/{thread_id}"
+    if host_session_id := os.environ.get("CLAUDE_CODE_HOST_SESSION_ID"):
+        return f"claude://code/continue?session={host_session_id}"
+    if session_id := os.environ.get("CLAUDE_CODE_SESSION_ID"):
+        return f"claude://resume?session={session_id}"
+    return None
 
 
 def parse_loop_duration(s: str) -> float:
@@ -119,24 +135,33 @@ def send_alert(
     message: str,
     sound: str = "Basso",
     modes: list[AlertMode] | None = None,
+    open_url: str | None = None,
 ):
-    """Send the alert across the requested channels (default: all)."""
+    """
+    Send the alert across the requested channels (default: all). Clicking the
+    macOS notification opens open_url when given; ntfy.sh gets it as its click
+    action and in the body, since app deep links only resolve on the laptop.
+    """
     modes = modes if modes is not None else ALL_MODES
     for mode in modes:
         match mode:
             case "macos":
+                open_args = ["-open", open_url] if open_url else []
                 subprocess.run(
                     [
                         "terminal-notifier",
                         "-title", message,
                         "-message", message,
                         "-sound", sound,
+                        *open_args,
                     ],
                     check=True,
                 )
             case "ntfy.sh":
+                body = f"{message}\n{open_url}" if open_url else message
+                headers = {"Click": open_url} if open_url else {}
                 try:
-                    requests.post(NTFY_URL, data=message.encode("utf-8"), timeout=5)
+                    requests.post(NTFY_URL, data=body.encode("utf-8"), headers=headers, timeout=5)
                 except Exception as e:
                     print(f"warning: ntfy.sh post failed: {e}")
             case _:
@@ -171,19 +196,32 @@ def main():
         action="store_true",
         help="Skip POST to ntfy.sh (sends by default)",
     )
+    parser.add_argument(
+        "--open",
+        dest="open_url",
+        metavar="URL",
+        help="URL or deep link opened when the notification is clicked "
+        "(default: the Codex/Claude session running this, if any)",
+    )
+    parser.add_argument(
+        "--no-open",
+        action="store_true",
+        help="Don't attach a click-through link",
+    )
 
     args = parser.parse_args()
     modes: list[AlertMode] = [m for m in ALL_MODES if not (m == "ntfy.sh" and args.no_ntfy)]
+    open_url = None if args.no_open else (args.open_url or current_session_url())
 
     if args.when:
         countdown_sleep(args.when, args.message)
 
     if args.loop:
         while True:
-            send_alert(args.message, sound=args.sound, modes=modes)
+            send_alert(args.message, sound=args.sound, modes=modes, open_url=open_url)
             time.sleep(args.loop)
     else:
-        send_alert(args.message, sound=args.sound, modes=modes)
+        send_alert(args.message, sound=args.sound, modes=modes, open_url=open_url)
 
 
 if __name__ == "__main__":
