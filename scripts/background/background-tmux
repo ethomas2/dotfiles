@@ -8,43 +8,53 @@ CMD_1="cd ~/scripts/background && ./brew-upgrade-daily.d"
 CMD_2="cd ~/scripts/background && ./mgrep-watch.d"
 CMD_3="cd ~/scripts/background && ./obsidian-watch.d"
 CMD_4="cd ~/scripts/background && ./sync-skills-daily.d"
-CMD_5="cd ~/scripts/background && ./giants-game-runner.d"
-CMD_6="cd ~/scripts/background && ./diffview.d"
-CMD_7="cd ~/scripts/background && ./sg-reindex-hourly.d"
-CMD_8="cd ~/scripts/background && ./ntn-spec-server.d"
-CMD_9="cd ~/scripts/background && ./scholarly.d"
+CMD_5="cd ~/scripts/background && ./diffview.d"
+CMD_6="cd ~/scripts/background && ./sg-reindex-hourly.d"
+CMD_7="cd ~/scripts/background && ./ntn-spec-server.d"
+CMD_8="cd ~/scripts/background && ./scholarly.d"
 LABEL_0="claude-tutorial dev"
 LABEL_1="brew-upgrade-daily"
 LABEL_2="mgrep-watch"
 LABEL_3="obsidian-watch"
 LABEL_4="sync-skills-daily"
-LABEL_5="giants-game-runner"
-LABEL_6="diffview"
-LABEL_7="sg-reindex-hourly"
-LABEL_8="ntn-spec-server"
-LABEL_9="scholarly"
+LABEL_5="diffview"
+LABEL_6="sg-reindex-hourly"
+LABEL_7="ntn-spec-server"
+LABEL_8="scholarly"
 
 # ───────────────────────────── simple-ai jobs ─────────────────────────────
 # Jobs specific to simple-ai (github.com/simple-ai-lab/simple) live in this
 # section — keep work jobs here, personal jobs above.
-CMD_10="cd ~/scripts/background && ./vuln-dashboard.d"
-LABEL_10="vuln-dashboard"
+CMD_9="cd ~/scripts/background && ./vuln-dashboard.d"
+LABEL_9="vuln-dashboard"
+CMD_10="cd ~/scripts/background && ./slack-alert-analyzer.d"
+LABEL_10="slack-alert-analyzer"
+CMD_11="cd ~/scripts/background && ./call-recording-viewer.d"
+LABEL_11="call-recording-viewer"
+CMD_12="cd ~/scripts/background && ./speedway-swagger.d"
+LABEL_12="speedway-swagger"
+CMD_13="cd ~/scripts/background && ./call-watcher.d"
+LABEL_13="call-watcher"
+CMD_14="cd ~/scripts/background && ./day-analysis-dashboard.d"
+LABEL_14="day-analysis-dashboard"
+CMD_15="cd ~/scripts/background && ./speedway-card-watch.d"
+LABEL_15="speedway-card-watch"
 # ──────────────────────────────────────────────────────────────────────────
+
+# Machine health
+CMD_16="cd ~/scripts/background && ./memory-watchdog.d"
+LABEL_16="memory-watchdog"
 
 # Create the session with the appropriate layout
 if ! tmux has-session -t "$SESSION" 2>/dev/null; then
     tmux new-session -d -s "$SESSION" -x 240 -y 80
-    tmux split-window -h -t "$SESSION:0"
-    tmux split-window -v -t "$SESSION:0.1"
-    tmux split-window -v -t "$SESSION:0.2"
-    tmux split-window -v -t "$SESSION:0.3"
-    tmux split-window -v -t "$SESSION:0.4"
-    tmux split-window -v -t "$SESSION:0.5"
-    tmux split-window -v -t "$SESSION:0.6"
-    tmux split-window -v -t "$SESSION:0.7"
-    tmux split-window -v -t "$SESSION:0.8"
-    tmux split-window -v -t "$SESSION:0.9"
-    tmux select-layout -t "$SESSION:0" tiled
+    for pane_index in {1..16}; do
+        tmux split-window -v -t "$SESSION:0.$((pane_index - 1))"
+        # Keep every pane large enough for the next split. Without retiling
+        # here, repeatedly splitting the newest pane eventually fails with
+        # "pane too small" and leaves the fresh session incomplete.
+        tmux select-layout -t "$SESSION:0" tiled
+    done
 
     # Fresh session — start scripts in their panes (kill the default shells)
     tmux respawn-pane -k -t "$SESSION:0.0" "$CMD_0"
@@ -59,9 +69,46 @@ if ! tmux has-session -t "$SESSION" 2>/dev/null; then
     tmux respawn-pane -k -t "$SESSION:0.9" "$CMD_9"
     # simple-ai jobs
     tmux respawn-pane -k -t "$SESSION:0.10" "$CMD_10"
+    tmux respawn-pane -k -t "$SESSION:0.11" "$CMD_11"
+    tmux respawn-pane -k -t "$SESSION:0.12" "$CMD_12"
+    tmux set-option -p -t "$SESSION:0.12" @background_job "speedway-swagger"
+    tmux respawn-pane -k -t "$SESSION:0.13" "$CMD_13"
+    tmux set-option -p -t "$SESSION:0.13" @background_job "call-watcher"
+    tmux respawn-pane -k -t "$SESSION:0.14" "$CMD_14"
+    tmux set-option -p -t "$SESSION:0.14" @background_job "day-analysis-dashboard"
+    tmux respawn-pane -k -t "$SESSION:0.15" "$CMD_15"
+    tmux set-option -p -t "$SESSION:0.15" @background_job "speedway-card-watch"
+    tmux respawn-pane -k -t "$SESSION:0.16" "$CMD_16"
+    tmux set-option -p -t "$SESSION:0.16" @background_job "memory-watchdog"
 else
     # Session exists — respawn-pane without -k only works on dead panes,
     # so this is a no-op if the script is still running.
+    # A job added after this session was created can have a non-canonical live
+    # pane index. Preserve that pane's identity so the monitor can restart it.
+    SPEEDWAY_LIVE_PANE="$(tmux list-panes -t "$SESSION:0" -F '#{pane_index} #{@background_job}' | awk '$2 == "speedway-swagger" { print $1; exit }')"
+    if [[ -n "$SPEEDWAY_LIVE_PANE" ]]; then
+        tmux respawn-pane -t "$SESSION:0.$SPEEDWAY_LIVE_PANE" "$CMD_12" 2>/dev/null || true
+    fi
+    CALL_WATCHER_LIVE_PANE="$(tmux list-panes -t "$SESSION:0" -F '#{pane_index} #{@background_job}' | awk '$2 == "call-watcher" { print $1; exit }')"
+    if [[ -n "$CALL_WATCHER_LIVE_PANE" ]]; then
+        tmux respawn-pane -t "$SESSION:0.$CALL_WATCHER_LIVE_PANE" "$CMD_13" 2>/dev/null || true
+    fi
+    DAYANALYSIS_LIVE_PANE="$(tmux list-panes -t "$SESSION:0" -F '#{pane_index} #{@background_job}' | awk '$2 == "day-analysis-dashboard" { print $1; exit }')"
+    if [[ -n "$DAYANALYSIS_LIVE_PANE" ]]; then
+        tmux respawn-pane -t "$SESSION:0.$DAYANALYSIS_LIVE_PANE" "$CMD_14" 2>/dev/null || true
+    fi
+    CARDWATCH_LIVE_PANE="$(tmux list-panes -t "$SESSION:0" -F '#{pane_index} #{@background_job}' | awk '$2 == "speedway-card-watch" { print $1; exit }')"
+    if [[ -n "$CARDWATCH_LIVE_PANE" ]]; then
+        tmux respawn-pane -t "$SESSION:0.$CARDWATCH_LIVE_PANE" "$CMD_15" 2>/dev/null || true
+    fi
+    WATCHDOG_LIVE_PANE="$(tmux list-panes -t "$SESSION:0" -F '#{pane_index} #{@background_job}' | awk '$2 == "memory-watchdog" { print $1; exit }')"
+    if [[ -n "$WATCHDOG_LIVE_PANE" ]]; then
+        tmux respawn-pane -t "$SESSION:0.$WATCHDOG_LIVE_PANE" "$CMD_16" 2>/dev/null || true
+    fi
+    SLACK_LIVE_PANE="$(tmux list-panes -t "$SESSION:0" -F '#{pane_index} #{@background_job}' | awk '$2 == "slack-alert-analyzer" { print $1; exit }')"
+    if [[ -n "$SLACK_LIVE_PANE" ]]; then
+        tmux respawn-pane -t "$SESSION:0.$SLACK_LIVE_PANE" "$CMD_10" 2>/dev/null || true
+    fi
     tmux respawn-pane -t "$SESSION:0.0" "$CMD_0" 2>/dev/null || true
     tmux respawn-pane -t "$SESSION:0.1" "$CMD_1" 2>/dev/null || true
     tmux respawn-pane -t "$SESSION:0.2" "$CMD_2" 2>/dev/null || true
@@ -72,9 +119,21 @@ else
     tmux respawn-pane -t "$SESSION:0.7" "$CMD_7" 2>/dev/null || true
     tmux respawn-pane -t "$SESSION:0.8" "$CMD_8" 2>/dev/null || true
     tmux respawn-pane -t "$SESSION:0.9" "$CMD_9" 2>/dev/null || true
-    # simple-ai jobs
-    tmux respawn-pane -t "$SESSION:0.10" "$CMD_10" 2>/dev/null || true
+    # Simple-ai numbered fallbacks only when the job wasn't found at a live (possibly
+    # non-canonical) pane via @background_job above — otherwise a dead pane at
+    # the canonical index could be revived with the wrong job.
+    [[ -z "$SLACK_LIVE_PANE" ]] && tmux respawn-pane -t "$SESSION:0.10" "$CMD_10" 2>/dev/null || true
+    tmux respawn-pane -t "$SESSION:0.11" "$CMD_11" 2>/dev/null || true
+    [[ -z "$SPEEDWAY_LIVE_PANE" ]] && tmux respawn-pane -t "$SESSION:0.12" "$CMD_12" 2>/dev/null || true
+    [[ -z "$CALL_WATCHER_LIVE_PANE" ]] && tmux respawn-pane -t "$SESSION:0.13" "$CMD_13" 2>/dev/null || true
+    [[ -z "$DAYANALYSIS_LIVE_PANE" ]] && tmux respawn-pane -t "$SESSION:0.14" "$CMD_14" 2>/dev/null || true
+    [[ -z "$CARDWATCH_LIVE_PANE" ]] && tmux respawn-pane -t "$SESSION:0.15" "$CMD_15" 2>/dev/null || true
+    [[ -z "$WATCHDOG_LIVE_PANE" ]] && tmux respawn-pane -t "$SESSION:0.16" "$CMD_16" 2>/dev/null || true
 fi
+
+# Keep dead panes visible (border shows "(dead)") instead of closing them —
+# the monitor can only respawn a pane that still exists.
+tmux set-window-option -t "$SESSION:0" remain-on-exit on
 
 # Show per-pane labels in the border so each pane is identified by what's running.
 tmux set-window-option -t "$SESSION:0" pane-border-status top
@@ -91,3 +150,27 @@ tmux select-pane -t "$SESSION:0.8" -T "$LABEL_8"
 tmux select-pane -t "$SESSION:0.9" -T "$LABEL_9"
 # simple-ai jobs
 tmux select-pane -t "$SESSION:0.10" -T "$LABEL_10" 2>/dev/null || true
+tmux select-pane -t "$SESSION:0.11" -T "$LABEL_11" 2>/dev/null || true
+tmux select-pane -t "$SESSION:0.12" -T "$LABEL_12" 2>/dev/null || true
+tmux select-pane -t "$SESSION:0.13" -T "$LABEL_13" 2>/dev/null || true
+tmux select-pane -t "$SESSION:0.14" -T "$LABEL_14" 2>/dev/null || true
+tmux select-pane -t "$SESSION:0.15" -T "$LABEL_15" 2>/dev/null || true
+if [[ -n "${SPEEDWAY_LIVE_PANE:-}" ]]; then
+    tmux select-pane -t "$SESSION:0.$SPEEDWAY_LIVE_PANE" -T "$LABEL_12"
+fi
+if [[ -n "${CALL_WATCHER_LIVE_PANE:-}" ]]; then
+    tmux select-pane -t "$SESSION:0.$CALL_WATCHER_LIVE_PANE" -T "$LABEL_13"
+fi
+if [[ -n "${SLACK_LIVE_PANE:-}" ]]; then
+    tmux select-pane -t "$SESSION:0.$SLACK_LIVE_PANE" -T "$LABEL_10"
+fi
+if [[ -n "${DAYANALYSIS_LIVE_PANE:-}" ]]; then
+    tmux select-pane -t "$SESSION:0.$DAYANALYSIS_LIVE_PANE" -T "$LABEL_14"
+fi
+if [[ -n "${CARDWATCH_LIVE_PANE:-}" ]]; then
+    tmux select-pane -t "$SESSION:0.$CARDWATCH_LIVE_PANE" -T "$LABEL_15"
+fi
+tmux select-pane -t "$SESSION:0.16" -T "$LABEL_16" 2>/dev/null || true
+if [[ -n "${WATCHDOG_LIVE_PANE:-}" ]]; then
+    tmux select-pane -t "$SESSION:0.$WATCHDOG_LIVE_PANE" -T "$LABEL_16"
+fi
